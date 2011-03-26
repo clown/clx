@@ -1,0 +1,405 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ja">
+
+<head>
+<meta name="verify-v1" content="roxTDqhnUxPBZ7m9A5IHz7ZKoxiIcajoZUA2Lo+7Z7s=">
+<meta name="author" content="clown">
+<meta http-equiv="Content-type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<meta http-equiv="Content-Script-Type" content="text/javascript">
+
+<link rel="index" href="index.html">
+<link rel="stylesheet" href="style/default.css" type="text/css">
+
+<title>CLX C++ Libraries</title>
+</head>
+
+<body>
+<div class="contents">
+
+<!-- header -->
+<div class="title">
+<a href="http://clx.cielquis.net/">CLX C++ Libraries</a>
+<a href="http://b.hatena.ne.jp/entry/http://clx.cielquis.net/">
+<img src="http://d.hatena.ne.jp/images/b_entry.gif" width="16" height="12" border="0"></a>
+</div>
+<div class="head"><a href="index.html">Home</a></div>
+<!-- end of header -->
+
+<!-- main text -->
+<div class="main">
+
+<h1>Overvies</h1>
+<p>CLX C++ Libraries は，文字列処理やネットワークプログラミングの補助などを行うための，
+ヘッダファイルのみで構成された C++ ライブラリです．
+CLX C++ Libraries は，<a href="http://www.opensource.org/licenses/bsd-license.php" target="_blank">
+BSDライセンス</a>で配布しています．ソースコードの複製・改変は自由ですが，
+自己責任でお願い致します．</p>
+
+<h1>Usage</h1>
+<p>CLX C++ Libraries を使用する際には，以下のファイルをダウンロードし，
+解凍して出来た clx フォルダ以下のヘッダファイルを作業フォルダにコピーするか，
+または，インクルードオプションを適切に指定して下さい．
+CLX C++ Libraries で作成したクラスは clx 名前空間の中に定義してあります．
+利用する場合は，直接指定するか適切な using ディレクティブを指定して下さい．
+動作確認は gcc 4.0.2 (Linux), gcc 4.3.4 (cygwin)，Visual Studio 2010, Borland C++ Compiler 5.5 で行っています．
+そのため，ソケット等システムに依存する部分はPOSIX および Windows のみに対応しています．
+また，コンパイラによっては利用できないライブラリも存在します．コンパイラ毎のエラー状況については，
+<a href="http://sourceforge.jp/forum/message.php?msg_id=52261" target="_blank">コンパイラ毎のエラー状況</a>
+を参照して下さい．</p>
+
+<p>CLX C++ Libraris の一部のライブラリは，外部ライブラリを利用しています．
+これらのライブラリは Linux 環境ではデフォルトでインストールされている事も多いですが，
+Windows 環境にはインストールされていません．Windows 上で CLX C++ Libraries
+の全てのライブラリを使用するための環境設定については，
+<a href="http://d.hatena.ne.jp/tt_clown/20100602/1275457123" target="_blank">
+VC++ 2010 の環境設定</a>，<a href="http://d.hatena.ne.jp/tt_clown/20100730/1280482017" target="_blank">
+Borland C++ Compiler 5.5 の環境設定</a>などを参照して下さい．</p>
+
+<p>最新のリリース，および関連ファイルは <a href="http://sourceforge.jp/projects/clxcpp/"
+target="_blank">SourceForge.JP - CLX C++ Libraries</a> から取得することができます．
+また，（リリース前の）最新のソースコードは，
+<a href="http://svn.sourceforge.jp/view/trunk/?root=clxcpp" target="_blank">svn/clx</a>，
+<a href="http://svn.sourceforge.jp/view/branches/example/?root=clxcpp" target="_blank">svn/clx/example</a>
+にて閲覧/取得することができます．尚，clx_doc，clx_example はそれぞれ，
+本サイトで公開しているリファレンス・ドキュメント，
+サンプルコード群をアーカイブ化したものです．ドキュメントをオフラインで閲覧したり，
+サンプルコードをまとめて取得したい場合は，以下のリンクからダウンロードして下さい．
+Web ページの表示チェックは，Internet Explorer 8.0, Firefox 3.6 で行っています．</p>
+
+<p>使用例などについては，各ライブラリの説明ページの他，<a href="
+http://d.hatena.ne.jp/tt_clown/searchdiary?word=*[C%2B%2B]"target="_blank">blog</a>
+でもいくつか紹介しています．</p>
+
+<div style="padding:1em 0.25em 1em 3em; width:475px; text-align:center; float:left;">
+<script type="text/javascript">
+var sfjp_widget_width = '470px';
+var sfjp_widget_customcss = null;
+</script>
+<script src="http://sourceforge.jp/projects/clxcpp/files/compact.js" type="text/javascript" charset="utf-8"></script>
+</div>
+
+<!-- begining of banner -->
+<div style="padding:1.5em 3em 0em 0.25em; float:right">
+<div style="padding:0 0 0.6em 0em"><a href="http://sourceforge.jp/projects/clxcpp/">
+<img src="http://sourceforge.jp/sflogo.php?group_id=3652&type=1"
+width="96" height="31" border="0" alt="SourceForge.JP"></a>
+</div>
+
+<!-- Google AdSense -->
+<script type="text/javascript"><!--
+google_ad_client = "pub-2984397400684534";
+/* CLX，234x60 */
+google_ad_slot = "8195471443";
+google_ad_width = 234;
+google_ad_height = 60;
+//-->
+</script>
+<script type="text/javascript"
+src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+
+<!-- Google Analytics -->
+<script type="text/javascript">
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+try {
+var pageTracker = _gat._getTracker("UA-4893592-2");
+pageTracker._trackPageview();
+} catch(err) {}</script>
+</div>
+<!-- end of banner -->
+
+<h1 style="clear:both;">Contents</h1>
+<ol class="section">
+<li><strong>文字列とテキスト</strong></li>
+  <ol class="subsection">
+  <li><a href="salgorithm.html">salgorithm</a> ..... 文字列アルゴリズム群</li>
+    <ul class="paragraph">
+    <li><a href="adjust.html">adjust</a> ..... 文字列の位置調整</li>
+    <li><a href="case_conv.html">case_conv</a> ..... 大文字/小文字の変換</li>
+    <li><a href="remove.html">remove</a> ..... 特定文字の消去</li>
+    <li><a href="replace.html">replace</a> ..... 文字列の置換</li>
+    <li><a href="split.html">split</a> ..... 文字列の分割/結合</li>
+    <li><a href="strip.html">strip</a> ..... 空白文字の除去</li>
+    <li><a href="predicate.html">predicate</a> ..... 叙述関数群</a></li>
+    </ul>
+  <li><a href="cstring.html">cstring</a> ..... C 標準ライブラリ (cstring) のラッパ関数群</li>
+  <li><a href="lexical_cast.html">lexical_cast</a> ..... 文字列 &lt;-&gt; 数値の相互変換</li>
+  <li><a href="code_convert.html">code_convert</a> ..... ナロー文字 &lt;-&gt; ワイド文字の相互変換</li>
+  <li><a href="tokenizer.html">tokenizer</a> ..... 文字列のトークン分割</li>
+    <ul class="paragraph">
+    <li><a href="tokenizer_func.html">tokenizer_func</a> ..... 文字列分割のためのポリシークラス</li>
+    </ul>
+  <li><a href="tokenmap.html">tokenmap</a> ..... 文字列のトークン分割（マップコンテナ版）</li>
+  <li><a href="table.html">table</a> ..... 整形済みテキストファイルの読み込み</li>
+  <li><a href="scanner.html">scanner</a> ..... 書式付き文字列の読み込み</li>
+  <li><a href="format.html">format</a> ..... 書式付き文字列の書き出し</li>
+  <li><a href="utf8.html">utf8</a> ..... UTF-8 の文字列を操作するための補助関数群</li>
+  </ol>
+<li><strong>ソケット</strong></li>
+  <ol class="subsection">
+  <li><a href="socket.html">socket</a> ..... 各種ソケットの基底クラス</li>
+  <li><a href="sockaddress.html">sockaddress</a> ..... ソケットアドレス</li>
+  <li><a href="udp.html">udp::socket</a> ..... UDP 用ソケット</li>
+  <li><a href="tcp.html">tcp::socket</a> ..... TCP 用ソケット</li>
+  <li><a href="acceptor.html">tcp::acceptor</a> ..... TCP サーバ用ソケット</li>
+  <li><a href="ssl.html">ssl::socket</a> ..... SSL 通信用ソケット</li>
+  <li><a href="sslacceptor.html">ssl::acceptor</a> ..... SSL 通信用サーバソケット</li>
+  <li><a href="icmp.html">icmp::socket</a> ..... ICMP 用ソケット</li>
+  <li><a href="sockmanager.html">sockmanager</a> ..... 複数のソケットの入力状況の管理</li>
+    <ul class="paragraph">
+    <li><a href="sockhandler.html">sockhandler</a> ..... sockhandler の実装例</li>
+    <li><a href="sslmanager.html">ssl::sockmanager</a> ..... SSL ソケット用 sockmanager</li>
+    </ul>
+  </ol>
+<li><strong>ネットワークサービス</strong></li>
+  <ol class="subsection">
+  <li><a href="resolver.html">resolver</a> ..... 名前解決</li>
+    <ul class="paragraph">
+    <li><a href="localhost.html">localhost</a> ..... ローカルホストの IP アドレスを取得</li>
+    </ul>
+  <li><a href="http.html">http</a>/<a href="https.html">https</a> ..... HTTP/HTTPS (HTTP over SSL) 通信</li>
+  <li><a href="smtp.html">smtp</a>/<a href="smtps.html">smtps</a> ..... SMTP/SMTPS (SMTP over SSL) 通信</li>
+  <li><a href="pop3.html">pop3</a>/<a href="pop3s.html">pop3s</a> ..... POP3/POP3S (POP3 over SSL) 通信</li>
+  <li><a href="ftp.html">ftp</a> ..... FTP 通信</li>
+  <li><a href="hmac.html">hmac</a> ..... HMAC によるダイジェストの計算</li>
+  <li><a href="wsse.html">wsse</a> ..... WSSE 認証用 HTTP リクエスト文字列の生成</li>
+  <li><a href="json.html">json</a> ..... JSON 形式データの解析</li>
+  </ol>
+<li><strong>エンコード</strong></li>
+  <ol class="subsection">
+  <li><a href="uri.html">uri</a> ..... URI の encode/decode</li>
+  <li><a href="base64.html">base64</a> ..... Base64 方式の encode/decode</li>
+  <li><a href="hexdump.html">hexdump</a> ..... 文字列を 16 進数で出力</li>
+  <li><a href="html_escape.html">html::escape</a> ..... html 制御文字のエスケープ</li>
+  </ol>
+<li><strong>ストリーム</strong></li>
+  <ol class="subsection">
+  <li><a href="istream_utility.html">istream_utility</a> ..... 入力ストリームの補助関数群</li>
+  <li><a href="vstream.html">vstream</a> ..... 仮想ストリーム</li>
+  <li><a href="sockstream.html">sockstream</a> ..... ソケット通信用ストリーム</li>
+  <li><a href="zstream.html">zstream</a> ..... zlib を用いた圧縮/解凍のためのストリームフィルタ</li>
+  <li><a href="unzip.html">unzip</a> ..... zip の解凍</li>
+  </ol>
+<li><strong>スレッド</strong></li>
+  <ol class="subsection">
+  <li><a href="thread.html">thread</a> ..... スレッドの作成，操作</li>
+  <li><a href="mutex.html">mutex</a> ..... スレッド間での排他制御</li>
+  <li><a href="condition.html">condition</a> ..... スレッド間での待受/通知制御</li>
+  <li><a href="call_once.html">call_once</a> ..... 特定の関数（オブジェクト）を一度だけ実行する関数</li>
+  </ol>
+<li><strong>日付と時刻</strong></li>
+  <ol class="subsection">
+  <li><a href="date_time.html">date_time</a> ..... 日付と時刻</li>
+    <ul class="paragraph">
+    <li><a href="time_convert.html">string conversion</a> ..... 書式付き文字列の入出力</li>
+    <li><a href="time_duration.html">time_duration</a> ..... 時間を扱うための補助クラス/関数</li>
+    </ul>
+  <li><a href="timer.html">timer</a> ..... タイマー</li>
+  </ol>
+<li><strong>数値</strong></li>
+  <ol class="subsection">
+  <li><a href="unit.html">unit</a> ..... 単位を定義するためのクラス</li>
+  <li><a href="constrained_value.html">constrained_value</a> ..... 制約付きの値</li>
+  <li><a href="random.html">random</a> ..... ランダムな値の生成</li>
+  <li><a href="md5.html">md5</a> ..... MD5 方式のハッシュ値の計算</li>
+  <li><a href="sha1.html">sha1</a> ..... SHA-1 方式のハッシュ値の計算</li>
+  <li><a href="stats.html">stats</a> ..... 統計計算</li>
+  <li><a href="quantile.html">quantile</a> ..... 分位点の計算</li>
+  </ol>
+<li><strong>その他</strong>
+  <ol class="subsection">
+  <li><a href="argument.html">argument</a> ..... コマンドライン引数解析</li>
+  <li><a href="ini.html">ini</a> ..... INI ファイルの操作</li>
+  <li><a href="filetype.html">filetype</a> ..... ファイルタイプ判別関数群</li>
+  <li><a href="container_wrapper.html">container_wrapper</a> ..... STL コンテナを継承するためのラッパクラス</li>
+  </ol>
+</ol>
+
+<h1>News</h1>
+
+<p>version 0.18.0 から Borland C++ Compiler に対応しました．
+ただし，Borland C++ Compiler で使用する場合，一部使用できないライブラリが存在します．
+Borland C++ Compiler で使用する場合の主な機能制限は以下の通りです．</p>
+<ul>
+<li><a href="smtp.html">smtp</a> の mail() メンバ関数において，独自のメール送信用クラスが指定できない．</li>
+<li><a href="combine.html">combine</a> 関数に指定できる型が unsigned char のみである．</li>
+</ul>
+<p>コンパイラ毎のエラー状況については，
+<a href="http://sourceforge.jp/forum/message.php?msg_id=52261" target="_blank">コンパイラ毎のエラー状況</a>
+を参照して下さい (2010/07/31)．</p>
+
+<p>version 0.15.0 より zlib を利用した圧縮・解凍を行うライブラリ (<a href="zstream.html">
+zstream</a>, <a href="http://d.hatena.ne.jp/tt_clown/20090601/p1">unzip</a>)
+を追加しました．これらのライブラリを利用する際にはあらかじめ環境に zlib
+ライブラリをインストールしておく必要があります．zlib に関する詳細は，
+<a href="http://www.zlib.net" target="_blank">zlib Home Site</a> を参照して下さい (2009/06/07)．</p>
+
+<p>version 0.13.0 より，SSL 通信用ライブラリを追加しました．SSL 通信用ライブラリ は
+OpenSSL を用いて実装しているため，利用する際にはあらかじめ環境に OpenSSL
+ライブラリをインストールしておく必要があります．OpenSSL に関する詳細は，
+<a href="http://www.openssl.org/" target="_blank">OpenSSL - The Open Source toolkit
+for SSL/TLS</a> ( <a href="http://www.infoscience.co.jp/technical/openssl/"
+target="_blank">OpenSSL 日本語サイト</a> ) を参照して下さい (2008/10/23)．</p>
+
+<p><a href="http://sourceforge.jp/projects/sourceforge/wiki/potm_0808_CLXCPP" target="_blank">
+SourceForge.JP - 今月のプロジェクト</a>に CLX C++ Libraries が紹介されました (2008/08/29)．</p>
+
+<!--<p>version 0.11.0 より，文字列を扱う（一部の）クラスに関してはワイド文字に対応しました
+（文字列を扱うクラスのうち，ネットワーク通信の発生しないもの）．
+ワイド文字版のクラス名は，元のクラス名の頭に &quot;w&quot; が付いたものとなります
+(e.g., tokenizer -&gt; wtokenizer)．ワイド文字版のクラスを使用する場合は，CLX_USE_WCHAR
+を定義して下さい．尚，ワイド文字を扱う部分に関しては，現在のところ Visual Studio 2005
+でのみ動作を確認しています (2008/08/28)．</p>-->
+
+<h1>Column</h1>
+<ul>
+<li><strong>環境設定</strong></li>
+  <ol class="subsection">
+  <li><a href="http://d.hatena.ne.jp/tt_clown/20100602/1275457123" target="_blank">
+  VC++ 2010 の環境設定</a></li>
+  <li><a href="http://d.hatena.ne.jp/tt_clown/20100730/1280482017" target="_blank">
+  Borland C++ Compiler 5.5 の環境設定</a></li>
+  </ol>
+<li><strong>文字列とテキスト</strong></li>
+  <ol class="subsection">
+  <li><a href="http://d.hatena.ne.jp/tt_clown/20070405/p1" target="_blank">
+  階層的 CSS コンバータ</a></li>
+  <li><a href="http://d.hatena.ne.jp/tt_clown/20071106/p1" target="_blank">
+  拡張 lexical_cast</a></li>
+  <li><a href="http://d.hatena.ne.jp/tt_clown/20080829/p1" target="_blank">
+  ワイド文字とcodecvt</a></li>
+  <li><a href="http://d.hatena.ne.jp/tt_clown/20090108/p1" target="_blank">
+  文字列の 16 進数ダンプ</a></li>
+  <li><a href="http://d.hatena.ne.jp/tt_clown/20090902/1251822236" target="_blank">
+  boost::tokenizer で scanf を作ってみる</a></li>
+  </ol>
+<li><strong>ネットワーク</strong></li>
+  <ol class="subsection">
+  <li><a href="http://d.hatena.ne.jp/tt_clown/20080320/p1" target="_blank">
+  マルチプラットフォームなソケットクラスの実装に関する覚書</a></li>
+  <li><a href="http://d.hatena.ne.jp/tt_clown/20080714/p1" target="_blank">
+  streambuf のカスタマイズ</a></li>
+  <li><a href="http://d.hatena.ne.jp/tt_clown/20080715/p1" target="_blank">
+  ネットワーク帯域計測プログラム</a></li>
+  <li><a href="http://d.hatena.ne.jp/tt_clown/20080727/p1" target="_blank">
+  手抜き PING プログラム</a></li>
+  <li><a href="http://d.hatena.ne.jp/tt_clown/20080730/p1" target="_blank">
+  ICMP パケットを利用したパケット間隔ベースの帯域計測方法</a></li>
+  <li><a href="http://d.hatena.ne.jp/tt_clown/20081031/p1" target="_blank">
+  Hello, OpenSSL!</a></li>
+  <li><a href="http://d.hatena.ne.jp/tt_clown/20081108/p1" target="_blank">
+  OpenSSL と select</a></li>
+  <li><a href="http://d.hatena.ne.jp/tt_clown/20081225/p1" target="_blank">
+  ローカルホストの IP アドレス取得方法</a></li>
+  </ol>
+<li><strong>エンコード</strong></li>
+  <ol class="subsection">
+  <li><a href="http://d.hatena.ne.jp/tt_clown/20100607/1275912518" target="_blank">
+  エンコード処理のインターフェース</a></li>
+  </ol>
+<li><strong>ストリーム</strong></li>
+  <ol class="subsection">
+  <li><a href="http://d.hatena.ne.jp/tt_clown/20100112/1263286891" target="_blank">
+  ストリームから読み込んで STL コンテナに格納する</a></li>
+  </ol>
+<li><strong>スレッド</strong></li>
+  <ol class="subsection">
+  <li><a href="http://d.hatena.ne.jp/tt_clown/20080813/p1" target="_blank">
+  マルチプラットフォームなスレッドクラス</a></li>
+  </ol>
+<li><strong>日付と時刻</strong></li>
+  <ol class="subsection">
+  <li><a href="http://d.hatena.ne.jp/tt_clown/20080905/p1" target="_blank">
+  strptime の実装</a></li>
+  </ol>
+<li><strong>その他</strong></li>
+  <ol class="subsection">
+  <li><a href="http://d.hatena.ne.jp/tt_clown/20100202/1265096776" target="_blank">
+  基礎文法最速マスター まとめ</a></li>
+  <li><a href="http://d.hatena.ne.jp/tt_clown/20090322/p1" target="_blank">
+  エンディアンを考慮したメモリコピー</a></li>
+  <li><a href="http://d.hatena.ne.jp/tt_clown/20090402/p1" target="_blank">
+  CLX C++ Libraies の動作確認</a></li>
+  <li><a href="http://d.hatena.ne.jp/tt_clown/20090405/p1" target="_blank">
+  char から int へのキャスト時の問題</a></li>
+  <li><a href="http://d.hatena.ne.jp/tt_clown/20090609/p1" target="_blank">
+  固定小数点数を double に変換</a></li>
+  <li><a href="http://d.hatena.ne.jp/tt_clown/20090611/p1" target="_blank">
+  コンパイル時チェック (STATIC_CHECK)</a></li>
+  <li><a href="http://d.hatena.ne.jp/tt_clown/20090620/p1" target="_blank">
+  俺コーディング規則</a></li>
+  <li><a href="http://d.hatena.ne.jp/tt_clown/20090710/p1" target="_blank">
+  終了処理とコピーコンストラクタ</a></li>
+  <li><a href="http://d.hatena.ne.jp/tt_clown/20090717/p1" target="_blank">
+  const の取り扱い</a></li>
+  <li><a href="http://d.hatena.ne.jp/tt_clown/20090816/p1" target="_blank">
+  コマンドラインから VC++ のコンパイラ (cl.exe) を使用する</a></li>
+  <li><a href="http://d.hatena.ne.jp/tt_clown/20090819/p1" target="_blank">
+  Microsoft Office ファイルの判別方法</a></li>
+  <li><a href="http://d.hatena.ne.jp/tt_clown/20091212/1260603758" target="_blank">
+  Boost 勉強会メモ</a></li>
+  <li><a href="http://d.hatena.ne.jp/tt_clown/20091215/1260817453" target="_blank">
+  静的配列の要素数を取得する構文</a></li>
+  <li><a href="http://d.hatena.ne.jp/tt_clown/20091222/1261447006" target="_blank">
+  複数の値を一つの変数に纏める関数 combine とメタ関数 combineN_</a></li>
+  <li><a href="http://d.hatena.ne.jp/tt_clown/20100108/1262923986" target="_blank">
+  TrueType フォント名を取得する</a></li>
+  <li><a href="http://d.hatena.ne.jp/tt_clown/20100114/1263463150" target="_blank">
+  Hello, wonderful logging world!</a></li>
+  <li><a href="http://d.hatena.ne.jp/tt_clown/20100120/1263927900" target="_blank">
+  どのような場面で new を使うか？</a></li>
+  <li><a href="http://d.hatena.ne.jp/tt_clown/20100201/1265023762" target="_blank">
+  エラー通知方法の古今東西</a></li>
+  <li><a href="http://d.hatena.ne.jp/tt_clown/20100210/1265791007" target="_blank">
+  クラス設計メモ</a></li>
+  <li><a href="http://d.hatena.ne.jp/tt_clown/20100305/1267789528" target="_blank">
+  イテレータの比較</a></li>
+  <li><a href="http://d.hatena.ne.jp/tt_clown/20100516/1273948045" target="_blank">
+  既存のソースコードの読み方</a></li>
+  </ol>
+</ul>
+
+<h1>History</h1>
+<dl>
+<dt>2010/07/31 version 0.18.0</dt>
+<dd>Borland C++ Compiler に対応．</dd>
+
+<dt>2010/06/19 version 0.17.1</dt>
+<dd><a href="json.html">json</a> のバグを修正．</dd>
+
+<dt>2010/06/02 version 0.17.0</dt>
+<dd>ビット処理（バイト処理）を行うメタ関数 (lower_mask, upper_mask, combine, reverse, rotate, min, max) を新規作成．<br>
+bitmask を mpl::lower_mask, mpl::upper_mask に変更．<br>
+<a href="ini.html">ini</a> において，特定のセクションに属さない key=value 群の処理を追加（v[""]key のようにしてアクセスする）．<br>
+convert 関数を新規作成．また，<a href="hexdump.html">hexdump</a>, <a href="uri.html">uri</a>, <a href="html_escape.html">html::escape</a>, <a href="base64.html">base64</a> を convert ベースに修正．<br>
+<a href="utf8.html">utf8</a> の関数を修正・追加．<br>
+utf16 の関数を追加（主にサロゲート・ペアへの対応）．</dd>
+
+<dt>2010/01/14 version 0.16.2</dt>
+<dd><a href="istream_utility.html">istream_utility</a> を新規作成．<br>
+<a href="filetype.html">filetype</a> に is_ttf(), is_ttc() 関数を追加．</dd>
+</dl>
+
+<div style="text-align:right;font-weight:bold">..... <a href="history.html">More</a></div>
+
+</div>
+<!-- end of main text -->
+
+<!-- footer -->
+<div class="foot">
+<address class="copyright">
+Copyright &copy; 2004 - 2010, clown. All rights reserved.
+Mailto: tt.clown(a)gmail.com
+</address>
+</div>
+<!-- end of footer -->
+
+</div>
+</body>
+
+</html>

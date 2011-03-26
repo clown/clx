@@ -1,0 +1,364 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ja">
+
+<head>
+<meta name="author" content="clown">
+<meta http-equiv="Content-type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+
+<link rel="index" href="index.html">
+<link rel="stylesheet" href="style/default.css" type="text/css">
+
+<title>CLX C++ Libraries - history</title>
+</head>
+
+<body>
+<div class="contents">
+
+<!-- header -->
+<div class="title">
+<a href="http://clx.cielquis.net/">CLX C++ Libraries</a>
+<a href="http://b.hatena.ne.jp/entry/http://clx.cielquis.net/history.html">
+<img src="http://d.hatena.ne.jp/images/b_entry.gif"
+  width="16" height="12" border="0">
+</a>
+</div>
+<div class="head"><a href="index.html">Home</a> &gt;&gt;
+<a href="history.html">History</a></div>
+<!-- end of header -->
+
+<!-- main text -->
+<div class="main">
+<h1>Update history</h1>
+
+<h2>version 0.18.x</h2>
+<dl>
+<dt>2010/07/31 version 0.18.0</dt>
+<dd>Borland C++ Compiler に対応．</dd>
+</dl>
+
+<h2>version 0.17.x</h2>
+<dl>
+<dt>2010/06/19 version 0.17.1</dt>
+<dd><a href="json.html">json</a> のバグを修正．</dd>
+
+<dt>2010/06/02 version 0.17.0</dt>
+<dd>ビット処理（バイト処理）を行うメタ関数 (lower_mask, upper_mask, combine, reverse, rotate, min, max) を新規作成．<br>
+bitmask を mpl::lower_mask, mpl::upper_mask に変更．<br>
+<a href="ini.html">ini</a> において，特定のセクションに属さない key=value 群の処理を追加（v[""]key のようにしてアクセスする）．<br>
+convert 関数を新規作成．また，<a href="hexdump.html">hexdump</a>, <a href="uri.html">uri</a>, <a href="html_escape.html">html::escape</a>, <a href="base64.html">base64</a> を convert ベースに修正．<br>
+<a href="utf8.html">utf8</a> の関数を修正・追加．<br>
+utf16 の関数を追加（主にサロゲート・ペアへの対応）．</dd>
+</dl>
+
+<h2>version 0.16.x</h2>
+<dl>
+<dt>2010/01/14 version 0.16.2</dt>
+<dd><a href="istream_utility.html">istream_utility</a> を新規作成．<br>
+<a href="filetype.html">filetype</a> に is_ttf(), is_ttc() 関数を追加．</dd>
+
+<dt>2009/12/25 version 0.16.1</dt>
+<dd><a href="ssl.html">ssl::socket</a> を修正．<br>
+<a href="ini.html">ini</a> に write() メソッドを追加．<br>
+<a href="vstream.html">vstream</a> の引数を改変（const の除去など）．</dd>
+
+<dt>2009/11/24 version 0.16.0</dt>
+<dd><a href="container_wrapper.html">container_wrapper</a> の新規作成．<br>
+<a href="tokenizer.html">tokenizer</a>, <a href="tokenmap.html">tokenmap</a>,
+<a href="table.html">table</a>, <a href="ini.html">ini</a> を
+<a href="container_wrapper.html">container_wrapper</a> を利用する形に変更．<br>
+<a href="tokenizer.html">tokenizer</a>, <a href="tokenmap.html">tokenmap</a>,
+<a href="table.html">table</a> の data() メソッドを削除．<br>
+socket 関連クラスのクラス内での typedef を若干変更．</dd>
+</dl>
+
+<h2>version 0.15.x</h2>
+<dl>
+<dt>2009/09/02 version 0.15.8</dt>
+<dd><a href="tokenizer_func.html">escape_separator および format_separator</a> のバグを修正．</dd>
+
+<dt>2009/08/19 version 0.15.7</dt>
+<dd><a href="http.html">http</a> のバグを修正（chunked 転送の場合）．<br>
+<a href="filetype.html">filetype</a> の新規作成．</dd>
+
+<dt>2009/08/12 version 0.15.6</dt>
+<dd><a href="utf8.html">UTF-8 を扱う際の補助関数群</a>を新規作成．</dd>
+
+<dt>2009/06/13 version 0.15.4</dt>
+<dd><a href="thread.html">unzip</a> が分割コンパイル時にエラーになるバグを修正．</dd>
+
+<dt>2009/06/11 version 0.15.3</dt>
+<dd><a href="thread.html">unzip</a> のバグを修正．<br>
+コンパイル時のチェックを行う <a href="http://d.hatena.ne.jp/tt_clown/20090405/p1"
+target="_blank">STATIC_CHECK</a> マクロを新規作成．</dd>
+
+<dt>2009/06/06 version 0.15.2</dt>
+<dd><a href="thread.html">unzip</a> のバグを修正．</dd>
+
+<dt>2009/06/03 version 0.15.1</dt>
+<dd><a href="thread.html">thread.h</a> をインクルードする際，
+特定の環境でコンパイルエラーが発生する問題に対応．</dd>
+
+<dt>2009/06/01 version 0.15.0</dt>
+<dd><a href="zstream.html">zstream/unzstream</a> を新規作成．<br>
+<a href="vstream.html">vstream</a> を新規作成．<br>
+<a href="unzip.html">unzip</a> を新規作成．<br>
+<a href="call_once.html">call_once</a> が分割コンパイル時にエラーとなる問題に対応．<br>
+<a href="uri.html">uri</a> を修正．</dd>
+</dl>
+
+<h2>version 0.14.x</h2>
+<dl>
+<dt>2009/04/18 <a href="download/clx_0.14.5.tar.gz">version 0.14.5</a></dt>
+<dd><a href="uri.html">uri</a> のバグを修正．<br>
+<a href="argument.html">argument</a> において，
+負の整数がオプションと誤認識される問題を修正．</dd>
+
+<dt>2009/04/05 <a href="download/clx_0.14.4.tar.gz">version 0.14.4</a></dt>
+<dd>endian の判別関数を修正．<br>
+uri::encode において，0x7F より大きい値（2 バイト文字など）が含まれる場合に，
+期待される結果が得られない問題を修正．<br>
+VC++ において，C4996 の警告を抑制するように設定．</dd>
+
+<dt>2009/03/15 <a href="download/clx_0.14.3.tar.gz">version 0.14.3</a></dt>
+<dd><a href="md5.html">md5</a>, <a href="sha1.html">sha1</a> を Endian
+を考慮するように修正．<br>
+MinGW (g++ -mno-cygwin) 環境で発生していたコンパイルエラーを修正．<br>
+</dd>
+
+<dt>2009/02/03 <a href="download/clx_0.14.2.tar.gz">version 0.14.2</a></dt>
+<dd><a href="hexdump.html">hexdump</a> のインターフェースを一部変更．</dd>
+
+<dt>2009/01/27 <a href="download/clx_0.14.1.tar.gz">version 0.14.1</a></dt>
+<dd>各種例外クラスのメッセージ送出部分のバグを修正．</dd>
+
+<dt>2009/01/16 <a href="download/clx_0.14.0.tar.gz">version 0.14.0</a></dt>
+<dd><a href="format.html">format</a> の書式に &quot;%%&quot;
+を指定したときに発生するバグを修正．<br>
+<a href="hexdump.html">hexdump</a> を追加．</dd>
+</dl>
+
+<h2>version 0.13.x</h2>
+<dl>
+<dt>2009/01/04 <a href="download/clx_0.13.9.tar.gz">version 0.13.9</a></dt>
+<dd><a href="time_convert.html">date_time</a> の to_string() の引数に wchar_t
+型を指定したときにメモリのオーバフローが発生するバグを修正．</dd>
+
+<dt>2008/12/27 <a href="download/clx_0.13.8.tar.gz">version 0.13.8</a></dt>
+<dd><a href="sha1.html">sha1</a> の to_string() のバグを修正．<br>
+<a href="hmac.html">hmac</a> の Engine に <a href="md5.html">md5</a>
+以外のクラスを適用した場合に正常な結果が得られないバグを修正．<br>
+<a href="md5.html">md5</a>, <a href="sha1.html">sha1</a> に size() メソッドを追加．</dd>
+
+<dt>2008/12/26 <a href="download/clx_0.13.7.tar.gz">version 0.13.7</a></dt>
+<dd><a href="ftp.html">ftp</a> を新規作成．<br>
+<a href="localhost.html">localhost</a> を新規作成．</dd>
+
+<dt>2008/12/18 <a href="download/clx_0.13.6.tar.gz">version 0.13.6</a></dt>
+<dd><a href="timer.html">timer</a> を Widnows で使用する場合，Windows
+のタイマー粒度を 1ms に変更するように修正．</dd>
+
+<dt>2008/11/19 <a href="download/clx_0.13.5.tar.gz">version 0.13.5</a></dt>
+<dd><a href="pop3.html">pop3</a> の retrieve() のバグを修正．</dd>
+
+<dt>2008/11/14 <a href="download/clx_0.13.4.tar.gz">version 0.13.4</a></dt>
+<dd><a href="smtp.html">smtp</a> の mail() に複数の宛先を指定するインターフェースを追加．<br>
+<a href="smtp.html">smtp</a> の mail()，および <a href="pop3.html">pop3</a>
+の retrieve() に関数オブジェクトを引数に指定するインターフェースを追加．</dd>
+
+<dt>2008/11/08 <a href="download/clx_0.13.3.tar.gz">version 0.13.3</a></dt>
+<dd><a href="sslacceptor.html">ssl::acceptor</a> のバグを修正．<br>
+<a href="sslmanager.html">sockmanager</a> を SSL 通信用ソケットに対応．</dd>
+
+<dt>2008/10/29 <a href="download/clx_0.13.2.tar.gz">version 0.13.2</a></dt>
+<dd><a href="smtp.html">smtp</a> を SMTP-AUTH (CRAM-MD5, PLAIN, LOGIN) に対応．</dd>
+
+<dt>2008/10/28 <a href="download/clx_0.13.1.tar.gz">version 0.13.1</a></dt>
+<dd><a href="smtp.html">smtp</a> のインターフェースの変更．<br>
+各種クラスのコンストラクタの例外関連処理の修正．</dd>
+
+<dt>2008/10/23 <a href="download/clx_0.13.0.tar.gz">version 0.13.0</a></dt>
+<dd>ssl ライブラリ (<a href="ssl.html">ssl::socket</a>, <a href="sslacceptor.html">
+ssl::acceptor</a>, <a href="sockstream.html">ssl::sockstream</a>) を新規作成．<br>
+<a href="https.html">https</a>, <a href="smtp.html">smtp</a>, <a href="smtps.html">
+smtps</a>, <a href="pop3.html">pop3</a>, <a href="pop3s.html">pop3s</a> を新規作成．<br>
+tcp::socket, tcp::acceptor, udp::socket, sockstream において，
+ポート番号の代わりにサービス名 (e.g., http, smtp, pop3) を引数に指定するメソッドを削除．
+代わりに，port(), tcp::port(), udp::port() 関数を追加（詳細は，<a href="resolver.html">
+resolver</a> を参照）．</dd>
+</dl>
+
+<h2>version 0.12.x</h2>
+<dl>
+<dt>2008/10/21 <a href="download/clx_0.12.8.tar.gz">version 0.12.8</a></dt>
+<dd><a href="tokenizer.html">tokenizer</a>, および <a href="tokenmap.html">
+tokenmap</a> において，String から Type への変換を TokenizerFunc
+に委ねるように変更．<br>
+gcc 4.0.2 (Linux) 環境において，<a href="udp.html">udp</a>, <a href="icmp.html">
+icmp</a> を用いたプログラムでコンパイルエラーが発生していた問題を修正．</dd>
+
+<dt>2008/10/15 <a href="download/clx_0.12.6.tar.gz">version 0.12.6</a></dt>
+<dd><a href="date_time.html">date_time</a> のバグを修正．<br>
+<a href="tokenizer.html">tokenizer</a>, <a href="tokenmap.html">tokenmap</a>,
+<a href="table.html">table</a> のコンテナの扱いを変更．</dd>
+
+<dt>2008/10/10 <a href="download/clx_0.12.5.tar.gz">version 0.12.5</a></dt>
+<dd><a href="uri.html">uri</a>, <a href="constrained_value.html">constrained_value</a>,
+<a href="ini.html">ini</a>, <a href="udp.html">udp</a> のバグを修正．<br>
+<a href="socket.html">socket</a> のコピーコンストラクタ，
+および代入演算子が呼ばれたときの動作を変更．<br>
+<a href="http.html">http</a> のテンプレート引数を変更．<br>
+<a href="random.html">random</a> の新規作成．<br>
+<a href="cstring.html">cstring</a> の新規作成．</dd>
+
+<dt>2008/10/02 <a href="download/clx_0.12.4.tar.gz">version 0.12.4</a></dt>
+<dd><a href="split.html">lsprit_if/rsplit_if</a> のバグを修正．<br>
+inline を明示するように変更．</dd>
+
+<dt>2008/09/05 <a href="download/clx_0.12.3.tar.gz">version 0.12.3</a></dt>
+<dd><a href="tokenmap.html">tokenmap</a> を使用したときに，特定の状況でエラーとなるバグを修正．<br>
+date_time::from_string Windows 版の対応書式を一部拡大．詳細は，<a
+href="time_convert.html">date_time - string conversion</a> を参照．</dd>
+
+<dt>2008/09/04 <a href="download/clx_0.12.2.tar.gz">version 0.12.2</a></dt>
+<dd>date_time::from_string() の Windows 版を一部実装．詳細は，<a
+href="time_convert.html">date_time - string conversion</a> を参照．<br>
+<a href="sockbuf.html">sockbuf</a> を使用したときに，特定の状況でエラーとなるバグを修正．<br>
+<a href="unit.html">unit</a> の新規作成．</dd>
+
+<dt>2008/09/03 <a href="download/clx_0.12.1.tar.gz">version 0.12.1</a></dt>
+<dd><a href="http.html">http</a>，<a href="sockstream.html">sockstream</a>，
+<a href="sockbuf.html">sockbuf</a> を修正．</dd>
+
+<dt>2008/09/02 <a href="download/clx_0.12.0.tar.gz">version 0.12.0</a></dt>
+<dd>ioftime の機能を <a href="date_time.html">date_time</a> に統合（詳細は，
+<a href="time_convert.html">date_time - string conversion</a> を参照）．<br>
+UTC の時刻を扱う <a href="date_time.html">date_time_utc</a> を新規作成．<br>
+<a href="http.html">http</a> を修正．<br>
+<a href="wsse.html">wsse</a> を新規作成．<br>
+<a href="base64.html">base64</a>，<a href="md5.html">md5</a>，<a href="sha1.html">
+sha1</a> を新規作成．</dd>
+</dl>
+
+<h2>version 0.11.x</h2>
+<dl>
+<dt>2008/08/28 <a href="download/clx_0.11.0.tar.gz">version 0.11.0</a></dt>
+<dd>ワイド文字に対応．<br>
+<a href="code_convert.html">code_convert</a> を新規作成．<br>
+<a href="json.html">json</a> を新規作成．</dd>
+</dl>
+
+<h2>version 0.10.x</h2>
+<dl>
+<dt>2008/08/26 <a href="download/clx_0.10.3.tar.gz">version 0.10.3</a></dt>
+<dd><a href="http.html">http</a> を新規作成．<br>
+<a href="tokenizer.html">tokenizer</a> において，引数に format_separator と
+istreambuf_iterator&lt;char&gt; などの -- 演算子を持たない入力イテレータを
+同時に指定するとエラーとなるバグを修正．</dd>
+
+<dt>2008/08/19 <a href="download/clx_0.10.2.tar.gz">version 0.10.2</a></dt>
+<dd><a href="mutex.html">try_mutex，recursive_try_mutex</a> を新規作成．<br>
+<a href="lexical_cast.html">lexical_cast</a> において，Source と Type
+に同じ型が指定された場合の処理を高速化．</dd>
+
+<dt>2008/08/13 <a href="download/clx_0.10.0.tar.gz">version 0.10.0</a></dt>
+<dd>thread モジュール（<a href="thread.html">thread</a>，<a href="mutex.html">mutex</a>，
+<a href="condition.html">condition</a>，<a href="call_once.html">call_once</a>）
+を新規作成．<br>
+<a href="html_escape.html">html::escape</a> を新規作成．<br>
+<a href="uri.html">uri</a> を新規作成．</dd>
+</dl>
+
+<h2>version 0.9.x</h2>
+<dl>
+<dt>2008/08/09 <a href="download/clx_0.9.7.tar.gz">version 0.9.7</a></dt>
+<dd><a href="tokenizer_func.html">format_separator</a> のバグ修正．</dd>
+
+<dt>2008/07/28 <a href="download/clx_0.9.6.tar.gz">version 0.9.6</a></dt>
+<dd><a href="icmp.html">icmp</a> を新規作成．<br>
+<a href="table.html">table</a> のインターフェースを変更．<br>
+<a href="split.html">split</a> のバグ修正．</dd>
+
+<dt>2008/07/16 <a href="download/clx_0.9.5.tar.gz">version 0.9.5</a></dt>
+<dd><a href="sockmanager.html">sockmanager</a> のハンドラとして関数オブジェクトの他，
+通常の関数も指定できるように変更．</dd>
+
+<dt>2008/07/15 <a href="download/clx_0.9.4.tar.gz">version 0.9.4</a></dt>
+<dd><a href="sockmanager.html">sockmanager</a> を新規作成．<br>
+<dd><a href="tokenmap.html">tokenmap</a> のテンプレート引数を変更．</dd>
+
+<dt>2008/07/12 <a href="download/clx_0.9.2.tar.gz">version 0.9.2</a></dt>
+<dd><a href="sockstream.html">sockstream</a> の修正．<br>
+TCP，UDP ソケットのポート番号を指定する際に，サービス名 (http, ftp, ...)
+も受け付けるように変更．</dt>
+
+<dt>2008/02/27 <a href="download/clx_0.9.0.tar.gz">version 0.9.0</a></dt>
+<dd>Socket 関連のクラスを Winsock に対応．<br>
+<a href="http://asio.sourceforge.net/boost_asio_0_3_8/libs/asio/doc/html/index.html"
+target="_blank">boost::asio</a> を参考にネットワーク通信のための各クラスのインターフェースを変更．<br>
+<a href="timer.html">timer</a> を新規作成．<br>
+<a href="ini.html">ini</a> を新規作成．</dd>
+</dl>
+
+<h2>version 0.8.x</h2>
+<dl>
+<dt>2007/08/09 <a href="download/clx_0.8.2.tar.gz">version 0.8.2</a></dt>
+<dd>文字列アルゴリズム群を新規作成．</dd>
+
+<dt>2007/04/23 <a href="download/clx_0.8.1.tar.gz">version 0.8.1</a></dt>
+<dd>各種バグ修正．</dd>
+
+<dt>2007/03/23 <a href="download/clx_0.8.0.tar.gz">version 0.8.0</a></dt>
+<dd>時刻，数値を扱うクラス群を新規作成．<br>
+各種ソケットクラスに例外処理を追加 (socket_error)．<br>
+<a href="tokenmap.html">tokenmap</a> のインターフェースを変更．</dd>
+</dl>
+
+<h2>version 0.7.x</h2>
+<h2>version 0.6.x</h2>
+
+<h2>version 0.5.x</h2>
+<dl>
+<dt>2006/09/06 <a href="download/clx_0.5.6.tar.gz">version 0.5.6</a></dt>
+<dd>各種ファイルの include を修正．</dd>
+
+<dt>2006/06/08 <a href="download/clx_0.5.5.tar.gz">version 0.5.5</a></dt>
+<dd><a href="tokenmap.html">tokenmap</a> を新規作成．<br>
+format_separator を tokenmap で利用できるように変更．</dd>
+
+<dt>2006/04/07 <a href="download/clx_0.5.4.tar.gz">version 0.5.4</a></dt>
+<dd><a href="format.html">format</a> を新規作成．<br>
+format_separator のバグ修正．</dd>
+
+<dt>2006/03/31 <a href="download/clx_0.5.3.tar.gz">version 0.5.3</a></dt>
+<dd><a href="scanner.html">scanner</a> を新規作成．<br>
+format_separator のバグ修正．<br>
+table のテンプレート引数を変更．</dd>
+
+<dt>2006/02/25 <a href="download/clx_0.5.1.tar.gz">version 0.5.1</a></dt>
+<dd>lexical_cast のうち，次の型に関して特殊化．(Type, Source) = (int, int),
+(unsigned int, unsigned int), (long, long), (unsigned long, unsigned long),
+(char, char), (unsigend char, unsigned char), (double, double),
+(std::string, std::string)</dd>
+
+<dt>2006/02/22 <a href="download/clx_0.5.0.tar.gz">version 0.5.0</a></dt>
+<dd>最初の公開バージョン．</dd>
+</dl>
+
+</div>
+<!-- end of main text -->
+
+<!-- footer -->
+<div class="foot">
+<address class="copyright">
+Copyright &copy; 2004 - 2009, clown. All rights reserved.
+Mailto: tt.clown(a)gmail.com
+</address>
+</div>
+<!-- end of footer -->
+
+</div>
+</body>
+
+</html>

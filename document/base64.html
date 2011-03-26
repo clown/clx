@@ -1,0 +1,122 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ja">
+
+<head>
+<meta name="author" content="clown">
+<meta http-equiv="Content-type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<meta http-equiv="Content-Script-Type" content="text/javascript">
+
+<script type="text/javascript" src="script/sh_main.js"></script>
+<script type="text/javascript" src="script/sh_cpp.js"></script>
+
+<link rel="index" href="index.html">
+<link rel="stylesheet" href="style/default.css" type="text/css">
+<link rel="stylesheet" href="style/hilight.css" type="text/css">
+
+<title>CLX C++ Libraries - base64</title>
+</head>
+
+<body onload="sh_highlightDocument()">
+<div class="contents">
+
+<!-- header -->
+<div class="title">
+<a href="http://clx.cielquis.net/">CLX C++ Libraries</a>
+<a href="http://b.hatena.ne.jp/entry/http://clx.cielquis.net/base64.html">
+<img src="http://d.hatena.ne.jp/images/b_entry.gif"
+  width="16" height="12" border="0">
+</a>
+</div>
+<div class="head"><a href="index.html">Home</a> &gt;&gt;
+<a href="base64.html">base64</a></div>
+<!-- end of header -->
+
+<!-- main text -->
+<div class="main">
+
+<h1>Declrations</h1>
+<pre class="sh_cpp">
+namespace base64 {
+    template &lt;class InIter, class OutIter&gt;
+    OutIter encode(InIter first, InIter last, OutIter result);
+    
+    std::string encode(const char* src, size_t n);
+    std::string encode(const std::string&amp; src);
+    
+    template &lt;class InIter, class OutIter&gt;
+    OutIter decode(InIter first, InIter last, OutIter result);
+    
+    std::string decode(const char* src, size_t n);
+    std::string decode(const std::string&amp; src);
+}
+</pre>
+
+<h1>Overview</h1>
+<p>base64 は，バイト列を Base64 方式で encode/decode するための関数群です．
+引数には，入力データ，および文字列を指定することができます．その他のデータを
+encode する場合は，1Byte （char 型）の配列にデータを格納してその配列を指定して下さい．</p>
+
+<h1>Example</h1>
+<p><a href="example/example_base64.cpp">example_base64.cpp</a></p>
+
+<pre class="sh_cpp">
+#include &lt;iostream&gt;
+#include &lt;string&gt;
+#include &quot;clx/base64.h&quot;
+
+int main(int argc, char* argv[]) {
+    // 入力ストリームからデータを受け取る場合
+    std::istreambuf_iterator&lt;char&gt; input(std::cin);
+    std::istreambuf_iterator&lt;char&gt; last;
+    
+    std::string code;
+    std::insert_iterator&lt;std::string&gt; ss(code, code.begin());
+    clx::base64::encode(input, last, ss);
+    
+    std::cout &lt;&lt; &quot;from std::cin&quot; &lt;&lt; std::endl;
+    std::cout &lt;&lt; &quot;encode: &quot; &lt;&lt; code &lt;&lt; std::endl;
+    std::cout &lt;&lt; &quot;decode: &quot;;
+    std::ostreambuf_iterator&lt;char&gt; output(std::cout);
+    clx::base64::decode(code.begin(), code.end(), output);
+    std::cout &lt;&lt; std::endl;
+    std::cout &lt;&lt; std::endl;
+    
+    // 文字列からデータを受け取る場合
+    std::string src = &quot;Hello, world!&quot;;
+    code = clx::base64::encode(src);
+    std::cout &lt;&lt; &quot;from std::string&quot; &lt;&lt; std::endl;
+    std::cout &lt;&lt; &quot;encode: &quot; &lt;&lt; code &lt;&lt; std::endl;
+    std::cout &lt;&lt; &quot;decode: &quot; &lt;&lt; clx::base64::decode(code) &lt;&lt; std::endl;
+    
+    return 0;
+}
+</pre>
+
+<pre>
+<strong>Result</strong>
+$ echo -n 'Hello, world!' | ./test
+from std::cin
+encode: SGVsbG8sIHdvcmxkIQ==
+decode: Hello, world!
+
+from std::string
+encode: SGVsbG8sIHdvcmxkIQ==
+decode: Hello, world!</pre>
+</div>
+<!-- end of main text -->
+
+<!-- footer -->
+<div class="foot">
+<address class="copyright">
+Copyright &copy; 2004 - 2008, clown. All rights reserved.
+Mailto: tt.clown(a)gmail.com
+</address>
+</div>
+<!-- end of footer -->
+
+</div>
+</body>
+
+</html>

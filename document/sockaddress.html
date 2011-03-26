@@ -1,0 +1,128 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ja">
+
+<head>
+<meta name="author" content="clown">
+<meta http-equiv="Content-type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<meta http-equiv="Content-Script-Type" content="text/javascript">
+
+<script type="text/javascript" src="script/sh_main.js"></script>
+<script type="text/javascript" src="script/sh_cpp.js"></script>
+
+<link rel="index" href="index.html">
+<link rel="stylesheet" href="style/default.css" type="text/css">
+<link rel="stylesheet" href="style/hilight.css" type="text/css">
+
+<title>CLX C++ Libraries - sockaddress</title>
+</head>
+
+<body onload="sh_highlightDocument()">
+<div class="contents">
+
+<!-- header -->
+<div class="title">
+<a href="http://clx.cielquis.net/">CLX C++ Libraries</a>
+<a href="http://b.hatena.ne.jp/entry/http://clx.cielquis.net/sockaddress.html">
+<img src="http://d.hatena.ne.jp/images/b_entry.gif"
+  width="16" height="12" border="0">
+</a>
+</div>
+<div class="head"><a href="index.html">Home</a> &gt;&gt;
+<a href="sockaddress.html">sockaddress</a></div>
+<!-- end of header -->
+
+<!-- main text -->
+<div class="main">
+
+<h1>Declaration</h1>
+
+<pre class="sh_cpp">
+template &lt;
+    int Family,
+    int Protocol
+&gt; class basic_sockaddress;
+
+class sockaddress_error;
+</pre>
+
+<h1>Overview</h1>
+<p>sockaddress は，struct sockaddr のラッパクラスです．ホスト名 and/or
+ポート番号（または，サービス名）を指定すると，それらの情報を基に新たな
+struct sockaddr を生成します．sockaddress_error は，指定されたホスト名，
+またはサービス名に対応するポート番号が見つからない場合に送出される例外です．</p>
+
+<h1>Template Parameters</h1>
+<dl>
+<dt>Family</dt><dd>プロトコルファミリーを指定します．</dd>
+<dt>Protocol</dt><dd>プロトコルを指定します．</dd>
+</dl>
+
+<h1>Related Types</h1>
+<pre class="sh_cpp">
+typedef struct sockaddr_in inet_type;
+typedef char char_type;
+typedef std::basic_string&lt;char&gt; string_type;
+typedef unsigned int size_type;
+</pre>
+
+<h1>Construction and Member Functions</h1>
+<pre class="sh_cpp">
+basic_sockaddress();
+explicit basic_sockaddress(const inet_type&amp; addr);
+explicit basic_sockaddress(int port);
+explicit basic_sockaddress(const char_type* host, int port);
+explicit basic_sockaddress(const string_type&amp; host, int port);
+virtual ~basic_sockaddress() throw();
+</pre>
+
+<p>引数にホスト名 and/or ポート番号が指定された場合は，指定された引数で
+assign() メソッドを実行します．assign() メソッドについては後述します．</p>
+
+<pre class="sh_cpp">
+basic_sockaddress&amp; assign(const inet_type&amp; addr);
+basic_sockaddress&amp; assign(int port);
+basic_sockaddress&amp; assign(const char_type* host, int port, int n = 0);
+basic_sockaddress&amp; assign(const string_type&amp; host, int port, int n = 0);
+</pre>
+
+<p>ホスト名，およびポート番号が引数に指定された場合は，指定された引数を基にして，
+新たなクライアント用のソケット・アドレスを生成します．ホスト名の名前解決には，
+<a href="resolver.html">resolver</a> を使用します．指定されたホスト名に対して複数の
+IP アドレスが設定されている場合には，n 番目の IP アドレスを用いて生成します．</p>
+
+<p>ポート番号のみが引数に指定された場合は，サーバ用のソケット・アドレスを生成します．</p>
+
+<pre class="sh_cpp">
+string_type ipaddr() const;
+int port() const;
+</pre>
+
+<p>IP アドレス，およびポート番号の情報へアクセスするためのメソッドです．
+ipaddr() は，ドット区切りの文字列 (e.g., 192.168.0.1) が返されます．</p>
+
+<pre class="sh_cpp">
+const inet_type* data() const;
+size_type size() const; // inet_typeのサイズ
+</pre>
+
+<p>これらのメソッドは，OS のシステムコールを使う際に，struct sockaddr
+へアクセスを行う必要がある場合に使用します．</p>
+
+</div>
+<!-- end of main text -->
+
+<!-- footer -->
+<div class="foot">
+<address class="copyright">
+Copyright &copy; 2004 - 2009, clown. All rights reserved.
+Mailto: tt.clown(a)gmail.com
+</address>
+</div>
+<!-- end of footer -->
+
+</div>
+</body>
+
+</html>

@@ -1,0 +1,100 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ja">
+
+<head>
+<meta name="author" content="clown">
+<meta http-equiv="Content-type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<meta http-equiv="Content-Script-Type" content="text/javascript">
+
+<script type="text/javascript" src="script/sh_main.js"></script>
+<script type="text/javascript" src="script/sh_cpp.js"></script>
+
+<link rel="index" href="index.html">
+<link rel="stylesheet" href="style/default.css" type="text/css">
+<link rel="stylesheet" href="style/hilight.css" type="text/css">
+
+<title>CLX C++ Libraries - time_duration</title>
+</head>
+
+<body onload="sh_highlightDocument()">
+<div class="contents">
+
+<!-- header -->
+<div class="title">
+<a href="http://clx.cielquis.net/">CLX C++ Libraries</a>
+<a href="http://b.hatena.ne.jp/entry/http://clx.cielquis.net/time_duration.html">
+<img src="http://d.hatena.ne.jp/images/b_entry.gif"
+  width="16" height="12" border="0">
+</a>
+</div>
+<div class="head"><a href="index.html">Home</a> &gt;&gt;
+<a href="date_time.html">date_time</a> &gt;&gt;
+<a href="time_duration.html">time_duration</a></div>
+<!-- end of header -->
+
+<!-- main text -->
+<div class="main">
+
+<h1>Declarations</h1>
+
+<pre class="sh_cpp">
+typedef unit&lt;60,     1&gt; minutes;  // 60 sec
+typedef unit&lt;3600,   1&gt; hours;    // 60 * 60 sec
+typedef unit&lt;86400,  1&gt; days;     // 60 * 60 * 24 sec
+typedef unit&lt;604800, 1&gt; weeks;    // 60 * 60 * 24 * 7 sec
+
+class date_duration {
+public:
+    typedef int value_type;
+    
+    explicit date_duration(value_type y = 0, value_type m = 0, value_type d = 0);
+    
+    date_duration&amp; operator+=(const date_duration&amp; t);
+    date_duration&amp; operator-=(const date_duration&amp; t);
+    
+    friend date_duration operator+(date_duration x, const date_duration&amp; y)
+    friend date_duration operator-(date_duration x, const date_duration&amp; y)
+    friend date_duration operator+(const date_duration&amp; y, date_duration x)
+    friend date_duration operator-(const date_duration&amp; y, date_duration x)
+    
+    value_type years() const;
+    value_type months() const;
+    value_type days() const;
+};
+
+date_duration years(int t);
+date_duration months(int t);
+</pre>
+
+<h1>Overview</h1>
+<p>秒単位以外の時間を秒単位に変換するためのクラス/関数群です．例えば，clx::hours(24)
+は 86400 秒を返します．unit クラスの詳細については，<a href="unit.html">unit</a>
+を参照して下さい．</p>
+
+<p>years()，months() に関しては，year, month, day 毎に増減させる値を記憶させ date_time
+に渡します．date_time は，指定された値の増減を行った後，std::mktime()
+を用いて時刻の再設定を行います．</p>
+
+<h1>Related Page</h1>
+<ol>
+<li><a href="unit.html">CLX C++ Libraries - unit</a></li>
+</ol>
+
+</div>
+<!-- end of main text -->
+
+<!-- footer -->
+<div class="foot">
+<address class="copyright">
+Copyright &copy; 2004 - 2008, clown. All rights reserved.
+Mailto: tt.clown(a)gmail.com
+</address>
+</div>
+<!-- end of footer -->
+
+</div>
+</body>
+
+</html>

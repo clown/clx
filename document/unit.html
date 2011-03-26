@@ -1,0 +1,175 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ja">
+
+<head>
+<meta name="author" content="clown">
+<meta http-equiv="Content-type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<meta http-equiv="Content-Script-Type" content="text/javascript">
+
+<script type="text/javascript" src="script/sh_main.js"></script>
+<script type="text/javascript" src="script/sh_cpp.js"></script>
+
+<link rel="index" href="index.html">
+<link rel="stylesheet" href="style/default.css" type="text/css">
+<link rel="stylesheet" href="style/hilight.css" type="text/css">
+
+<title>CLX C++ Libraries - unit</title>
+</head>
+
+<body onload="sh_highlightDocument()">
+<div class="contents">
+
+<!-- header -->
+<div class="title">
+<a href="http://clx.cielquis.net/">CLX C++ Libraries</a>
+<a href="http://b.hatena.ne.jp/entry/http://clx.cielquis.net/unit.html">
+<img src="http://d.hatena.ne.jp/images/b_entry.gif"
+  width="16" height="12" border="0">
+</a>
+</div>
+<div class="head"><a href="index.html">Home</a> &gt;&gt;
+<a href="unit.html">unit</a></div>
+<!-- end of header -->
+
+<!-- main text -->
+<div class="main">
+
+<h1>Declarations</h1>
+
+<pre class="sh_cpp">
+template &lt;int N, int D = 1&gt;
+class unit;
+
+template &lt;class Unit&gt;
+Unit unit_cast(double x);
+
+typedef unit&lt;1, 1000000000&gt; nano;
+typedef unit&lt;1,    1000000&gt; micro;
+typedef unit&lt;1,       1000&gt; milli;
+typedef unit&lt;1,        100&gt; centi;
+typedef unit&lt;1,         10&gt; deci;
+typedef unit&lt;        10, 1&gt; deca;
+typedef unit&lt;       100, 1&gt; hecto;
+typedef unit&lt;      1000, 1&gt; kilo;
+typedef unit&lt;   1000000, 1&gt; mega;
+typedef unit&lt;1000000000, 1&gt; giga;
+
+typedef unit&lt;8, 1&gt; byte;
+</pre>
+
+<h1>Overview</h1>
+<p>unit は，単位を定義するためのクラスです．<em>N</em>/<em>D</em> という形で，
+その単位の基準となる値を保持します．unit クラスのインスタンスを参照すると，
+基準となる値に変換した後の値を取得することができます．一方，value() メソッドは，
+その単位で変換された値を返します．例えば，byte クラスを下記のように使用した場合，
+filesize は 512 * 8，filesize.value() は 512 を返します．</p>
+
+<pre class="sh_cpp">
+clx::byte filesize(512)
+</pre>
+
+<p>unit クラスは，ある単位で表された値を基準となる値に変換するためのクラスです．
+この逆変換（基準となる値からある単位で表された値への変換）を行う場合は，unit_cast
+を使用します．</p>
+
+<h1>Example</h1>
+<p><a href="example/example_unit.cpp">example_unit.cpp</a></p>
+
+<pre class="sh_cpp">
+#include &lt;iostream&gt;
+#include &quot;clx/unit.h&quot;
+
+int main(int argc, char* argv[]) {
+    std::cout &lt;&lt; clx::nano(1) &lt;&lt; &quot;, &quot;;
+    std::cout &lt;&lt; clx::micro(1) &lt;&lt; &quot;, &quot;;
+    std::cout &lt;&lt; clx::milli(1) &lt;&lt; &quot;, &quot;;
+    std::cout &lt;&lt; clx::kilo(1) &lt;&lt; &quot;, &quot;;
+    std::cout &lt;&lt; clx::mega(1) &lt;&lt; &quot;, &quot;;
+    std::cout &lt;&lt; clx::giga(1) &lt;&lt; std::endl;
+    
+    std::cout &lt;&lt; &quot;2M + 34k = &quot; &lt;&lt; clx::mega(2) + clx::kilo(34) &lt;&lt; std::endl;
+    
+    // 時間単位の入力値の合計を秒単位で出力
+    typedef clx::unit&lt;3600&gt; hour;
+    hour sum;
+    for (int i = 0; i &lt; 10; i++) sum += i;
+    std::cout &lt;&lt; sum.value() &lt;&lt; &quot; hours -&gt; &quot; &lt;&lt; sum &lt;&lt; &quot; seconds&quot; &lt;&lt; std::endl;
+    
+    // 分-&gt;時間単位への変換
+    typedef clx::unit&lt;60&gt; minute;
+    minute minutes(1440);
+    hour test = clx::unit_cast&lt;hour&gt;(minutes);
+    std::cout &lt;&lt; minutes.value() &lt;&lt; &quot; minutes -&gt; &quot; &lt;&lt; test.value() &lt;&lt;
+        &quot; hours&quot; &lt;&lt; std::endl;
+    
+    return 0;
+}
+</pre>
+
+<pre>
+<strong>Result</strong>
+1e-09, 1e-06, 0.001, 1000, 1e+06, 1e+09
+2M + 34k = 2.034e+06
+45 hours -&gt; 162000 seconds
+1440 minutes -&gt; 24 hours
+</pre>
+
+<h1>Template Parameters</h1>
+<dl>
+<dt>N</dt><dd>単位の基準値を分数で表したときの分子の値を指定します．</dd>
+<dt>D</dt><dd>単位の基準値を分数で表したときの分母の値を指定します．デフォルト値は，1．</dd>
+</dd>
+</dl>
+
+<h1>Related Types</h1>
+<pre class="sh_cpp">
+typedef unsigned int uint_t;
+</pre>
+
+<h1>Construction and Member Functions</h1>
+<pre class="sh_cpp">
+explicit unit(double x = 0.0);
+double value() const;
+operator double () const;
+</pre>
+
+<p>value() メソッドは，インスタンスが保持している値をその単位で表した場合の値を返します．
+これに対して，インスタンス自体を参照した場合は，基準となる値に変換した値を返します．</p>
+
+<h1>Operators</h1>
+
+<pre class="sh_cpp">
+unit& operator=(double x);
+
+unit& operator+=(double x);
+unit& operator-=(double x);
+unit& operator*=(double x);
+unit& operator/=(double x);
+</pre>
+
+<p>いずれの演算子も引数に指定する値は，そのクラスで定義された単位で表された値である必要があります．</p>
+
+<h1>Referrence</h1>
+<ol>
+<li><a href="http://d.hatena.ne.jp/faith_and_brave/20080903/1220433505" target="_blank">
+Faith and Brave - C++で遊ぼう - C++0x ratio</a></li>
+</ol>
+
+</div>
+<!-- end of main text -->
+
+<!-- footer -->
+<div class="foot">
+<address class="copyright">
+Copyright &copy; 2004 - 2008, clown. All rights reserved.
+Mailto: tt.clown(a)gmail.com
+</address>
+</div>
+<!-- end of footer -->
+
+</div>
+</body>
+
+</html>

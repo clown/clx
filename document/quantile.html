@@ -1,0 +1,116 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ja">
+
+<head>
+<meta name="author" content="clown">
+<meta http-equiv="Content-type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<meta http-equiv="Content-Script-Type" content="text/javascript">
+
+<script type="text/javascript" src="script/sh_main.js"></script>
+<script type="text/javascript" src="script/sh_cpp.js"></script>
+
+<link rel="index" href="index.html">
+<link rel="stylesheet" href="style/default.css" type="text/css">
+<link rel="stylesheet" href="style/hilight.css" type="text/css">
+
+<title>CLX C++ Libraries - quantile</title>
+</head>
+
+<body onload="sh_highlightDocument()">
+<div class="contents">
+
+<!-- header -->
+<div class="title">
+<a href="http://clx.cielquis.net/">CLX C++ Libraries</a>
+<a href="http://b.hatena.ne.jp/entry/http://clx.cielquis.net/quantile.html">
+<img src="http://d.hatena.ne.jp/images/b_entry.gif"
+  width="16" height="12" border="0">
+</a>
+</div>
+<div class="head"><a href="index.html">Home</a> &gt;&gt;
+<a href="quantile.html">quantile</a></div>
+<!-- end of header -->
+
+<!-- main text -->
+<div class="main">
+
+<h1>Declarations</h1>
+<pre class="sh_cpp">
+template &lt;class InIter&gt;
+double quantile(InIter first, InIter last, unsigned int k, unsigned int q);
+
+template &lt;class InIter&gt;
+double median(InIter first, InIter last);
+
+template &lt;class InIter&gt;
+double tertile(InIter first, InIter last, unsigned int k);
+
+template &lt;class InIter&gt;
+double quartile(InIter first, InIter last, unsigned int k);
+
+template &lt;class InIter&gt;
+double quintile(InIter first, InIter last, unsigned int k);
+
+template &lt;class InIter&gt;
+double decile(InIter first, InIter last, unsigned int k);
+
+template &lt;class InIter&gt;
+double percentile(InIter first, InIter last, unsigned int k);
+</pre>
+
+<h1>Overview</h1>
+<p>第 <em>k</em> 位 <em>q</em> 分位点を求めます．第 <em>k</em> 位 <em>q</em>
+分位点とは，与えられたデータ昇順に <em>q</em> 分割したときの <em>k</em>
+番目に当たる値を表します．quantile.h には，この他に中央値 (median)，三分位点 (tertile)，
+四分位点 (quartile)，五分位点 (quintile)，十分位点 (decile)，百分位点 (percentile)
+を定義しています．</p>
+
+<h1>Example</h1>
+<p><a href="example/example_percentile.cpp">example_percentile.cpp</a></p>
+
+<pre class="sh_cpp">
+#include &lt;iostream&gt;
+#include &lt;iterator&gt;
+#include &quot;clx/quantile.h&quot;
+
+int main(int argc, char* argv[]) {
+    std::istream_iterator&lt;int&gt; input(std::cin);
+    std::istream_iterator&lt;int&gt; last;
+    
+    double val = clx::percentile(input, last, 95);
+    std::cout &lt;&lt; 95 &lt;&lt; &quot;% percentile: &quot; &lt;&lt; val &lt;&lt; std::endl;
+    
+  return 0;
+}
+</pre>
+
+<pre>
+<strong>test_stats.dat</strong>
+100 60 70 80 80
+ 89 85 82 90 75
+ 75 60 65 60 80
+ 80 90 80 80 80
+ 90 85 83 50 75
+
+<strong>Result</strong>
+95% percentile: 90
+</pre>
+
+</div>
+<!-- end of main text -->
+
+<!-- footer -->
+<div class="foot">
+<address class="copyright">
+Copyright &copy; 2004 - 2008, clown. All rights reserved.
+Mailto: tt.clown(a)gmail.com
+</address>
+</div>
+<!-- end of footer -->
+
+</div>
+</body>
+
+</html>

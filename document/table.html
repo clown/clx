@@ -1,0 +1,198 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ja">
+
+<head>
+<meta name="author" content="clown">
+<meta http-equiv="Content-type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<meta http-equiv="Content-Script-Type" content="text/javascript">
+
+<script type="text/javascript" src="script/sh_main.js"></script>
+<script type="text/javascript" src="script/sh_cpp.js"></script>
+
+<link rel="index" href="index.html">
+<link rel="stylesheet" href="style/default.css" type="text/css">
+<link rel="stylesheet" href="style/hilight.css" type="text/css">
+
+<title>CLX C++ Libraries - table</title>
+</head>
+
+<body onload="sh_highlightDocument()">
+<div class="contents">
+
+<!-- header -->
+<div class="title">
+<a href="http://clx.cielquis.net/">CLX C++ Libraries</a>
+<a href="http://b.hatena.ne.jp/entry/http://clx.cielquis.net/table.html">
+<img src="http://d.hatena.ne.jp/images/b_entry.gif"
+  width="16" height="12" border="0">
+</a>
+</div>
+<div class="head"><a href="index.html">Home</a> &gt;&gt;
+<a href="table.html">table</a></div>
+<!-- end of header -->
+
+<!-- main text -->
+<div class="main">
+
+<h1>Declaration</h1>
+<pre class="sh_cpp">
+template &lt;
+    class Type,
+    class Source = std::string,
+    class Container = std::vector&lt;std::vector&lt;Type&gt; &gt;
+&gt;
+class table : private container_generator&lt;Container&gt;,
+    public random_accessor&lt;Container&gt;;
+</pre>
+
+<h1>Overview</h1>
+<p>table は，CSV 形式などの整形されたテキストファイルを読み込んで，x[i][j]
+のように各要素に対してランダムアクセスを行えるようにするためのクラスです．
+指定されたテキストファイルから一行ずつ読み込み，
+コンストラクタで指定された関数オブジェクト（または関数ポインタ）
+を用いて分割して結果を Container に格納します．
+指定する関数オブジェクトは，文字列をある規則にしたがって分割し，
+分割した結果をコンテナに格納して返すような機能を持つようなクラス（または，
+関数）である必要があります．例えば，デフォルトのテンプレート引数の場合，
+必要となる関数オブジェクトのインターフェースは下記のようになります．</p>
+
+<pre class="sh_cpp">
+template &lt;class Type&gt;
+class parser {
+public:
+    std::vector&lt;Type&gt; operator()(const std::string&amp; s);
+};
+</pre>
+
+<p>尚，<a href="tokenizer.html">tokenizer</a> は上記の要件を満たしているため，
+文字列分割用の関数オブジェクトとして利用することができます．また，
+CLX C++ Libraries の中に create_tokenizer と言う補助関数を用意しています．
+使用方法は，Example を参照して下さい．</p>
+
+<pre class="sh_cpp">
+template &lt;class Type, class TokenizerFunc&gt;
+basic_tokenizer&lt;TokenizerFunc, Type&gt; create_tokenizer(TokenizerFunc f);
+</pre>
+
+<h1>Example</h1>
+<p><a href="example/example_table.cpp">example_table.cpp</a></p>
+
+<pre class="sh_cpp">
+#include &lt;iostream&gt;
+#include &quot;clx/table.h&quot;
+
+int main(int argc, char* argv[]) {
+    /*
+     * create_tokenizer()は，下記の場合，
+     * clx::basic_tokenizer&lt;clx::char_separator&lt;char&gt;, double&gt;
+     * という型宣言を省略するための補助関数．
+     */
+    clx::char_separator&lt;char&gt; sep(','); // 分割方法を決めるためのポリシークラス
+    clx::table&lt;double&gt; v(std::cin, clx::create_tokenizer&lt;double&gt;(sep));
+    for (size_t i = 0; i &lt; v.size(); i++) {
+        double sum = 0.0;
+        for (size_t j = 0; j &lt; v[i].size(); j++) sum += v[i][j];
+        std::cout &lt;&lt; &quot;line &quot; &lt;&lt; i + 1 &lt;&lt; &quot;: num &quot; &lt;&lt; v[i].size()
+            &lt;&lt; &quot;, sum &quot; &lt;&lt; sum &lt;&lt; &quot;, average &quot; &lt;&lt; sum / v[i].size()
+        &lt;&lt; std::endl;
+    }
+    
+    return 0;
+}
+</pre>
+
+<pre>
+<strong>test.dat</strong>
+100,60,70,80,80
+ 89,85,82,90,75
+ 75,60,65,60,80
+ 80,90,80,80,80
+ 90,85,83,50,75
+ 
+<strong>Result</strong>
+line 1: num 5, sum 390, average 78
+line 2: num 5, sum 421, average 84.2
+line 3: num 5, sum 340, average 68
+line 4: num 5, sum 410, average 82
+line 5: num 5, sum 383, average 76.6
+</pre>
+
+<h1>Template Parameters</h1>
+<dl>
+<dt>Type</dt><dd>格納する要素の型を指定します</dd>
+<dt>Source</dt><dd>文字列の型を指定します．デフォルト値は，std::string．</dd>
+<dt>Container</dt><dd>分割した文字列を格納するためのコンテナを指定します．
+デフォルト値は，std::vector&lt;std::vector&lt;Type&gt; &gt;．</dd>
+</dl>
+
+<h1>Related Types</h1>
+<pre class="sh_cpp">
+typedef Type value_type;
+typedef Source string_type;
+typedef Container container;
+typedef typename container::value_type subcontainer;
+</pre>
+
+<h1>Construction and Member Functions</h1>
+<pre class="sh_cpp">
+template &lt;class Functor&gt;
+table(Functor f);
+
+template &lt;class Functor&gt;
+table(const string_type&amp; path, Functor f);
+
+template &lt;class Ch, class Tr, class Functor&gt;
+table(std::basic_istream&lt;Ch, Tr&gt;&amp; sin, Functor f);
+
+virtual ~table() throw();
+</pre>
+
+<p>コンストラクタには，ファイル名，または入力ストリームを指定します．</p>
+
+<pre class="sh_cpp">
+template &lt;class Ch, class Tr&gt;
+bool readline(std::basic_istream&lt;Ch, Tr&gt;&amp; sin);
+
+template &lt;class Ch, class Tr&gt;
+table&amp; read(std::basic_istream&lt;Ch, Tr&gt;&amp; sin);
+
+table&amp; read(const string_type&amp; path);
+
+void reset();
+</pre>
+
+<p>readline() メソッドは引数として指定された入力ストリームから 1 行読み込み，
+ポリシーに基づいて分割した後，結果を table に格納します．read() メソッドは，
+ファイルから文字列を全て読み込み，ポリシーに基づいて分割した後，結果を table
+に格納します．</p>
+
+<p>readline() および read() メソッドによって解析された結果へのアクセスは，
+Container で提供されている各メソッドを利用して行います．
+Container （の継承）に関する詳細は，<a href="container_wrapper.html">container_wrapper</a>
+を参照して下さい．</p>
+
+<h1>Related Pages</h1>
+<ol>
+<li><a href="tokenizer.html">CLX C++ Libraries - tokenizer</a></li>
+<li><a href="tokenizer_func.html">CLX C++ Libraries - tokenizer_func</a></li>
+<li><a href="container_wrapper.html">CLX C++ Libraries - container_wrapper</a></li>
+</ol>
+
+</div>
+<!-- end of main text -->
+
+<!-- footer -->
+<div class="foot">
+<address class="copyright">
+Copyright &copy; 2004 - 2009, clown. All rights reserved.
+Mailto: tt.clown(a)gmail.com
+</address>
+</div>
+<!-- end of footer -->
+
+</div>
+</body>
+
+</html>

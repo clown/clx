@@ -1,0 +1,144 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ja">
+
+<head>
+<meta name="author" content="clown">
+<meta http-equiv="Content-type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<meta http-equiv="Content-Script-Type" content="text/javascript">
+
+<script type="text/javascript" src="script/sh_main.js"></script>
+<script type="text/javascript" src="script/sh_cpp.js"></script>
+
+<link rel="index" href="index.html">
+<link rel="stylesheet" href="style/default.css" type="text/css">
+<link rel="stylesheet" href="style/hilight.css" type="text/css">
+
+<title>CLX C++ Libraries - vstream</title>
+</head>
+
+<body onload="sh_highlightDocument()">
+<div class="contents">
+
+<!-- header -->
+<div class="title">
+<a href="http://clx.cielquis.net/">CLX C++ Libraries</a>
+<a href="http://b.hatena.ne.jp/entry/http://clx.cielquis.net/vstream.html">
+<img src="http://d.hatena.ne.jp/images/b_entry.gif" width="16" height="12" border="0"></a>
+</div>
+<div class="head"><a href="index.html">Home</a> &gt;&gt;
+<a href="vstream.html">vstream</a></div>
+<!-- end of header -->
+
+<!-- main text -->
+<div class="main">
+
+<h1>Declarations</h1>
+<pre class="sh_cpp">
+template &lt;
+    class CharT,
+    class Traits = std::char_traits&lt;CharT&gt;
+&gt;
+class basic_ivstream : public std::basic_istream&lt;CharT, Traits&gt;;
+
+typedef basic_ivstream&lt;char&gt; ivstream;
+</pre>
+
+<h1>Overview</h1>
+<p>手元に配列や（std::string, std::vector, std::deque などの）コンテナの形でデータ保持しているが，
+使用したい関数（またはメソッド）のインターフェース（引数）は std::basic_istream
+と言うケースに遭遇する事があります．この時，簡単な解決策としては std::basic_stringstream
+を利用する事が挙げられますが，元のデータサイズが大きくなるとコピーのコストが高くなります．</p>
+
+<p>ivstream は，配列やコンテナをストリームのように扱うためのクラスです．
+コンテナや配列をコンストラクタに指定して ivstream を生成すると，指定したデータの範囲内で，
+read(), seekg(), tellg() メソッドなどを実行する事のできる仮想入力ストリームが生成されます．</p>
+
+<h1>Example</h1>
+<p><a href="example/example_vstream.cpp">example_vstream.cpp</a></p>
+
+<pre class="sh_cpp">
+#include &lt;iostream&gt;
+#include &lt;iterator&gt;
+#include &lt;vector&gt;
+#include &quot;clx/vstream.h&quot;
+
+template &lt;class InStream, class Type&gt;
+bool getdata(InStream&amp; in, Type&amp; dest) {
+    typedef typename InStream::char_type char_type;
+    in.read(reinterpret_cast&lt;char_type*&gt;(&amp;dest), sizeof(Type));
+    if (in.gcount() &lt;= 0) return false;
+    return true;
+}
+
+int main(int argc, char* argv[]) {
+    std::vector&lt;int&gt; v;
+    for (int i = 0; i &lt; 100; ++i) v.push_back(i);
+    clx::ivstream vs(v);
+    
+    int data;
+    vs.seekg(80);
+    vs.seekg(-40, std::ios_base::end);
+    while (getdata(vs, data)) std::cout &lt;&lt; data &lt;&lt; &quot; &quot;;
+    std::cout &lt;&lt; std::endl;
+    
+    return 0;
+}
+</pre>
+
+<p>ivstream に指定するコンテナは std::vector&lt;int&gt; など char 型以外のコンテナも指定できますが，
+（basic_ivstream&lt;char&gt; の場合）read() メソッドや seekg() メソッドの引数でサイズを指定する際には，
+バイト単位で指定する必要があります．尚，ivstream には組み込み配列も上記と同じ形で指定する事が出来ます．
+組み込み配列を指定するサンプルコードは，<a href="example/example_vstream_2.cpp">
+example_vstream_2.cpp</a> を参照して下さい．</p>
+
+<h1>Template Parameters</h1>
+
+<dl>
+<dt>CharT</dt><dd>文字の型を指定します．</dd>
+<dt>Traits</dt><dd>文字列を扱うためのtraitsを指定します．デフォルト値は，
+std::char_traits&lt;CharT&gt;．</dd>
+</dl>
+
+<h1>Construction and Member Functions</h1>
+
+<pre class="sh_cpp">
+template &lt;class InIter&gt;
+basic_ivstream(InIter first, InIter last);
+
+template &lt;class Container&gt;
+basic_ivstream(const Container&amp; data);
+
+virtual ~basic_ivstream() throw();
+</pre>
+
+<p>コンストラクタには，イテレータ，またはコンテナを引数に指定します．コンテナには，STL コンテナなどのように
+begin()/end() メソッドを持つクラス，または組み込み配列 (e.g., char hoge[256]) を指定する事ができます．
+ただし，コンテナを指定する場合，領域が連続されたメモリ空間内に確保されてある必要があります．</p>
+
+<p>動的に確保した配列 (e.g., char* p = new char[256]) や配列の一部を仮想ストリームとして扱う場合には，
+その範囲の最初と最後のポインタを指定します (e.g., basic_ivstream vs(p, p + std::strlen(p));)．</p>
+
+<h1>Reference</h1>
+<ol>
+<li><a href="http://d.hatena.ne.jp/tt_clown/20090527/p1"
+target="_blank">配列やコンテナをストリームとして扱う - Life like a clown</a></li>
+</ol>
+
+</div>
+<!-- end of main text -->
+
+<!-- footer -->
+<div class="foot">
+<address class="copyright">
+Copyright &copy; 2004 - 2009, clown. All rights reserved.
+Mailto: tt.clown(a)gmail.com
+</address>
+</div>
+<!-- end of footer -->
+
+</div>
+</body>
+
+</html>

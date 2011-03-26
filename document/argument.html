@@ -1,0 +1,205 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ja">
+
+<head>
+<meta name="author" content="clown">
+<meta http-equiv="Content-type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<meta http-equiv="Content-Script-Type" content="text/javascript">
+
+<script type="text/javascript" src="script/sh_main.js"></script>
+<script type="text/javascript" src="script/sh_cpp.js"></script>
+
+<link rel="index" href="index.html">
+<link rel="stylesheet" href="style/default.css" type="text/css">
+<link rel="stylesheet" href="style/hilight.css" type="text/css">
+
+<title>CLX C++ Libraries - argument</title>
+</head>
+
+<body onload="sh_highlightDocument()">
+<div class="contents">
+
+<!-- header -->
+<div class="title">
+<a href="http://clx.cielquis.net/">CLX C++ Libraries</a>
+<a href="http://b.hatena.ne.jp/entry/http://clx.cielquis.net/argument.html">
+<img src="http://d.hatena.ne.jp/images/b_entry.gif"
+  width="16" height="12" border="0">
+</a>
+</div>
+<div class="head"><a href="index.html">Home</a> &gt;&gt;
+<a href="argument.html">argument</a></div>
+<!-- end of header -->
+
+<!-- main text -->
+<div class="main">
+
+<h1>Declaration</h1>
+<pre class="sh_cpp">
+template &lt;
+    class CharT,
+    class Traits = std::char_traits&lt;CharT&gt;
+&gt;
+class basic_arument;
+
+typedef basic_argument&lt;char&gt; argument;
+#ifdef CLX_USE_WCHAR
+typedef basic_argument&lt;wchar_t&gt; wargument;
+#endif
+</pre>
+
+<h1>Overview</h1>
+<p>コマンドライン引数を解釈するためのクラスです．引数は，必須要素とオプション要素に分かれます．
+必須要素は，プログラム名の直後の引数 (<em>argv[1]</em>) から，最初に <em>'-'</em>
+で始まる引数が現れる直前までの集合を指します．オプション要素は，引数 (<em>argv</em>)
+の要素のうち <em>'-'</em> または <em>&quot;--&quot;</em> で始まるものを指します．
+この要素から先頭のハイフン文字列を除いた文字はオプション文字とされ，
+要素へアクセスする際に使用します（args['X'][i] などのように）．あるオプション要素から，
+次のオプション要素の直前の引数までを，そのオプション要素の引数とします．</p>
+
+<p><em>'-'</em> に続く文字列は，それぞれを一つのオプション要素と見なします．
+例えば，&quot;-abc&quot; と &quot;-a -b -c&quot; は同じ意味を持ちます．
+ただし，この方法でオプション要素を指定した場合，
+そのオプション要素は引数を持つことができません．</p>
+
+<h1>Example</h1>
+<p><a href="example/example_argument.cpp">example_argument.cpp</a></p>
+
+<pre class="sh_cpp">
+#include &lt;iostream&gt;
+#include &quot;clx/argument.h&quot;
+
+int main(int argc, char* argv[]) {
+    /*
+     * 解析するcmdlineのBNF記法
+     * &lt;program&gt; [&lt;nokey_param&gt;]* (['-'[&lt;key&gt;]+] | ['-'+&lt;key&gt; [&lt;param&gt;]*])*
+     */
+    clx::argument p;
+    p.assign(argc, argv);
+    
+    int x, y, z;
+    
+    std::cout &lt;&lt; &quot;head paramters&quot; &lt;&lt; std::endl;
+    std::cout &lt;&lt; &quot;------------------------------&quot; &lt;&lt; std::endl;;
+    for (size_t i = 0; i &lt; p.head().size(); i++) {
+        std::cout &lt;&lt; p.head().at(i) &lt;&lt; std::endl;
+    }
+    std::cout &lt;&lt; std::endl;
+    
+    /*
+     * &lt;key&gt;に対応する&lt;param&gt;へアクセスする場合．
+     * 第一引数には，&lt;key&gt;を指定する．カンマ(',')区切りで複数の&lt;key&gt;を指定する
+     * ことが可能で，最初にヒットした&lt;key&gt;に対応する&lt;param&gt;の値を格納する．
+     *
+     * 第三引数は，&lt;key&gt;に対応する&lt;param&gt;のリストのうち，何番目の&lt;param&gt;を
+     * 格納するか指定する．省略時には，0番目の&lt;param&gt;が格納される．
+     */
+    p(&quot;s,space&quot;, x)('y', y, 2);
+    std::cout &lt;&lt; &quot;s,space: &quot; &lt;&lt; x &lt;&lt; std::endl;
+    std::cout &lt;&lt; &quot;y[2]: &quot; &lt;&lt; y &lt;&lt; std::endl;
+    std::cout &lt;&lt; std::endl;
+    
+    /*
+     * '-'に続く文字列は，それぞれが一つの引数として扱われるため，
+     * p.exist(&quot;abc&quot;)ではなく，p.exist(&quot;b&quot;)の条件文と一致する．
+     */
+    if (p.exist(&quot;abc&quot;)) std::cout &lt;&lt; &quot;the abc parameter exists.&quot; &lt;&lt; std::endl;
+    if (p.exist('b')) std::cout &lt;&lt; &quot;the b parameter exists.&quot; &lt;&lt; std::endl;
+    
+    return 0;
+}
+</pre>
+
+<pre>
+<strong>Result</strong> (foo bar bas --space 1200 -y 100 200 300 -abc)
+head paramters
+------------------------------
+foo
+bar
+bas
+
+s,space: 1200
+y[2]: 300
+
+the b parameter exists.
+</pre>
+
+<h1>Template Parameters</h1>
+<dl>
+<dt>CharT</dt><dd>文字の型を指定します．</dd>
+<dt>Traits</dt><dd>文字列を扱うためのtraitsを指定します．デフォルト値は，
+std::char_traits&lt;CharT&gt;．</dd>
+</dl>
+
+<h1>Related Types</h1>
+<pre class="sh_cpp">
+typedef CharT char_type;
+typedef size_t size_type;
+typedef std::basic_string&lt;CharT, Traits&gt; string_type;
+typedef std::vector&lt;string_type&gt; container_type;
+typedef std::map&lt;string_type, container_type&gt; map_type;
+typedef typename map_type::key_type key_type;
+typedef typename map_type::mapped_type param_list;
+</pre>
+
+<h1>Construction and Member Functions</h1>
+
+<pre class="sh_cpp">
+explicit basic_argument(char_type c = '-');
+explicit basic_argument(int_type argc, char_type* argv[], char_type c = '-');
+virtual ~basic_argument();
+
+basic_argument&amp; assign(int_type argc, char_type* argv[]);
+</pre>
+
+<h2>Accessor</h2>
+<pre class="sh_cpp">
+string_type program();
+param_list&amp; head();
+param_list&amp; operator[](const string_type&amp; x);
+param_list&amp; operator[](const char_type* x);
+param_list&amp; operator[](char_type x);
+</pre>
+
+<p>解析し終わった後に各要素にアクセスするためのメソッド群です．
+program() はプログラム名，head() は必須要素にアクセスを行います．
+返り値は std::vector なので，必要とする引数にアクセスを行うためには
+std::vector で提供されているメソッド，および演算子を用いて行います．</p>
+
+<pre class="sh_cpp">
+template &lt;class ValueT&gt;
+basic_argument&amp; operator()(ValueT&amp; dest, size_type n = 0);
+
+template &lt;class ValueT&gt;
+basic_argument&amp; operator()(const string_type&amp; key, ValueT&amp; dest, size_type n = 0);
+
+template &lt;class ValueT&gt;
+basic_argument&amp; operator()(const char_type* key, ValueT&amp; dest, size_type n = 0);
+
+template &lt;class ValueT&gt;
+basic_argument&amp; operator()(char_type key, ValueT&amp; dest, size_type n = 0);
+</pre>
+
+<p>() 演算子は，<em>key</em> に対応する引数を <em>dest</em> に格納します．
+引数が複数存在する場合は，何番目の引数を <em>dest</em> へ格納するのか，
+引数 <em>n</em> で指定します．<em>key</em> を指定しない場合，
+必須要素に対して操作が行われます．</p>
+
+</div>
+<!-- end of main text -->
+
+<!-- footer -->
+<div class="foot">
+<address class="copyright">
+Copyright &copy; 2004 - 2008, clown. All rights reserved.
+Mailto: tt.clown(a)gmail.com
+</address>
+</div>
+<!-- end of footer -->
+
+</div>
+</body>
+
+</html>

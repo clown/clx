@@ -1,0 +1,150 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ja">
+
+<head>
+<meta name="author" content="clown">
+<meta http-equiv="Content-type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<meta http-equiv="Content-Script-Type" content="text/javascript">
+
+<script type="text/javascript" src="script/sh_main.js"></script>
+<script type="text/javascript" src="script/sh_cpp.js"></script>
+
+<link rel="index" href="index.html">
+<link rel="stylesheet" href="style/default.css" type="text/css">
+<link rel="stylesheet" href="style/hilight.css" type="text/css">
+
+<title>CLX C++ Libraries - mutex</title>
+</head>
+
+<body onload="sh_highlightDocument()">
+<div class="contents">
+
+<!-- header -->
+<div class="title">
+<a href="http://clx.cielquis.net/">CLX C++ Libraries</a>
+<a href="http://b.hatena.ne.jp/entry/http://clx.cielquis.net/mutex.html">
+<img src="http://d.hatena.ne.jp/images/b_entry.gif"
+  width="16" height="12" border="0">
+</a>
+</div>
+<div class="head"><a href="index.html">Home</a> &gt;&gt;
+<a href="mutex.html">mutex</a></div>
+<!-- end of header -->
+
+<!-- main text -->
+<div class="main">
+
+<h1>Declrations</h1>
+<pre class="sh_cpp">
+class mutex;
+class try_mutex;
+class recursive_mutex;
+class recursive_try_mutex;
+
+template &lt;class Mutex&gt;
+class unique_lock;
+</pre>
+
+<h1>Overview</h1>
+<p>mutex，try_mutex，recursive_mutex，recursive_try_mutex は，
+スレッド間での排他制御を行うためのクラスです．mutex，try_mutex は，一旦 lock
+するとどのスレッドが lock したかに関わらず，unlock しなければ再 lock
+を行うことができません．これに対して，recursive_mutex は，同じスレッドであるならば，
+lock した後さらに lock を行うことができます．ただし，N 回 lock した場合は，
+必ず N 回 unlock を行う必要があります．</p>
+
+<p>mutex，recursive_mutex は，lock が成功するまでブロックします．これに対して，
+try_mutex，recursive_try_mutex は，lock 可能かどうかを調べ，既に他のスレッドによって
+lock されている場合は，false を返します．</p>
+
+<p>mutex，try_mutex，recursive_mutex，recursive_try_mutex は，scoped_lock
+と併用して使うことを推奨します．scoped_lock は，以下の例のように mutex
+を引数にしてオブジェクトを作成すると，コンストラクタで lock を行い，デストラクタで
+unlock を行います．これにより，そのスコープから抜けて，一時変数が開放された時に必ず
+unlock されるので，unlock のし忘れを防ぐことができます（<a href="
+http://www.boost.org/doc/libs/1_35_0/doc/html/thread.html" target="_blank">
+boost::thread</a> を参照）．また，<a href="condition.html">condition</a> は，
+scoped_lock を引数として要求します．</p>
+
+<pre class="sh_cpp">
+clx::mutex m;
+
+{ // このスコープから抜けると同時にデストラクタが呼ばれ unlock される．
+    clx::mutex::scoped_lock lock(m);
+}
+</pre>
+
+<h1>Example</h1>
+<p><a href="thread.html">thread</a> の Example を参照して下さい（<a href="
+example/example_thread.cpp">example_thread.cpp</a>）．</p>
+
+<h1>Related Types</h1>
+<h2>mutex</h2>
+<pre class="sh_cpp">
+typedef unique_guard&lt;mutex&gt; scoped_lock;
+typedef ... handle_pointer;
+</pre>
+
+<h2>try_mutex</h2>
+<pre class="sh_cpp">
+typedef unique_guard&lt;try_mutex&gt; scoped_lock;
+typedef ... handle_pointer;
+</pre>
+
+<h2>recursive_mutex</h2>
+<pre class="sh_cpp">
+typedef unique_guard&lt;recursive_mutex&gt; scoped_lock;
+typedef ... handle_pointer;
+</pre>
+
+<h2>recursive_try_mutex</h2>
+<pre class="sh_cpp">
+typedef unique_guard&lt;recursive_try_mutex&gt; scoped_lock;
+typedef ... handle_pointer;
+</pre>
+
+<h1>Construction and Member Functions</h1>
+<pre class="sh_cpp">
+mutex();
+virtual ~mutex();
+
+bool lock();
+void unlock();
+handle_pointer native_handle();
+</pre>
+
+<p>mutex，try_mutex，recursive_mutex，recursive_try_mutex のインターフェースは同じです．
+lock()/unlock() メソッドを持っていますが，通常は，直接呼ばずに scoped_lock
+を併用することを推奨します．</p>
+
+<h1>Related Pages</h1>
+<ol>
+<li><a href="thread.html">CLX C++ Libraries - thread</a></li>
+<li><a href="condition.html">CLX C++ Libraries - condition</a></li>
+<li><a href="call_once.html">CLX C++ Libraries - call_once</a></li>
+</ol>
+
+<h1>Reference</h1>
+<ol>
+<li><a href="http://d.hatena.ne.jp/tt_clown/20080813/p1" target="_blank">
+Life like a clown - マルチプラットフォームなスレッドクラス</a></li>
+</ol>
+
+</div>
+<!-- end of main text -->
+
+<!-- footer -->
+<div class="foot">
+<address class="copyright">
+Copyright &copy; 2004 - 2008, clown. All rights reserved.
+Mailto: tt.clown(a)gmail.com
+</address>
+</div>
+<!-- end of footer -->
+
+</div>
+</body>
+
+</html>

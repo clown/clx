@@ -1,0 +1,175 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ja">
+
+<head>
+<meta name="author" content="clown">
+<meta http-equiv="Content-type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Script-Type" content="text/javascript">
+
+<script type="text/javascript" src="script/sh_main.js"></script>
+<script type="text/javascript" src="script/sh_cpp.js"></script>
+
+<link rel="index" href="index.html">
+<link rel="stylesheet" href="style/default.css" type="text/css">
+<link rel="stylesheet" href="style/hilight.css" type="text/css">
+
+<title>CLX C++ Libraries - tcp::acceptor</title>
+</head>
+
+<body onload="sh_highlightDocument()">
+<div class="contents">
+
+<!-- header -->
+<div class="title">
+<a href="http://clx.cielquis.net/">CLX C++ Libraries</a>
+<a href="http://b.hatena.ne.jp/entry/http://clx.cielquis.net/acceptor.html">
+<img src="http://d.hatena.ne.jp/images/b_entry.gif"
+  width="16" height="12" border="0">
+</a>
+</div>
+<div class="head"><a href="index.html">Home</a> &gt;&gt;
+<a href="acceptor.html">tcp::acceptor</a></div>
+<!-- end of header -->
+
+<!-- main text -->
+<div class="main">
+
+<h1>Declaration</h1>
+<pre class="sh_cpp">
+namespace tcp {
+    template &lt;int Family&gt;
+    class basic_acceptor : public basic_rawsocket&lt;SOCK_STREAM, Family&gt;;
+    
+    typedef basic_socket&lt;AF_INET&gt; socket;
+    typedef basic_sockaddress&lt;AF_INET, IPPROTO_TCP&gt; sockaddress;
+    typedef basic_acceptor&lt;AFINET&gt; acceptor;
+    typedef basic_sockbuf&lt;socket&gt; sockbuf;
+    typedef basic_sockstream&lt;socket&gt; sockstream;
+    typedef basic_sockmanager&lt;SOCK_STREAM, AF_INET, 0&gt; sockmanager;
+};
+</pre>
+
+<h1>Overview</h1>
+
+<p>サーバ/クライアント型モデルで TCP 通信 を行うときに，サーバ用の（TCP の）
+ソケットを生成するためのクラスです．tcp::acceptor は，クライアントからの
+TCP コネクション確立要求を受諾するまでの作業を担います．tcp::acceptor は，
+クライアントとのTCP コネクションが確立すると <a href="tcp.html">tcp::socket</a>
+オブジェクトを返すので，実際のデータ転送は返された tcp::scoket，または，
+<a href="sockstream.html">tcp::sockstream</a> を用いて行います．tcp::acceptor
+は，クライアントとの TCP コネクションの確立に失敗すると socket_error
+を例外として送出します．</p>
+
+<h1>Example</h1>
+<p><a href="example/example_tcp_server.cpp">example_tcp_server.cpp</a></p>
+
+<pre class="sh_cpp">
+#include &lt;iostream&gt;
+#include &lt;string&gt;
+#include &quot;clx/tcp.h&quot;
+
+int recv(clx::tcp::socket sock);
+
+int main(int argc, char* argv[]) {
+    if (argc &lt; 2) std::exit(-1);
+    try {
+        clx::tcp::acceptor s(clx::tcp::port(argv[1]));
+        
+        while (1) {
+            clx::tcp::socket clt = s.accept();
+            std::cout &lt;&lt; clt.address().ipaddr() &lt;&lt; ':' &lt;&lt; clt.address().port()
+                &lt;&lt; &quot; Connection was established&quot; &lt;&lt; std::endl;
+            
+            if (recv(clt) == -1) break;
+            else {
+                std::cout &lt;&lt; clt.address().ipaddr() &lt;&lt; ':' &lt;&lt; clt.address().port()
+                    &lt;&lt; &quot; Connection was closed&quot; &lt;&lt; std::endl;
+                clt.close();
+            }
+        }
+        s.close();
+    }
+    catch (clx::socket_error&amp; e) {
+        std::cerr &lt;&lt; e.what() &lt;&lt; std::endl;
+        std::exit(-1);
+    }
+    catch (clx::sockaddress_error&amp e) {
+        std::cerr &lt;&lt; e.what() &lt;&lt; std::endl;
+        std::exit(-1);
+    }
+    
+    return 0;
+}
+
+int recv(clx::tcp::socket sock) {
+    clx::tcp::sockstream ss(sock);
+    std::string msg;
+    while (1) {
+        std::string buf;
+        ss &gt;&gt; buf;
+        if (buf.empty()) break;
+        msg += buf;
+    }
+    std::cout &lt;&lt; &quot;Receive messages: &quot; &lt;&lt; msg &lt;&lt; std::endl;
+    return 0;
+}
+</pre>
+
+<p>クライアント側のサンプルプログラムについては，<a href="tcp.html">tcp::socket</a>
+を参照して下さい (<a href="example/example_tcp_client.cpp">example_tcp_client.cpp</a>)．</p>
+
+<h1>Template Parameters</h1>
+<dl>
+<dt>Family</dt><dd>プロトコルファミリーを指定します．</dd>
+</dl>
+
+<h1>Related Types</h1>
+<pre class="sh_cpp">
+typedef basic_sockaddress&lt;Family, IPPROTO_TCP&gt; address_type;
+typedef char char_type;
+typedef typename std::basic_string&lt;char&gt; string_type;
+</pre>
+
+<h1>Construction and Member Functions</h1>
+<pre class="sh_cpp">
+basic_acceptor();
+explicit basic_acceptor(int port, int n = nmax);
+virtual ~basic_acceptor();
+</pre>
+
+<p>コンストラクタでは，ポート番号を指定してサーバ用ソケットを作成します．</p>
+
+<pre class="sh_cpp">
+basic_acceptor& open(int port, int n = nmax);
+</pre>
+
+<p>open() メソッドは，指定されたポート番号を用いてクライアントからの接続要求を
+待ち受けるためのサーバ用 TCP ソケットを生成します．
+クライアントが一度に接続可能な最大値を n で指定する事ができます．
+サーバ用 TCP ソケットの生成に失敗した場合には，socket_error が例外として送出されます．</p>
+
+<pre class="sh_cpp">
+basic_socket&lt;Family&gt; accept();
+</pre>
+
+<p>accept() メソッドは，接続要求のあったクライアントとデータ通信を行うための
+TCP ソケットを生成します．データ通信を行うための TCP ソケットに関する詳細は，
+<a href="tcp.html">tcp::socket</a> を参照して下さい．</p>
+
+</div>
+<!-- end of main text -->
+
+<!-- footer -->
+<div class="foot">
+<address class="copyright">
+Copyright &copy; 2004 - 2009, clown. All rights reserved.
+Mailto: tt.clown(a)gmail.com
+</address>
+</div>
+<!-- end of footer -->
+
+</div>
+</body>
+
+</html>

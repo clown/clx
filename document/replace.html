@@ -1,0 +1,104 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ja">
+
+<head>
+<meta name="author" content="clown">
+<meta http-equiv="Content-type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<meta http-equiv="Content-Script-Type" content="text/javascript">
+
+<script type="text/javascript" src="script/sh_main.js"></script>
+<script type="text/javascript" src="script/sh_cpp.js"></script>
+
+<link rel="index" href="index.html">
+<link rel="stylesheet" href="style/default.css" type="text/css">
+<link rel="stylesheet" href="style/hilight.css" type="text/css">
+
+<title>CLX C++ Libraries - replace</title>
+</head>
+
+<body onload="sh_highlightDocument()">
+<div class="contents">
+
+<!-- header -->
+<div class="title">
+<a href="http://clx.cielquis.net/">CLX C++ Libraries</a>
+<a href="http://b.hatena.ne.jp/entry/http://clx.cielquis.net/replace.html">
+<img src="http://d.hatena.ne.jp/images/b_entry.gif"
+  width="16" height="12" border="0">
+</a>
+</div>
+<div class="head"><a href="index.html">Home</a> &gt;&gt;
+<a href="salgorithm.html">salgorithm</a>&gt;&gt;
+<a href="replace.html">replace</a></div>
+<!-- end of header -->
+
+<!-- main text -->
+<div class="main">
+
+<h1>Declarations</h1>
+<pre class="sh_cpp">
+String&amp; replace(String& s, const String& sch, const String& rep,
+    unsigned int nth = 1);
+String replace_copy(const String& s, const String& sch, const String& rep,
+    unsigned int nth = 1);
+String&amp; replace_all(String& s, const String& sch, const String& rep);
+String replace_all_copy(const String& s, const String& sch, const String& rep);
+</pre>
+
+<h1>Overview</h1>
+<p>replace() は，文字列中に存在する <em>n</em> 番目の文字列 <em>sch</em> を文字列
+<em>rep</em> に置換します．これに対して，replace_all() は文字列中に存在する全ての文字列
+<em>sch</em> を文字列 <em>rep</em> に置換します．replace_copy()，replace_all_copy()
+は，引数として指定された文字列を直接変更せず，コピーした文字列を変更します．</p>
+
+<p>尚，Declarations においては template &lt; ... &gt; の部分を省略していますが，
+単語の先頭が大文字になっているものはテンプレート引数として渡される型です（ただし，
+String は std::basic_string&lt;CharT, Traits&gt;）．</p>
+
+<h1>Example</h1>
+<p><a href="example/example_replace.cpp">example_replace.cpp</a></p>
+
+<pre class="sh_cpp">
+#include &lt;iostream&gt;
+#include &lt;string&gt;
+#include &quot;clx/salgorithm.h&quot;
+
+int main(int argc, char* argv[]) {
+    std::string s = &quot;apple apple apple apple apple&quot;;
+    
+    std::cout &lt;&lt; &quot;original: &quot; &lt;&lt; s &lt;&lt; std::endl;
+    std::cout &lt;&lt; &quot;replace from apple to orange&quot; &lt;&lt; std::endl;
+    std::cout &lt;&lt; &quot;replace (4th): &quot; &lt;&lt; clx::replace_copy(s, &quot;apple&quot;, &quot;orange&quot;, 4)
+        &lt;&lt; std::endl;
+    std::cout &lt;&lt; &quot;replace_all: &quot; &lt;&lt; clx::replace_all_copy(s, &quot;apple&quot;, &quot;orange&quot;)
+        &lt;&lt; std::endl;
+    
+    return 0;
+}
+</pre>
+
+<pre>
+<strong>Result</strong>
+original: apple apple apple apple apple
+replace from apple to orange
+replace (4th): apple apple apple orange apple
+replace_all: orange orange orange orange orange
+</pre>
+</div>
+<!-- end of main text -->
+
+<!-- footer -->
+<div class="foot">
+<address class="copyright">
+Copyright &copy; 2004 - 2008, clown. All rights reserved.
+Mailto: tt.clown(a)gmail.com
+</address>
+</div>
+<!-- end of footer -->
+
+</div>
+</body>
+
+</html>

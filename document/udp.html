@@ -1,0 +1,166 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ja">
+
+<head>
+<meta name="author" content="clown">
+<meta http-equiv="Content-type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<meta http-equiv="Content-Script-Type" content="text/javascript">
+
+<script type="text/javascript" src="script/sh_main.js"></script>
+<script type="text/javascript" src="script/sh_cpp.js"></script>
+
+<link rel="index" href="index.html">
+<link rel="stylesheet" href="style/default.css" type="text/css">
+<link rel="stylesheet" href="style/hilight.css" type="text/css">
+
+<title>CLX C++ Libraries - udp::socket</title>
+</head>
+
+<body onload="sh_highlightDocument()">
+<div class="contents">
+
+<!-- header -->
+<div class="title">
+<a href="http://clx.cielquis.net/">CLX C++ Libraries</a>
+<a href="http://b.hatena.ne.jp/entry/http://clx.cielquis.net/udp.html">
+<img src="http://d.hatena.ne.jp/images/b_entry.gif"
+  width="16" height="12" border="0">
+</a>
+</div>
+<div class="head"><a href="index.html">Home</a> &gt;&gt;
+<a href="udp.html">udp::socket</a></div>
+<!-- end of header -->
+
+<!-- main text -->
+<div class="main">
+
+<h1>Declaration</h1>
+
+<pre class="sh_cpp">
+namespace udp {
+    template &lt;int Family&gt;
+    class basic_socket : basic_rawsocket&lt;SOCK_DGRAM, Family, 0&gt;;
+    
+    typedef basic_socket&lt;AF_INET&gt; socket;
+    typedef basic_sockaddress&lt;AF_INET, IPPROTO_UDP&gt; sockaddress;
+    typedef basic_sockbuf&lt;socket&gt; sockbuf;
+    typedef basic_sockstream&lt;socket&gt; sockstream;
+    typedef basic_sockmanager&lt;SOCK_DGRAM, AF_INET, 0&gt; sockmanager;
+};
+</pre>
+
+<h1>Overview</h1>
+
+<p>udp::socket は，UDP 用ソケットのラッパクラスです．UDP によるデータ通信においても，
+<a href="sockstream.html">sockstream</a> を利用することができます．UDP
+ソケットを用いたときは，以下のような動作を行います．</p>
+
+<ul>
+<li>送信側の場合は，udp::socket（または，直接 udp::sockstream）オブジェクトを生成する際に指定した
+IP アドレス，ポート番号に対して通信を行います．</li>
+<li>受信側の場合は，from() メソッドで返されるアドレスに対して通信を行います．
+from() メソッドで返されるアドレスの領域は，データを受信する度に更新されていきます．
+すなわち，受信側が sockstream を用いてデータ通信を行う場合，
+受信側は直近にデータを受信した相手に対してデータ送信を行います．from()
+メソッドで返されるアドレス領域に無効な値が設定されている場合は通信に失敗します．</li>
+</ul>
+
+<h1>Example</h1>
+<h2>Sender</h2>
+<p><a href="example/example_udp_send.cpp">example_udp_send.cpp</a></p>
+
+<pre class="sh_cpp">
+#include &lt;iostream&gt;
+#include &lt;string&gt;
+#include &quot;clx/udp.h&quot;
+
+int main(int argc, char* argv[]) {
+    if (argc &lt; 3) std::exit(-1);
+    clx::udp::sockstream s(argv[1], clx::udp::port(argv[2]));
+    
+    std::string buf;
+    while (std::getline(std::cin, buf)) {
+        s &lt;&lt; buf &lt;&lt; std::endl;
+    }
+    
+    return 0;
+}
+</pre>
+
+<h2>Receiver</h2>
+<p><a href="example/example_udp_recv.cpp">example_udp_recv.cpp</a></p>
+
+<pre class="sh_cpp">
+#include &lt;iostream&gt;
+#include &lt;string&gt;
+#include &quot;clx/udp.h&quot;
+
+int main(int argc, char* argv[]) {
+    if (argc &lt; 2) std::exit(-1);
+    clx::udp::sockstream ss(clx::udp::port(argv[1]));
+    
+    std::string buf;
+    while (std::getline(ss, buf)) {
+        std::cout &lt;&lt; buf &lt;&lt; &quot; (from &quot; &lt;&lt; ss.from().ipaddr()
+            &lt;&lt; ':' &lt;&lt; ss.from().port() &lt;&lt; ')' &lt;&lt; std::endl;
+    }
+    
+    return 0;
+}
+</pre>
+
+<h1>Template Parameters</h1>
+<dl>
+<dt>Family</dt><dd>プロトコルファミリーを指定します．</dd>
+</dl>
+
+<h1>Related Types</h1>
+<pre class="sh_cpp">
+typedef basic_sockaddress&lt;Family, IPPROTO_UDP&gt; address_type;
+typedef char char_type;
+typedef std::basic_string&lt;char_type&gt; string_type;
+</pre>
+
+<h1>Construction and Member Functions</h1>
+<pre class="sh_cpp">
+basic_socket();
+basic_socket(const basic_socket&amp; cp);
+explicit basic_socket(socket_int s, const address_type&amp; addr);
+explicit basic_socket(const char_type* host, int port);
+explicit basic_socket(const string_type&amp; host, int port);
+explicit basic_socket(int port);
+virtual ~basic_socket();
+
+int bind(int port);
+bool is_bind() const;
+
+int send_to(const char_type* src, int n, const address_type&amp; addr);
+int send_to(const string_type&amp; src, const address_type&amp; addr);
+int send_to(const char_type* src, int n, const char_type* host, int port);
+int send_to(const string_type&amp; src, const string_type&amp; host, int port);
+int send(const char_type* src, int n);
+int send(const string_type&amp; src);
+int recv(char_type* dest, int n);
+
+const address_type&amp; from() const;
+const address_type&amp; to() const;
+</pre>
+
+</div>
+<!-- end of main text -->
+
+<!-- footer -->
+<div class="foot">
+<address class="copyright">
+Copyright &copy; 2004 - 2009, clown. All rights reserved.
+Mailto: tt.clown(a)gmail.com
+</address>
+</div>
+<!-- end of footer -->
+
+</div>
+</body>
+
+</html>

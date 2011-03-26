@@ -1,0 +1,166 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ja">
+
+<head>
+<meta name="author" content="clown">
+<meta http-equiv="Content-type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<meta http-equiv="Content-Script-Type" content="text/javascript">
+
+<script type="text/javascript" src="script/sh_main.js"></script>
+<script type="text/javascript" src="script/sh_cpp.js"></script>
+
+<link rel="index" href="index.html">
+<link rel="stylesheet" href="style/default.css" type="text/css">
+<link rel="stylesheet" href="style/hilight.css" type="text/css">
+
+<title>CLX C++ Libraries - random</title>
+</head>
+
+<body onload="sh_highlightDocument()">
+<div class="contents">
+
+<!-- header -->
+<div class="title">
+<a href="http://clx.cielquis.net/">CLX C++ Libraries</a>
+<a href="http://b.hatena.ne.jp/entry/http://clx.cielquis.net/random.html">
+<img src="http://d.hatena.ne.jp/images/b_entry.gif"
+  width="16" height="12" border="0">
+</a>
+</div>
+<div class="head"><a href="index.html">Home</a> &gt;&gt;
+<a href="random.html">random</a></div>
+<!-- end of header -->
+
+<!-- main text -->
+<div class="main">
+
+<h1>Declaration</h1>
+<pre class="sh_cpp">
+template &lt;
+    class Type,
+    class Engine = mt19937
+&gt;
+class random;
+</pre>
+
+<h1>Overview</h1>
+<p>random クラスは Type 型のランダムな値を生成するためのクラスです．
+コンストラクタの引数にランダムな値を生成するための Engine を指定して randam
+の初期化を行った後，() 演算子を用いて生成されるランダムな値を取得します．</p>
+
+<p>Engine に指定するクラスは，以下のメソッドが定義されている必要があります．</p>
+
+<pre class="sh_cpp">
+class engine {
+public:
+    template &lt;typename ValueT&gt;
+    void operator()(ValueT&amp; dest);
+};
+</pre>
+
+<p>尚，デフォルトではランダムな値を生成するための Engine として mt19937 を用いています．
+mt19937 は Mersenne Twister (MT) と呼ばれる乱数生成アルゴリズムを実装したものです．
+MT のアルゴリズム，および実装に関する詳細は，<a
+href="http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/mt.html" target="_blank">
+Mersenne Twister Home Page</a> を参照して下さい．</p>
+
+<h1>Example</h1>
+<p><a href="example/example_random.cpp">example_random.cpp</a></p>
+
+<pre class="sh_cpp">
+#include &lt;iostream&gt;
+#include &quot;clx/random.h&quot;
+#include &quot;clx/format.h&quot;
+
+int main(int argc, char* argv[]) {
+    clx::random&lt;unsigned int&gt; rand1;
+    printf(&quot;1000 outputs of clx::random&lt;int&gt;\n&quot;);
+    for (int i = 0; i &lt; 1000; ++i) {
+        std::cout &lt;&lt; clx::format(&quot;%10u &quot;) % rand1();
+        if (i % 5 == 4) std::cout &lt;&lt; std::endl;
+    }
+    
+    printf(&quot;1000 outputs of clx::random&lt;double&gt;\n&quot;);
+    clx::random&lt;double&gt; rand2;
+    for (int i = 0; i &lt; 1000; ++i) {
+        std::cout &lt;&lt; clx::format(&quot;%10.8f &quot;) % rand2();
+        if (i % 5 == 4) std::cout &lt;&lt; std::endl;
+    }
+    
+    return 0;
+}
+</pre>
+
+<pre>
+<strong>Result</strong>
+1000 outputs of clx::random<int>
+3499211612  581869302 3890346734 3586334585  545404204
+4161255391 3922919429  949333985 2715962298 1323567403
+ 418932835 2350294565 1196140740  809094426 2348838239
+4264392720 4112460519 4279768804 4144164697 4156218106
+ 676943009 3117454609 4168664243 4213834039 4111000746
+
+・・・(中略)・・・
+
+1000 outputs of clx::random<double>
+0.81472369 0.13547700 0.90579193 0.83500859 0.12698681
+0.96886777 0.91337586 0.22103404 0.63235925 0.30816705
+0.09754040 0.54722060 0.27849822 0.18838198 0.54688152
+0.99288130 0.95750683 0.99646133 0.96488853 0.96769494
+0.15761308 0.72583896 0.97059278 0.98110969 0.95716695
+
+・・・(以下略)・・・
+</pre>
+
+<h1>Template Parameters</h1>
+<dl>
+<dt>Type</dt><dd>生成するランダムな値の型を指定します．</dd>
+<dt>Engine</dt><dd>ランダムな値を生成するためのアルゴリズムを指定します．
+デフォルト値は，mt19937．</dd>
+</dl>
+
+<h1>Related Types</h1>
+<pre class="sh_cpp">
+typedef Type value_type;
+typedef Engine engine_type;
+</pre>
+
+<h1>Construction and Member Functions</h1>
+<pre class="sh_cpp">
+explicit random(engine_type e = engine_type());
+virtual ~random();
+
+value_type operator()();
+</pre>
+
+<p>random は，() 演算子が呼ばれるたびに新たなランダムな値を返します．</p>
+
+<pre class="sh_cpp">
+engine_type&amp; engine();
+const engine_type&amp; engine() const;
+</pre>
+
+<h1>Reference</h1>
+<ol>
+<li><a href="http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/mt.html" target="_blank">
+Mersenne Twister Home Page</a></li>
+</ol>
+
+</div>
+<!-- end of main text -->
+
+<!-- footer -->
+<div class="foot">
+<address class="copyright">
+Copyright &copy; 2004 - 2008, clown. All rights reserved.
+Mailto: tt.clown(a)gmail.com
+</address>
+</div>
+<!-- end of footer -->
+
+</div>
+</body>
+
+</html>

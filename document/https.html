@@ -1,0 +1,222 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ja">
+
+<head>
+<meta name="author" content="clown">
+<meta http-equiv="Content-type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<meta http-equiv="Content-Script-Type" content="text/javascript">
+
+<script type="text/javascript" src="script/sh_main.js"></script>
+<script type="text/javascript" src="script/sh_cpp.js"></script>
+
+<link rel="index" href="index.html">
+<link rel="stylesheet" href="style/default.css" type="text/css">
+<link rel="stylesheet" href="style/hilight.css" type="text/css">
+
+<title>CLX C++ Libraries - https</title>
+</head>
+
+<body onload="sh_highlightDocument()">
+<div class="contents">
+
+<!-- header -->
+<div class="title">
+<a href="http://clx.cielquis.net/">CLX C++ Libraries</a>
+<a href="http://b.hatena.ne.jp/entry/http://clx.cielquis.net/https.html">
+<img src="http://d.hatena.ne.jp/images/b_entry.gif"
+  width="16" height="12" border="0">
+</a>
+</div>
+<div class="head"><a href="index.html">Home</a> &gt;&gt;
+<a href="http.html">http</a> &gt;&gt;
+<a href="https.html">https</a></div>
+<!-- end of header -->
+
+<!-- main text -->
+<div class="main">
+
+<h1>Declaration</h1>
+<pre class="sh_cpp">
+typedef basic_http&lt;ssl::socket&gt; https;
+</pre>
+
+<h1>Overview</h1>
+<p>https は，HTTPS (HTTP over SSL) 通信を行うためのクラスです．<a href="tcp.html">tcp::socket</a>
+の代わりに <a href="ssl.html">ssl::socket</a> を用いることで実現しています．
+インターフェースは <a href="http.html">http</a> クラスと同様です．ただし，
+サーバ側の証明書の認証を行う場合は，サーバと接続する（start() メソッドを実行する）
+前に verify_locations() メソッドで rootCA 認証書のファイル/ディレクトリ名を指定しておく必要があります
+（詳細は，<a href="ssl.html">ssl::socket</a> を参照して下さい）．</p>
+
+<p>CLX における SSL 通信は OpenSSL を用いて実装しています．
+そのため，SSL 通信関連ライブラリを使用する際には環境に OpenSSL
+ライブラリがインストールされている必要があります．OpenSSL に関する詳細は，
+<a href="http://www.openssl.org/" target="_blank">OpenSSL: The Open Source toolkit
+for SSL/TLS</a> ( <a href="http://www.infoscience.co.jp/technical/openssl/"
+target="_blank">OpenSSL 日本語サイト</a> ) を参照して下さい．</p>
+
+<h1>Example</h1>
+<p><a href="example/example_https.cpp">example_https.cpp</a></p>
+
+<pre class="sh_cpp">
+#include &lt;iostream&gt;
+#include &quot;clx/https.h&quot;
+#include &quot;clx/uri.h&quot;
+
+int main(int argc, char* argv[]) {
+    if (argc &lt; 3) return -1;
+    
+    try {
+        clx::https session(clx::uri::encode(argv[1]), 443);
+        session.get(clx::uri::encode(argv[2]));
+        
+        std::cout &lt;&lt; &quot;code: &quot; &lt;&lt; session.code() &lt;&lt; std::endl;
+        std::cout &lt;&lt; std::endl;
+        
+        std::cout &lt;&lt; &quot;head&quot; &lt;&lt; std::endl;
+        std::cout &lt;&lt; &quot;--&quot; &lt;&lt; std::endl;
+        for (clx::http::head_iterator pos = session.head().begin();
+            pos != session.head().end(); pos++) {
+            std::cout &lt;&lt; pos-&gt;first &lt;&lt; &quot;: &quot; &lt;&lt; pos-&gt;second &lt;&lt; std::endl;
+        }
+        std::cout &lt;&lt; std::endl;
+        
+        std::cout &lt;&lt; &quot;body&quot; &lt;&lt; std::endl;
+        std::cout &lt;&lt; &quot;--&quot; &lt;&lt; std::endl;
+        std::cout &lt;&lt; session.body() &lt;&lt; std::endl;
+    }
+    catch (clx::socket_error&amp; e) {
+        std::cerr &lt;&lt; e.what() &lt;&lt; std::endl;
+        std::exit(-1);
+    }
+    catch (clx::sockaddress_error&amp; e) {
+        std::cerr &lt;&lt; e.what() &lt;&lt; std::endl;
+        std::exit(-1);
+    }
+    catch (std::runtime_error&amp; e) {
+        std::cerr &lt;&lt; e.what() &lt;&lt; std::endl;
+        std::exit(-1);
+    }
+    
+    return 0;
+}
+</pre>
+
+<pre>
+<strong>実行結果</strong>
+$ ./a ss1.xrea.com /clx.cielquis.net/
+code: 200
+
+head
+--
+Accept-Ranges: bytes
+Connection: close
+Content-Length: 18632
+Content-Type: text/html
+Date: Tue, 15 Dec 2009 09:05:17 GMT
+ETag: "c5fe8e-48c8-4b0ae3a9"
+Last-Modified: Mon, 23 Nov 2009 19:34:01 GMT
+Server: Apache
+X-Cache: MISS from ss1.xrea.com
+
+body
+--
+&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.01 Transitional//EN&quot;
+  &quot;http://www.w3.org/TR/html4/loose.dtd&quot;&gt;
+&lt;html lang=&quot;ja&quot;&gt;
+
+・・・（省略）・・・
+</pre>
+
+<p>サーバ側の証明書の認証を行う場合は，以下のようにサーバと接続する（start()
+メソッドを実行する）前に verify_locations() メソッドで rootCA 認証書のファイル/
+ディレクトリ名を指定します．ファイルを指定する場合は verify_locations()
+メソッドの第 1 引数に，ディレクトリを指定する場合には第 2 引数にその名前を指定します．</p>
+
+<p><a href="example/example_https_verify.cpp">example_https_verify.cpp</a></p>
+
+<pre class="sh_cpp">
+#include &lt;iostream&gt;
+#include &quot;clx/https.h&quot;
+#include &quot;clx/uri.h&quot;
+
+int main(int argc, char* argv[]) {
+    if (argc &lt; 3) return -1;
+    
+    try {
+        clx::https session;
+        
+        try {
+            session.verify_locations(&quot;ca-bundle.crt&quot;);
+            session.start(clx::uri::encode(argv[1]), 443);
+        }
+        catch (clx::verify_error&amp; e) {
+            std::cerr &lt;&lt; e.what() &lt;&lt; std::endl;
+            // std::exit(-1);
+        }
+        
+        session.get(clx::uri::encode(argv[2]));
+        
+        std::cout &lt;&lt; &quot;code: &quot; &lt;&lt; session.code() &lt;&lt; std::endl;
+        std::cout &lt;&lt; std::endl;
+        
+        std::cout &lt;&lt; &quot;head&quot; &lt;&lt; std::endl;
+        std::cout &lt;&lt; &quot;--&quot; &lt;&lt; std::endl;
+        for (clx::http::head_iterator pos = session.head().begin();
+            pos != session.head().end(); pos++) {
+            std::cout &lt;&lt; pos-&gt;first &lt;&lt; &quot;: &quot; &lt;&lt; pos-&gt;second &lt;&lt; std::endl;
+        }
+        std::cout &lt;&lt; std::endl;
+        
+        std::cout &lt;&lt; &quot;body&quot; &lt;&lt; std::endl;
+        std::cout &lt;&lt; &quot;--&quot; &lt;&lt; std::endl;
+        std::cout &lt;&lt; session.body() &lt;&lt; std::endl;
+    }
+    catch (clx::socket_error&amp; e) {
+        std::cerr &lt;&lt; e.what() &lt;&lt; std::endl;
+        std::exit(-1);
+    }
+    catch (clx::sockaddress_error&amp; e) {
+        std::cerr &lt;&lt; e.what() &lt;&lt; std::endl;
+        std::exit(-1);
+    }
+    catch (std::runtime_error&amp; e) {
+        std::cerr &lt;&lt; e.what() &lt;&lt; std::endl;
+        std::exit(-1);
+    }
+    
+    return 0;
+}
+</pre>
+
+<h1>Related Pages</h1>
+<ol>
+<li><a href="ssl.html">CLX C++ Libraries - ssl::socket</a></li>
+<li><a href="http.html">CLX C++ Libraries - http</a></li>
+</ol>
+
+<h1>References</h1>
+<ol>
+<li><a href="http://www.openssl.org/" target="_blank">OpenSSL: The Open Source toolkit
+for SSL/TLS</a></li>
+<li><a href="http://www.infoscience.co.jp/technical/openssl/" target="_blank">
+OpenSSL 日本語サイト:  The Open Source toolkit for SSL/TLS</a></li>
+</ol>
+</div>
+<!-- end of main text -->
+
+<!-- footer -->
+<div class="foot">
+<address class="copyright">
+Copyright &copy; 2004 - 2008, clown. All rights reserved.
+Mailto: tt.clown(a)gmail.com
+</address>
+</div>
+<!-- end of footer -->
+
+</div>
+</body>
+
+</html>

@@ -1,0 +1,245 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ja">
+
+<head>
+<meta name="author" content="clown">
+<meta http-equiv="Content-type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<meta http-equiv="Content-Script-Type" content="text/javascript">
+
+<script type="text/javascript" src="script/sh_main.js"></script>
+<script type="text/javascript" src="script/sh_cpp.js"></script>
+
+<link rel="index" href="index.html">
+<link rel="stylesheet" href="style/default.css" type="text/css">
+<link rel="stylesheet" href="style/hilight.css" type="text/css">
+
+<title>CLX C++ Libraries - pop3</title>
+</head>
+
+<body onload="sh_highlightDocument()">
+<div class="contents">
+
+<!-- header -->
+<div class="title">
+<a href="http://clx.cielquis.net/">CLX C++ Libraries</a>
+<a href="http://b.hatena.ne.jp/entry/http://clx.cielquis.net/pop3.html">
+<img src="http://d.hatena.ne.jp/images/b_entry.gif"
+  width="16" height="12" border="0">
+</a>
+</div>
+<div class="head"><a href="index.html">Home</a> &gt;&gt;
+<a href="pop3.html">pop3</a></div>
+<!-- end of header -->
+
+<!-- main text -->
+<div class="main">
+
+<h1>Declaration</h1>
+<pre class="sh_cpp">
+template &lt;class Socket&gt;
+class basic_pop3 : public Socket;
+
+typedef basic_pop3&lt;tcp::socket&gt; pop3;
+</pre>
+
+<h1>Overview</h1>
+<p>pop3 クラスは POP3 (Post Office Protocol version 3) を用いて，
+メールサーバからメールを受信するためのクラスです．
+start() メソッドでメールサーバと接続し，login() メソッドでログイン処理を行った後，
+各種メソッドを用いてメールサーバと通信を行います．ログイン方法は，
+平文による認証方式と APOP 認証方式に対応しています．</p>
+
+<p>メールの内容を取得する retrieve() メソッドには，関数オブジェクト（または，関数ポインタ）
+を指定することもできます．引数として関数オブジェクトが指定された場合，pop3 クラスはメールの内容を
+受信するための入力ストリームを関数オブジェクトへ渡します．指定する関数オブジェクト，
+または関数ポインタには以下ような関数が定義されている必要があります．</p>
+
+<pre class="sh_cpp">
+// 関数の場合
+void recvmail(std::istream&amp; sin);
+
+// 関数オブジェクトの場合
+class recvmail {
+public:
+    template &lt;class InputStream&gt;
+    void operator()(InputStream&amp; sin);
+};
+</pre>
+
+<p>pop3 クラスは，サーバからエラーメッセージが返された場合には pop3_error
+を例外として送出します．</p>
+
+<h1>Example</h1>
+<p><a href="example/example_pop3.cpp">example_pop3.cpp</a></p>
+
+<pre class="sh_cpp">
+#include &lt;iostream&gt;
+#include &lt;string&gt;
+#include &quot;clx/pop3.h&quot;
+
+int main(int argc, char* argv[]) {
+    if (argc &lt; 4) std::exit(-1);
+    
+    try {
+        clx::pop3 session(argv[1], 110);
+        
+        // APOP が使用できるなら APOP 認証を用いる．
+        session.login(argv[2], argv[3], session.apop_support());
+        
+        std::cout &lt;&lt; &quot;status: &quot; &lt;&lt; session.status() &lt;&lt; std::endl;
+        
+        // LIST コマンド
+        clx::pop3::list_type list = session.list();
+        std::cout &lt;&lt; &quot;mail list&quot; &lt;&lt; std::endl;
+        std::cout &lt;&lt; &quot;-----&quot; &lt;&lt; std::endl;
+        for (size_t i = 0; i &lt; list.size(); ++i) {
+            std::cout &lt;&lt; list[i] &lt;&lt; std::endl;
+        }
+        std::cout &lt;&lt; &quot;-----&quot; &lt;&lt; std::endl;
+        
+        // TOP コマンド
+        std::cout &lt;&lt; &quot;top [1]&quot; &lt;&lt; std::endl;
+        std::cout &lt;&lt; &quot;-----&quot; &lt;&lt; std::endl;
+        std::cout &lt;&lt; session.top(1, 0) &lt;&lt; std::endl;
+        std::cout &lt;&lt; &quot;-----&quot; &lt;&lt; std::endl;
+        
+        session.finish();
+    }
+    catch (clx::pop3_error&amp; e) {
+        std::cerr &lt;&lt; e.what() &lt;&lt; std::endl;
+        std::exit(-1);
+    }
+    catch (clx::socket_error&amp; e) {
+        std::cerr &lt;&lt; e.what() &lt;&lt; std::endl;
+        std::exit(-1);
+    }
+    catch (std::runtime_error&amp; e) {
+        std::cerr &lt;&lt; e.what() &lt;&lt; std::endl;
+        std::exit(-1);
+    }
+    
+    return 0;
+}
+</pre>
+
+<pre>
+<strong>Result</strong>
+status: 6 5543
+mail list
+-----
+1 975
+2 1012
+3 960
+4 866
+5 864
+6 866
+-----
+top [1]
+-----
+Return-Path: &lt;clown@abeam.ocn.ne.jp&gt;
+Delivered-To: clown@cielquis.net
+
+・・・（以下略）・・・
+</pre>
+
+<h1>Template Parameters</h1>
+<dl>
+<dt>Socket</dt><dd>ソケットクラスを指定します．</dd>
+</dl>
+
+<h1>Related Types</h1>
+<pre class="sh_cpp">
+typedef Socket socket_type;
+typedef char char_type;
+typedef std::basic_string&lt;char_type&gt; string_type;
+typedef std::vector&lt;string_type&gt; list_type;
+</pre>
+
+<h1>Construction and Member Functions</h1>
+<pre class="sh_cpp">
+basic_pop3();
+basic_pop3(const basic_pop3&amp; cp);
+explicit basic_pop3(const string_type&amp; host, int port = 110);
+explicit basic_pop3(const char_type* host, int port = 110);
+virtual ~basic_pop3();
+
+basic_pop3&amp; start(const string_type&amp; host, int port = 110);
+basic_pop3&amp; start(const char_type* host, int port = 110);
+
+void finish();
+
+basic_pop3&amp; login(const string_type&amp; id, const string_type&amp; pass, bool apop = false);
+basic_pop3&amp; login(const char_type* id, const char_type* pass, bool apop = false);
+basic_pop3&amp; apop(const string_type&amp; id, const string_type&amp; pass);
+basic_pop3&amp; apop(const char_type* id, const char_type* pass);
+</pre>
+
+<p>start() メソッドで SMTP サーバと接続し，login() メソッドでログイン処理を行います．
+login() メソッドの第 3 引数が true の場合，APOP 認証を試みます．これは，login()
+メソッドの代わりに apop() メソッドを実行した場合と等価です．
+サーバが APOP 認証に対応しているかどうか不明な場合は，apop_suppert()
+メソッドの返り値を第 3 引数に指定しておくと，APOP 認証が可能なときだけ APOP
+認証を実行するように設定することができます．</p>
+
+<pre class="sh_cpp">
+string_type status();
+
+list_type list();
+list_type uid_list();
+string_type list(int n);
+string_type uid_list(int n);
+
+string_type retrieve(int n);
+
+template &lt;class Functor&gt;
+basic_pop3&amp; retrieve(int n, Functor f);
+
+string_type top(int n, int line);
+
+basic_pop3&amp; erase(int n);
+basic_pop3&amp; reset();
+basic_pop3&amp; noop();
+</pre>
+
+<p>status(), list(), uid_list(), retrieve(), top(), erase(), reset(), noop() メソッドは，
+それぞれ POP3 で定められている STAT, LIST, UIDL, RETR, TOP, DELE, RSET, NOOP
+コマンドをメールサーバへ送信し，サーバからの応答を受信します．</p>
+
+<pre class="sh_cpp">
+bool apop_support() const;
+</pre>
+
+<p>apop_support() メソッドは，通信しているメールサーバが APOP 認証に対応している場合に
+true を返します．</p>
+
+<h1>Related Pages</h1>
+<ol>
+<li><a href="pop3s.html">CLX C++ Libraries - pop3s</a></li>
+<li><a href="smtp.html">CLX C++ Libraries - smtp</a></li>
+<li><a href="smtps.html">CLX C++ Libraries - smtps</a></li>
+</ol>
+
+<h1>Reference</h1>
+<ol>
+<li><a href="http://thinkit.jp/article/737/1/" target="_blank">
+ThikIT - 暗号化した通信はtcpdumpでどう見えるか</a></li>
+</ol>
+
+</div>
+<!-- end of main text -->
+
+<!-- footer -->
+<div class="foot">
+<address class="copyright">
+Copyright &copy; 2004 - 2008, clown. All rights reserved.
+Mailto: tt.clown(a)gmail.com
+</address>
+</div>
+<!-- end of footer -->
+
+</div>
+</body>
+
+</html>

@@ -1,0 +1,118 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ja">
+
+<head>
+<meta name="author" content="clown">
+<meta http-equiv="Content-type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<meta http-equiv="Content-Script-Type" content="text/javascript">
+
+<script type="text/javascript" src="script/sh_main.js"></script>
+<script type="text/javascript" src="script/sh_cpp.js"></script>
+
+<link rel="index" href="index.html">
+<link rel="stylesheet" href="style/default.css" type="text/css">
+<link rel="stylesheet" href="style/hilight.css" type="text/css">
+
+<title>CLX C++ Libraries - remove</title>
+</head>
+
+<body onload="sh_highlightDocument()">
+<div class="contents">
+
+<!-- header -->
+<div class="title">
+<a href="http://clx.cielquis.net/">CLX C++ Libraries</a>
+<a href="http://b.hatena.ne.jp/entry/http://clx.cielquis.net/remove.html">
+<img src="http://d.hatena.ne.jp/images/b_entry.gif"
+  width="16" height="12" border="0">
+</a>
+</div>
+<div class="head"><a href="index.html">Home</a> &gt;&gt;
+<a href="salgorithm.html">salgorithm</a> &gt;&gt;
+<a href="remove.html">remove</a></div>
+<!-- end of header -->
+
+<!-- main text -->
+<div class="main">
+<h1>Declarations</h1>
+<pre class="sh_cpp">
+String&amp; remove(String&amp; s, CharT c);
+String remove_copy(const String&amp; s, CharT c);
+String&amp; remove_if(String&amp; s, PredicateFunc f);
+String remove_copy_if(const String&amp; s, PredicateFunc f);
+
+String&amp; unique(String&amp; s);
+String unique_copy(const String&amp; s);
+
+String&amp; squeeze(String&amp; s, CharT c);
+String squeeze_copy(const String&amp; s, CharT c);
+String&amp; squeeze_if(String&amp; s, PredicateFunc f);
+String squeeze_copy_if(const String&amp; s, PredicateFunc f);
+</pre>
+
+<h1>Overview</h1>
+
+<p>remove()，および unique() は，それぞれ STL Algorithm で定義されている std::remove()，
+std::unique() のラッパ関数です．STL Algorithm では実際には文字列の消去を行わないため，
+代わりに後処理を行います[<a href="http://www005.upp.so-net.ne.jp/episteme/html/stlprog/_05.html#algo_mutating"
+target="_blank">1</a>]．unique() は，文字列中において連続している全ての文字を
+一文字を残して消去します．これに対して squeeze() は，文字列中において引数で指定された文字
+<em>c</em> を一文字を残して消去します．</p>
+
+<p>remove_copy()，unique_copy()，squeeze_copy() は，引数として指定された文字列を直接変更せず，
+コピーした文字列を変更します．また，remove_if()，squeeze_if()，は，PredicateFunc
+で指定された Functor が真を返した文字にのみ操作を行います．</p>
+
+<p>尚，Declarations においては template &lt; ... &gt; の部分を省略していますが，
+単語の先頭が大文字になっているものはテンプレート引数として渡される型です（ただし，
+String は std::basic_string&lt;CharT, Traits&gt;）．</p>
+
+<h1>Example</h1>
+<p><a href="example/example_remove.cpp">example_remove.cpp</a></p>
+
+<pre class="sh_cpp">
+#include &lt;iostream&gt;
+#include &lt;string&gt;
+#incluhde &quot;clx/salgorithm.h&quot;
+
+int main(int argc, char* argv[]) {
+    std::string s = &quot;Hello, woooooooooorld!&quot;;
+    
+    std::cout &lt;&lt; &quot;original: &quot; &lt;&lt; s &lt;&lt; std::endl;
+    std::cout &lt;&lt; &quot;unique: &quot; &lt;&lt; clx::unique_copy(s) &lt;&lt; std::endl;
+    std::cout &lt;&lt; &quot;squeeze: &quot; &lt;&lt; clx::squeeze_copy(s, 'o') &lt;&lt; std::endl;
+    
+    return 0;
+}
+</pre>
+
+<pre>
+<strong>Result</strong>
+original: Hello, woooooooooorld!
+unique: Helo, world!
+squeeze: Hello, world!
+</pre>
+
+<h1>References</h1>
+<ol>
+<li><a href="http://www005.upp.so-net.ne.jp/episteme/html/stlprog/_05.html#algo_mutating"
+target="_blank">Standard Template Library プログラミング on the Web - アルゴリズム</a></li>
+</ol>
+</div>
+<!-- end of main text -->
+
+<!-- footer -->
+<div class="foot">
+<address class="copyright">
+Copyright &copy; 2004 - 2008, clown. All rights reserved.
+Mailto: tt.clown(a)gmail.com
+</address>
+</div>
+<!-- end of footer -->
+
+</div>
+</body>
+
+</html>

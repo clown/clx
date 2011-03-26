@@ -1,0 +1,151 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ja">
+
+<head>
+<meta name="author" content="clown">
+<meta http-equiv="Content-type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<meta http-equiv="Content-Script-Type" content="text/javascript">
+
+<script type="text/javascript" src="script/sh_main.js"></script>
+<script type="text/javascript" src="script/sh_cpp.js"></script>
+
+<link rel="index" href="index.html">
+<link rel="stylesheet" href="style/default.css" type="text/css">
+<link rel="stylesheet" href="style/hilight.css" type="text/css">
+
+<title>CLX C++ Libraries - utf8</title>
+</head>
+
+<body onload="sh_highlightDocument()">
+<div class="contents">
+
+<!-- header -->
+<div class="title">
+<a href="http://clx.cielquis.net/">CLX C++ Libraries</a>
+<a href="http://b.hatena.ne.jp/entry/http://clx.cielquis.net/utf8.html">
+<img src="http://d.hatena.ne.jp/images/b_entry.gif" width="16" height="12" border="0"></a>
+</div>
+<div class="head"><a href="index.html">Home</a> &gt;&gt;
+<a href="utf8.html">utf8</a></div>
+<!-- end of header -->
+
+<!-- main text -->
+<div class="main">
+<h1>Overview</h1>
+
+<p>近年，テキストの文字コードとして UTF-8 が広く利用されるようになりました．
+しかし，UTF-8 は 1 文字を 1--4Byte で表現するため，文字数のカウントなどが若干面倒になります．
+clx::utf8 はそう言った UTF-8 エンコードの文字列を扱うための補助関数群になります．</p>
+
+<p>clx::utf8 は，UTF-8 エンコードの文字列は char 型で扱う事を想定しています．
+そのため，現在のところ wchar_t 型の引数を取る関数は提供していません．</p>
+
+<h1>Example</h1>
+<p><a href="example/example_utf8.cpp">example_utf8.cpp</a></p>
+
+<pre class="sh_cpp">
+#include &lt;iostream&gt;
+#include &lt;string&gt;
+#include &quot;clx/utf8.h&quot;
+
+int main(int argc, char* argv[]) {
+    std::string s = &quot;はろーわーるど！ This is a UTF-8 test program.&quot;;
+    std::cout &lt;&lt; &quot;size: &quot; &lt;&lt; s.size() &lt;&lt; std::endl;
+    std::cout &lt;&lt; &quot;char count: &quot; &lt;&lt; clx::utf8::distance(s) &lt;&lt; std::endl;
+    
+    std::string::iterator pos = s.begin();
+    int n = 0;
+    while (pos != s.end()) {
+        clx::utf8::advance(pos, 1);
+        clx::utf8::advance(pos, -1);
+        clx::utf8::advance(pos, 1);
+        ++n;
+    }
+    std::cout &lt;&lt; &quot;char count: &quot; &lt;&lt; std::dec &lt;&lt; n &lt;&lt; std::endl;
+    
+    pos = s.begin();
+    while (pos != s.end()) {
+        std::string dest;
+        clx::utf8::get(pos, s.end(), std::insert_iterator&lt;std::string&gt;(dest, dest.end()));
+        for (size_t i = 0; i &lt; dest.size(); ++i) {
+            std::cout &lt;&lt; &quot;&lt;&quot;
+                &lt;&lt; std::hex &lt;&lt; (static_cast&lt;size_t&gt;(dest.at(i)) &amp; 0xff)
+                &lt;&lt; &quot;&gt;&quot;;
+        }
+        std::cout &lt;&lt; std::endl;
+    }
+    
+    return 0;
+}
+</pre>
+
+<h1>Functions</h1>
+<p>全ての関数は，utf8 名前空間の中に定義してあります．</p>
+
+<pre class="sh_cpp">
+template &lt;class InIter&gt;
+size_t get(InIter&amp; first, InIter last);
+
+template &lt;class InIter, class OutIter&gt;
+OutIter get(InIter&amp; first, InIter last, OutIter out);
+
+template &lt;class InIter, class OutIter&gt;
+OutIter get(InIter&amp; first, InIter last, OutIter out, size_t n);
+</pre>
+
+<p>get() メソッドは，first の位置から 1 文字取得し，1 文字分 (1--4Byte)
+イテレータを先に進めます．引数が入力イテレータのみ場合は，1 文字分の値を
+size_t の変数に格納し，その値を返します．引数に出力イテレータも指定された場合は，
+指定された出力イテレータに 1 文字分の値を格納します．
+出力イテレータの他に整数も指定された場合には，指定された文字数分だけ格納します．</p>
+
+<pre class="sh_cpp">
+template &lt;class InIter&gt;
+size_t peek(InIter first, InIter last);
+</pre>
+
+<p>get() メソッドは，引数に指定された入力イテレータ first を取得したバイト数分だけ前進させます．
+これに対して，peek() メソッドは引数に指定された入力イテレータの値を変化させません．</p>
+
+<pre class="sh_cpp">
+template &lt;class InIter&gt;
+void advance(InIter&amp; pos, int n);
+</pre>
+
+<p>advance() メソッドは，現在の位置から n 文字分だけイテレータを先に進めます．
+ただし，n に負の整数を指定した場合には n 文字分だけイテレータを後ろに戻します．</p>
+
+<pre class="sh_cpp">
+template &lt;class InIter&gt;
+size_t distance(InIter first, InIter last);
+
+size_t distance(const std::string& s);
+size_t distance(const char* s);
+</pre>
+
+<p>distance() メソッドは，引数に指定された文字列の文字数を返します．</p>
+
+<h1>Reference</h1>
+<ol>
+<li><a href="http://d.hatena.ne.jp/tt_clown/20090814/p1"
+target="_blank">UTF-8 の文字列を操作するための補助関数群 - Life like a clown</a></li>
+</ol>
+
+</div>
+<!-- end of main text -->
+
+<!-- footer -->
+<div class="foot">
+<address class="copyright">
+Copyright &copy; 2004 - 2009, clown. All rights reserved.
+Mailto: tt.clown(a)gmail.com
+</address>
+</div>
+<!-- end of footer -->
+
+</div>
+</body>
+
+</html>

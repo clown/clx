@@ -1,0 +1,134 @@
+﻿<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ja">
+
+<head>
+<meta name="author" content="clown">
+<meta http-equiv="Content-type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<meta http-equiv="Content-Script-Type" content="text/javascript">
+
+<script type="text/javascript" src="script/sh_main.js"></script>
+<script type="text/javascript" src="script/sh_cpp.js"></script>
+
+<link rel="index" href="index.html">
+<link rel="stylesheet" href="style/default.css" type="text/css">
+<link rel="stylesheet" href="style/hilight.css" type="text/css">
+
+<title>CLX C++ Libraries - stats</title>
+</head>
+
+<body onload="sh_highlightDocument()">
+<div class="contents">
+
+<!-- header -->
+<div class="title">
+<a href="http://clx.cielquis.net/">CLX C++ Libraries</a>
+<a href="http://b.hatena.ne.jp/entry/http://clx.cielquis.net/stats.html">
+<img src="http://d.hatena.ne.jp/images/b_entry.gif"
+  width="16" height="12" border="0">
+</a>
+</div>
+<div class="head"><a href="index.html">Home</a> &gt;&gt;
+<a href="stats.html">stats</a></div>
+<!-- end of header -->
+
+<!-- main text -->
+<div class="main">
+
+<h1>Declarations</h1>
+<pre class="sh_cpp">
+template &lt;class InIter&gt;
+double mean(InIter first, InIter last);
+
+template &lt;class InIter&gt;
+double variance(InIter first, InIter last);
+
+template &lt;class InIter&gt;
+double stddev(InIter first, InIter last);
+
+template &lt;class InIter&gt;
+double unbiasvar(InIter first, InIter last);
+
+template &lt;class InIter, class Type&gt;
+std::pair&lt;double, double&gt; confidence_interval(InIter first, InIter last, Type t);
+
+template &lt;class InIter, class Type&gt;
+double mse(InIter first, InIter last, Type correct);
+
+template &lt;class InIter, class Type&gt;
+double rmse(InIter first, InIter last, Type correct);
+</pre>
+
+<h1>Overview</h1>
+<p>平均 (mean)，分散 (variance)，標準偏差 (stddev)，不偏分散 (unbiasvar)，
+信頼区間 (confidence_interval)，平均二乗誤差 (mse) を求める関数です．<em>first</em>,
+<em>last</em> には，値が格納されているコンテナのイテレータを指定します．
+信頼区間を求める場合には，引数 <em>t</em> に <a
+href="http://risya.hus.osaka-u.ac.jp/taroh/SocialStatistics/ss04/Tdistribution.htm"
+target="_blank">t 分布表</a>から求められる値を指定する必要があります
+（自由度∞で95%信頼区間を求める場合は，1.96）．</p>
+
+<h1>Example</h1>
+<p><a href="example/example_stats.cpp">example_stats.cpp</a></p>
+
+<pre class="sh_cpp">
+#include &lt;iostream&gt;
+#include &lt;iterator&gt;
+#include &quot;clx/stats.h&quot;
+#include &quot;clx/lexical_cast.h&quot;
+
+int main(int argc, char* argv[]) {
+    // 標準入力から読み込む
+    std::istream_iterator&lt;int&gt; input(std::cin);
+    std::istream_iterator&lt;int&gt; last;
+    std::vector&lt;int&gt; v;
+    std::copy(input, last, std::inserter(v, v.begin()));
+    
+    std::cout &lt;&lt; &quot;mean: &quot; &lt;&lt; clx::mean(v.begin(), v.end()) &lt;&lt; std::endl;
+    std::cout &lt;&lt; &quot;stddev: &quot; &lt;&lt; clx::stddev(v.begin(), v.end()) &lt;&lt; std::endl;
+    
+    std::pair&lt;double, double&gt; ci = clx::confidence_interval(v.begin(), v.end(), 2.06);
+    std::cout &lt;&lt; &quot;95% confidence interval: [&quot;
+        &lt;&lt; ci.first &lt;&lt; ',' &lt;&lt; ci.second &lt;&lt; ']' &lt;&lt; std::endl;
+    
+    return 0;
+}
+</pre>
+
+<pre>
+<strong>test_stats.dat</strong>
+100 60 70 80 80
+ 89 85 82 90 75
+ 75 60 65 60 80
+ 80 90 80 80 80
+ 90 85 83 50 75
+
+<strong>Result</strong>
+mean: 77.76
+stddev: 11.3465
+95% confidence interval: [72.9889,82.5311]
+</pre>
+
+<h1>Reference</h1>
+<ol>
+<li><a href="http://risya.hus.osaka-u.ac.jp/taroh/SocialStatistics/ss04/Tdistribution.htm"
+target="_blank">t 分布表</a></li>
+</ol>
+
+</div>
+<!-- end of main text -->
+
+<!-- footer -->
+<div class="foot">
+<address class="copyright">
+Copyright &copy; 2004 - 2008, clown. All rights reserved.
+Mailto: tt.clown(a)gmail.com
+</address>
+</div>
+<!-- end of footer -->
+
+</div>
+</body>
+
+</html>

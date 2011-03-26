@@ -1,0 +1,276 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ja">
+
+<head>
+<meta name="author" content="clown">
+<meta http-equiv="Content-type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<meta http-equiv="Content-Script-Type" content="text/javascript">
+
+<script type="text/javascript" src="script/sh_main.js"></script>
+<script type="text/javascript" src="script/sh_cpp.js"></script>
+
+<link rel="index" href="index.html">
+<link rel="stylesheet" href="style/default.css" type="text/css">
+<link rel="stylesheet" href="style/hilight.css" type="text/css">
+
+<title>CLX C++ Libraries - ssl::sockmanager</title>
+</head>
+
+<body onload="sh_highlightDocument()">
+<div class="contents">
+
+<!-- header -->
+<div class="title">
+<a href="http://clx.cielquis.net/">CLX C++ Libraries</a>
+<a href="http://b.hatena.ne.jp/entry/http://clx.cielquis.net/sslmanager.html">
+<img src="http://d.hatena.ne.jp/images/b_entry.gif"
+  width="16" height="12" border="0">
+</a>
+</div>
+<div class="head"><a href="index.html">Home</a> &gt;&gt;
+<a href="sockmanager.html">sockmanager</a> &gt;&gt;
+<a href="sslmanager.html">ssl::sockmanager</a></div>
+<!-- end of header -->
+
+<!-- main text -->
+<div class="main">
+
+<h1>Declarations</h1>
+<pre class="sh_cpp">
+namespace ssl {
+    typedef basic_sockmanager&lt;SOCK_STREAM, AF_INET, 0&gt; sockmanager;
+};
+</pre>
+
+<h1>Overview</h1>
+<p>ssl::sockmanager は，SSL 通信用の <a href="sockmanager.html">sockmanager</a> です．
+その他の sockmanager と同様のインターフェースで使用することができます．</p>
+
+<h1>Examples</h1>
+<p><a href="example/example_sslmanager_send.cpp">example_sslmanager_send.cpp</a></p>
+
+<pre class="sh_cpp">
+#include &lt;cstdio&gt;
+#include &lt;iostream&gt;
+#include &lt;string&gt;
+#include &quot;clx/ssl.h&quot;
+
+/* ------------------------------------------------------------------------- */
+//  send_msg
+/* ------------------------------------------------------------------------- */
+bool send_msg(clx::ssl::rawsocket* s, clx::ssl::sockmanager&amp; sm) {
+    // read string from std::cin
+    std::string buf;
+    if (!std::getline(std::cin, buf)) {
+        sm.stop();
+        return false;
+    }
+    
+    // write string to the socket
+    for (clx::ssl::sockmanager::iterator pos = sm.begin(); pos != sm.end(); pos++) {
+        if (sm.socket(pos)-&gt;socket() == s-&gt;socket()) continue;
+        clx::ssl::sockstream* ss = dynamic_cast&lt;clx::ssl::sockstream*&gt;(sm.socket(pos));
+        *ss &lt;&lt; buf &lt;&lt; std::endl;
+    }
+    return true;
+}
+
+/* ------------------------------------------------------------------------- */
+//  recv_msg
+/* ------------------------------------------------------------------------- */
+bool recv_msg(clx::ssl::rawsocket* s, clx::ssl::sockmanager&amp; sm) {
+    clx::ssl::sockstream* ss = dynamic_cast&lt;clx::ssl::sockstream*&gt;(s);
+    
+    std::string buf;
+    if (!std::getline(*ss, buf)) {
+        ss-&gt;close();
+        return false;
+    }
+    std::cout &lt;&lt; buf &lt;&lt; std::endl;
+    return true;
+}
+
+/* ------------------------------------------------------------------------- */
+//  main
+/* ------------------------------------------------------------------------- */
+int main(int argc, char* argv[])
+{
+    if (argc &lt; 2) {
+        std::cerr &lt;&lt; &quot;usage: &quot; &lt;&lt; argv[0] &lt;&lt; &quot; host&quot; &lt;&lt; std::endl;
+        return -1;
+    }
+    
+    try {
+        clx::ssl::sockmanager sm;
+        int port = clx::ssl::port(argv[2]);
+        sm.add(new clx::ssl::sockstream(argv[1], port), recv_msg);
+        sm.add(new clx::ssl::rawsocket(0), send_msg); // for std::cin
+        sm.start();
+    }
+    catch (clx::socket_error&amp; e) {
+        std::cerr &lt;&lt; e.what() &lt;&lt; std::endl;
+        std::exit(-1);
+    }
+    catch (clx::sockaddress_error&amp; e) {
+        std::cerr &lt;&lt; e.what() &lt;&lt; std::endl;
+        std::exit(-1);
+    }
+    catch (std::runtime_error&amp; e) {
+        std::cerr &lt;&lt; e.what() &lt;&lt; std::endl;
+        std::exit(-1);
+    }
+    
+    return 0;
+}
+</pre>
+
+<p><a href="example/example_sslmanager_send.cpp">example_sslmanager_send.cpp</a></p>
+
+<pre class="sh_cpp">
+#include &lt;iostream&gt;
+#include &lt;cstring&gt;
+#include &quot;clx/ssl.h&quot;
+
+/* ----------------------------------------------------------------- */
+//  accept_handler
+/* ----------------------------------------------------------------- */
+template &lt;class Socket, class Service&gt;
+class accept_handler {
+public:
+    typedef Socket socket_type;
+    typedef clx::ssl::acceptor acceptor_type;
+    typedef Service service_handler;
+    
+    explicit accept_handler(const std::string&amp; pub, const std::string&amp; priv) :
+        public_(pub), private_(priv) {}
+    
+    explicit accept_handler(const char* pub, const char* priv) :
+        public_(pub), private_(priv) {}
+    
+    virtual ~accept_handler() throw() {}
+    
+    template &lt;class T, class SockManager&gt;
+    bool operator()(T* s, SockManager&amp; sm) {
+        acceptor_type* server = dynamic_cast&lt;acceptor_type*&gt;(s);
+        socket_type* client = new socket_type(server-&gt;accept(public_, private_));
+        if (client == NULL) throw std::bad_alloc();
+        
+        sm.add(client, service_handler(server-&gt;socket()));
+        return true;
+    }
+    
+private:
+    std::string public_;
+    std::string private_;
+};
+
+/* ------------------------------------------------------------------------- */
+//  chat_service
+/* ------------------------------------------------------------------------- */
+class chat_service {
+public:
+    typedef clx::ssl::sockstream socket_type;
+    
+    chat_service(socket_int s) : accid_(s) {}
+    
+    template &lt;class SockT, class SockManager&gt;
+    bool operator()(SockT* s, SockManager&amp; sm) {
+        socket_type* ss = dynamic_cast&lt;socket_type*&gt;(s);
+        
+        std::string ipaddr = ss-&gt;address().ipaddr();
+        int port = ss-&gt;address().port();
+        std::string buf;
+        if (!std::getline(*ss, buf)) {
+            std::cout &lt;&lt; ipaddr &lt;&lt; &#39;:&#39; &lt;&lt; port &lt;&lt; &quot;: connection was closed&quot; &lt;&lt; std::endl;
+            ss-&gt;close();
+            return false;
+        }
+        
+        /*
+         * 接続されている全クライアントに受信したメッセージを
+         * message (xxx.xxx.xxx.xxx:port)
+         * という形で送信する．ただし，sockmanager には接続確立用の
+         * ソケットも登録されてあるため，そのソケットには送らないように
+         * 注意する．コンストラクタで接続確立用のソケットのソケット番号
+         * を知らせてもらっている (accid_) ので，その値を基に判断する．
+         */
+        buf += &quot; (&quot; + ipaddr + &quot;:&quot; + clx::lexical_cast&lt;std::string&gt;(port) + &quot;)&quot;;
+        for (typename SockManager::iterator pos = sm.begin(); pos != sm.end(); pos++) {
+            if (sm.socket(pos)-&gt;socket() == accid_) continue;
+            socket_type* os = dynamic_cast&lt;socket_type*&gt;(sm.socket(pos));
+            *os &lt;&lt; buf &lt;&lt; std::endl;
+        }
+        
+        return true;
+    }
+    
+private:
+    socket_int accid_; // acceptorのソケット番号
+};
+
+/* ------------------------------------------------------------------------- */
+//  main
+/* ------------------------------------------------------------------------- */
+int main(int argc, char* argv[]) {
+    typedef accept_handler&lt;clx::ssl::sockstream, chat_service&gt; handler_type;
+    
+    try {
+        clx::ssl::sockmanager s;
+        int port = clx::ssl::port(argv[1]);
+        s.add(new clx::ssl::acceptor(port), handler_type(&quot;public.key&quot;, &quot;private.key&quot;));
+        s.start();
+    }
+    catch (clx::socket_error&amp; e) {
+        std::cerr &lt;&lt; e.what() &lt;&lt; std::endl;
+        std::exit(-1);
+    }
+    catch (clx::sockaddress_error&amp; e) {
+        std::cerr &lt;&lt; e.what() &lt;&lt; std::endl;
+        std::exit(-1);
+    }
+    catch (std::runtime_error&amp; e) {
+        std::cerr &lt;&lt; e.what() &lt;&lt; std::endl;
+        std::exit(-1);
+    }
+    
+    return 0;
+}
+</pre>
+
+<h1>Related Pages</h1>
+<ol>
+<li><a href="sockmanager.html">CLX C++ Libraries - sockmanager</a></li>
+<li><a href="ssl.html">CLX C++ Libraries - ssl::socket</a></li>
+<li><a href="sslacceptor.html">CLX C++ Libraries - ssl::acceptor</a></li>
+</ol>
+
+<h1>References</h1>
+<ol>
+<li><a href="http://www.openssl.org/" target="_blank">OpenSSL: The Open Source toolkit
+for SSL/TLS</a></li>
+<li><a href="http://www.infoscience.co.jp/technical/openssl/" target="_blank">
+OpenSSL 日本語サイト:  The Open Source toolkit for SSL/TLS</a></li>
+<li><a href="http://d.hatena.ne.jp/tt_clown/20081031/p1" target="_blank">
+Life like a clown - Hello, OpenSSL!</a></li>
+<li><a href="http://d.hatena.ne.jp/tt_clown/20081108/p1" target="_blank">
+Life like a clown - OpenSSL と select</a></li>
+</ol>
+
+</div>
+<!-- end of main text -->
+
+<!-- footer -->
+<div class="foot">
+<address class="copyright">
+Copyright &copy; 2004 - 2008, clown. All rights reserved.
+Mailto: tt.clown(a)gmail.com
+</address>
+</div>
+<!-- end of footer -->
+
+</div>
+</body>
+
+</html>

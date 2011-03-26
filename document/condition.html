@@ -1,0 +1,229 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ja">
+
+<head>
+<meta name="author" content="clown">
+<meta http-equiv="Content-type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<meta http-equiv="Content-Script-Type" content="text/javascript">
+
+<script type="text/javascript" src="script/sh_main.js"></script>
+<script type="text/javascript" src="script/sh_cpp.js"></script>
+
+<link rel="index" href="index.html">
+<link rel="stylesheet" href="style/default.css" type="text/css">
+<link rel="stylesheet" href="style/hilight.css" type="text/css">
+
+<title>CLX C++ Libraries - condition</title>
+</head>
+
+<body onload="sh_highlightDocument()">
+<div class="contents">
+
+<!-- header -->
+<div class="title">
+<a href="http://clx.cielquis.net/">CLX C++ Libraries</a>
+<a href="http://b.hatena.ne.jp/entry/http://clx.cielquis.net/condition.html">
+<img src="http://d.hatena.ne.jp/images/b_entry.gif"
+  width="16" height="12" border="0">
+</a>
+</div>
+<div class="head"><a href="index.html">Home</a> &gt;&gt;
+<a href="condition.html">condition</a></div>
+<!-- end of header -->
+
+<!-- main text -->
+<div class="main">
+
+<h1>Declrations</h1>
+<pre class="sh_cpp">
+class condition;
+</pre>
+
+<h1>Overview</h1>
+<p>condition は，何らかの条件を基準にして，スレッド間で待受/通知制御を行うためのクラスです．
+何らかの条件を満たせずに（読み込むためのデータが他のスレッドによってセットされていないなど），
+それ以上処理を続けることができなくなった場合，wait() メソッドでスレッドの実行を一時休止して，
+他のスレッドからの通知を待ち受けます．他のスレッドは自分の処理を続け，
+休止したスレッドが処理を再開できる状態になれば，notify_one()，または notify_all()
+メソッドを用いてその旨を通知します．</p>
+
+<h1>Example</h1>
+<p><a href="example/example_condition.cpp">example_condition.cpp</a></p>
+
+<pre class="sh_cpp">
+#include &lt;iostream&gt;
+#include &lt;sstream&gt;
+#include &lt;string&gt;
+#include &lt;list&gt;
+#include &quot;clx/thread.h&quot;
+
+/* ------------------------------------------------------------------------- */
+//  trivial_queue
+/* ------------------------------------------------------------------------- */
+template &lt;class Type&gt;
+class trivial_queue {
+public:
+    typedef Type value_type;
+    
+    trivial_queue() : list_(), mutex_(), not_empty_() {}
+    virtual ~trivial_queue() {}
+    
+    void enqueue(const value_type&amp; x) {
+        clx::mutex::scoped_lock lock(mutex_);
+        std::cout &lt;&lt; &quot;PSH: &quot; &lt;&lt; x &lt;&lt; &quot; (rest &quot; &lt;&lt; list_.size();
+        list_.push_back(x);
+        std::cout &lt;&lt; &quot; -&gt; &quot; &lt;&lt; list_.size() &lt;&lt; &quot;)&quot; &lt;&lt; std::endl;
+        not_empty_.notify_one();
+    }
+    
+    value_type dequeue() {
+        clx::mutex::scoped_lock lock(mutex_);
+        while (list_.empty()) {
+            std::cout &lt;&lt; &quot;empty buffer&quot; &lt;&lt; std::endl;
+            not_empty_.wait(lock);
+        }
+        value_type tmp = list_.front();
+        std::cout &lt;&lt; &quot;POP: &quot; &lt;&lt; tmp &lt;&lt; &quot; (rest &quot; &lt;&lt; list_.size();
+        list_.pop_front();
+        std::cout &lt;&lt; &quot; -&gt; &quot; &lt;&lt; list_.size() &lt;&lt; &quot;)&quot; &lt;&lt; std::endl;
+        return tmp;
+    }
+    
+    void reset() {
+        clx::mutex::scoped_lock lock(mutex_);
+        list_.clear();
+    }
+    
+private:
+    std::list&lt;value_type&gt; list_;
+    clx::mutex mutex_;
+    clx::condition not_empty_;
+};
+
+trivial_queue&lt;std::string&gt; data_;
+clx::once_flag once_ = CLX_ONCE_INIT;
+
+/* ------------------------------------------------------------------------- */
+//  init_data
+/* ------------------------------------------------------------------------- */
+void init_data() {
+    std::cout &lt;&lt; &quot;reset data queue&quot; &lt;&lt; std::endl;
+    data_.reset();
+}
+
+/* ------------------------------------------------------------------------- */
+//  send_something
+/* ------------------------------------------------------------------------- */
+void send_something() {
+    for (int i = 0; i &lt; 10; i++) {
+        clx::call_once(once_, init_data); // call_once test
+        std::stringstream ss;
+        ss &lt;&lt; &quot;element[&quot; &lt;&lt; i &lt;&lt; &quot;]&quot;;
+        data_.enqueue(ss.str());
+    }
+}
+
+/* ------------------------------------------------------------------------- */
+//  recv_something
+/* ------------------------------------------------------------------------- */
+void recv_something() {
+    std::string s;
+    for (int i = 0; i &lt; 10; i++) {
+        clx::call_once(once_, init_data); // call_once test
+        s = data_.dequeue();
+    }
+}
+
+/* ------------------------------------------------------------------------- */
+//  main
+/* ------------------------------------------------------------------------- */
+int main(int argc, char* argv[]) {
+    clx::thread enq_th[2];
+    clx::thread deq_th[2];
+    
+    for (size_t i = 0; i &lt; 2; i++) enq_th[i].start(send_something);
+    for (size_t i = 0; i &lt; 2; i++) deq_th[i].start(recv_something);
+    
+    for (size_t i = 0; i &lt; 2; i++) enq_th[i].join();
+    for (size_t i = 0; i &lt; 2; i++) deq_th[i].join();
+    
+    std::cout &lt;&lt; &quot;end of main thread&quot; &lt;&lt; std::endl;
+    
+    return 0;
+}
+</pre>
+
+<pre>
+<strong>Result</strong>
+reset data queue
+empty buffer
+empty buffer
+PSH: element[0] (rest 0)
+PSH: element[0] (rest 1)
+PSH: element[1] (rest 2)
+PSH: element[1] (rest 3)
+POP: element[0] (rest 4)
+PSH: element[2] (rest 3)
+POP: element[0] (rest 4)
+
+・・・（以下略）・・・
+</pre>
+
+<h1>Related Types</h1>
+<pre class="sh_cpp">
+typedef ... handle_pointer;
+</pre>
+
+<h1>Construction and Member Functions</h1>
+<pre class="sh_cpp">
+condition();
+virtual ~condition();
+
+template &lt;class LockT&gt;
+void wait(LockT&amp; lock);
+
+template &lt;class LockT&gt;
+bool timed_wait(LockT& lock, double sec);
+
+void notify_one();
+void notify_all();
+handle_pointer native_handle();
+</pre>
+
+<p>wait()，または timed_wait() メソッドには，mutex::scoped_lock，または
+recursive_mutex::scoped_lock を指定します．wait() メソッドは，
+他のスレッドから通知があるまで待機し続けます．これに対して timed_wait() メソッドは，
+最大で<em>sec</em> 秒まで待機します．timed_wait() メソッドは，タイムアウトした場合，
+false が返ります．</p>
+
+<h1>Related Pages</h1>
+<ol>
+<li><a href="thread.html">CLX C++ Libraries - thread</a></li>
+<li><a href="mutex.html">CLX C++ Libraries - mutex</a></li>
+<li><a href="call_once.html">CLX C++ Libraries - call_once</a></li>
+</ol>
+
+<h1>Reference</h1>
+<ol>
+<li><a href="http://d.hatena.ne.jp/tt_clown/20080813/p1" target="_blank">
+Life like a clown - マルチプラットフォームなスレッドクラス</a></li>
+</ol>
+
+</div>
+<!-- end of main text -->
+
+<!-- footer -->
+<div class="foot">
+<address class="copyright">
+Copyright &copy; 2004 - 2008, clown. All rights reserved.
+Mailto: tt.clown(a)gmail.com
+</address>
+</div>
+<!-- end of footer -->
+
+</div>
+</body>
+
+</html>

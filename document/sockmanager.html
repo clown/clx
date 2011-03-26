@@ -1,0 +1,290 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ja">
+
+<head>
+<meta name="author" content="clown">
+<meta http-equiv="Content-type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<meta http-equiv="Content-Script-Type" content="text/javascript">
+
+<script type="text/javascript" src="script/sh_main.js"></script>
+<script type="text/javascript" src="script/sh_cpp.js"></script>
+
+<link rel="index" href="index.html">
+<link rel="stylesheet" href="style/default.css" type="text/css">
+<link rel="stylesheet" href="style/hilight.css" type="text/css">
+
+<title>CLX C++ Libraries - sockmanager</title>
+</head>
+
+<body onload="sh_highlightDocument()">
+<div class="contents">
+
+<!-- header -->
+<div class="title">
+<a href="http://clx.cielquis.net/">CLX C++ Libraries</a>
+<a href="http://b.hatena.ne.jp/entry/http://clx.cielquis.net/sockmanager.html">
+<img src="http://d.hatena.ne.jp/images/b_entry.gif"
+  width="16" height="12" border="0">
+</a>
+</div>
+<div class="head"><a href="index.html">Home</a> &gt;&gt;
+<a href="sockmanager.html">sockmanager</a></div>
+<!-- end of header -->
+
+<!-- main text -->
+<div class="main">
+
+<h1>Declarations</h1>
+<pre class="sh_cpp">
+template &lt;
+    int Type,
+    int Family,
+    int Protocol = 0
+&gt;
+class basic_sockmanager;
+
+namespace udp {
+    typedef basic_sockmanager&lt;SOCK_DGRAM, AF_INET, 0&gt; sockmanager;
+};
+
+namespace tcp {
+    typedef basic_sockmanager&lt;SOCK_STREAM, AF_INET, 0&gt; sockmanager;
+};
+
+namespace icmp {
+    typedef basic_sockmanager&lt;SOCK_RAW, AF_INET, IPPROTO_ICMP&gt; sockmanager;
+};
+
+namespace ssl {
+    typedef basic_sockmanager&lt;SOCK_STREAM, AF_INET, 0&gt; sockmanager;
+};
+</pre>
+
+<h1>Overview</h1>
+<p>sockmanager は，複数のソケットへの入力状況を管理するためのクラスです．fd_set
+および select() システムコールを用いて実装しています．sockmanager は，
+何らかのデータがソケットへ到着すると，あらかじめそのソケットに対して登録しておいた
+handler を呼び出します．登録する handler は関数ポインタ，または関数を利用できます．
+例えば，TCP 通信用の handler を作成する場合は以下のような形になります．</p>
+
+<pre class="sh_cpp">
+// 関数の場合
+bool func(clx::tcp::rawsocket* s, clx::tcp::sockmanager&amp; sm);
+
+// 関数オブジェクトの場合
+class handler {
+public:
+    template &lt;class SockT, class SockManager&gt;
+    bool operator()(SockT* s, SockManager&amp; sm);
+};
+</pre>
+
+<p>指定した関数，または関数オブジェクトの () 演算子が false を返した場合，
+sockmanager はそのソケットオブジェクトを監視リストから外します．
+<a href="sockhandler.html">sockhandler</a> では，tcp::accept_handler&lt;...&gt;
+など，よく使われそうな handler をいくつか実装しています．</p>
+
+<p>sockmanager は，ソケットの情報を shared_ptr を利用して管理しています．
+new 演算子で確保した領域は shared_ptr より自動的に開放されるため，自分で delete
+演算子を用いて開放しないで下さい．</p>
+
+<h1>Examples</h1>
+<p><a href="example/example_sockmanager_recv.cpp">example_sockmanager_recv.cpp</a></p>
+
+<pre class="sh_cpp">
+#include &lt;iostream&gt;
+#include &lt;cstring&gt;
+#include &quot;clx/tcp.h&quot;
+#include &quot;clx/sockhandler.h&quot;
+
+/* ------------------------------------------------------------------------- */
+//  chat_service
+/* ------------------------------------------------------------------------- */
+class chat_service {
+public:
+    typedef clx::tcp::sockstream socket_type;
+    
+    chat_service(socket_int s) : accid_(s) {}
+    
+    template &lt;class T, class SockManager&gt;
+    bool operator()(T* s, SockManager&amp; sm) {
+        socket_type* ss = dynamic_cast&lt;socket_type*&gt;(s);
+        
+        std::string ipaddr = ss-&gt;address().ipaddr();
+        int port = ss-&gt;address().port();
+        std::string buf;
+        if (!std::getline(*ss, buf)) {
+            std::cout &lt;&lt; ipaddr &lt;&lt; ':' &lt;&lt; port
+                &lt;&lt; &quot;: connection was closed&quot; &lt;&lt; std::endl;
+            ss-&gt;close();
+            return false;
+        }
+        
+        /*
+         * 接続されている全クライアントに受信したメッセージを
+         * message (xxx.xxx.xxx.xxx:port)
+         * という形で送信する．ただし，sockmanager には接続確立用の
+         * ソケットも登録されてあるため，そのソケットには送らないように
+         * 注意する．コンストラクタで接続確立用のソケットのソケット番号
+         * を知らせてもらっている (accid_) ので，その値を基に判断する．
+         */
+        buf += &quot; (&quot; + ipaddr + &quot;:&quot; + clx::lexical_cast&lt;std::string&gt;(port) + &quot;)&quot;;
+        for (typename SockManager::iterator pos = sm.begin(); pos != sm.end(); pos++) {
+            if (sm.socket(pos)-&gt;socket() == accid_) continue;
+            socket_type* os = dynamic_cast&lt;socket_type*&gt;(sm.socket(pos));
+            *os &lt;&lt; buf &lt;&lt; std::endl;
+        }
+        
+        return true;
+    }
+    
+private:
+    socket_int accid_; // acceptorのソケット番号
+};
+
+/* ------------------------------------------------------------------------- */
+//  main
+/* ------------------------------------------------------------------------- */
+int main(int argc, char* argv[]) {
+    typedef clx::tcp::accept_handler&lt;clx::tcp::sockstream,
+        chat_service&gt; handler_type;
+    
+    try {
+        clx::tcp::sockmanager s;
+        int port = clx::tcp::port(argv[1]);
+        s.add(new clx::tcp::acceptor(port), handler_type());
+        s.start();
+    }
+    catch (clx::socket_error&amp; e) {
+        std::cerr &lt;&lt; e.what() &lt;&lt; std::endl;
+        return -1;
+    }
+    catch (clx::sockaddress_error&amp; e) {
+        std::cerr &lt;&lt; e.what() &lt;&lt; std::endl;
+        return -1;
+    }
+    
+    return 0;
+}
+</pre>
+
+<pre>
+<strong>Result</strong>
+server: (192.168.0.2)
+192.168.0.3:2419: connection was closed
+192.168.0.2:2335: connection was closed
+
+client1: (192.168.0.2)
+Hello, world! (192.168.0.3:2419)
+This is a test program.
+This is a test program. (192.168.0.2:2335)
+bye bye.
+bye bye. (192.168.0.2:2335)
+bye. (192.168.0.3:2419)
+
+client2: (192.168.0.3)
+Hello, world!
+Hello, world! (192.168.0.3:2419)
+This is a test program. (192.168.0.2:2335)
+bye bye. (192.168.0.2:2335)
+bye.
+bye. (192.168.0.3:2419)
+</pre>
+
+<p>クライアント用のプログラムの掲載は省略します．クライアント用のサンプルコードは
+<a href="example/example_sockmanager_send.cpp">example_sockmanager_send.cpp</a>
+から取得して下さい．サーバ側の接続要求受け付け処理を行う handler は，<a href="
+sockhandler.html">sockhandler</a> で定義している accept_handler を利用しています．
+各ソケットと同時に標準入力も監視する場合，new basic_rawsocket&lt;Type, Family&gt;(0)
+で監視用オブジェクトを生成した後，sockmanager へ
+（標準入力へデータが到着したときに行う処理を定義した handler とともに）登録します
+（<a href="example/example_sockmanager_send.cpp">example_sockmanager_send.cpp</a>
+を参照）．ただし，この方法は UNIX 系でしか使えないようです．</p>
+
+<h1>Template Parameters</h1>
+<dl>
+<dt>Type</dt><dd>ソケットタイプを指定します．</dd>
+<dt>Family</dt><dd>プロトコルファミリーを指定します．</dd>
+</dl>
+
+<h1>Related Types</h1>
+<pre class="sh_cpp">
+typedef basic_rawsocket&lt;Type, Family&gt; rawsocket_type;
+typedef detail::sockhandler_base&lt;Type, Family&gt; basehandler_type;
+typedef std::map&lt;shared_ptr&lt;rawsocket_type&gt;, shared_ptr&lt;basehandler_type&gt;,
+    detail::socket_less&lt;rawsocket_type&gt; > rfdset;
+typedef typename rfdset::size_type size_type;
+typedef typename rfdset::iterator iterator;
+typedef typename rfdset::const_iterator const_iterator;
+typedef struct timeval timeval_type;
+</pre>
+
+<h1>Construction and Member Functions</h1>
+<pre class="sh_cpp">
+basic_sockmanager();
+virtual ~basic_sockmanager();
+
+void start();
+void start(const timeval_type&amp; t);
+void start(double sec);
+void stop();
+void reset();
+
+template &lt;Functor&gt;
+bool add(rasocket_type* s, Functor h);
+bool remove(rawsocket_type* s);
+
+size_type size() const;
+bool empty() const;
+
+iterator begin();
+iterator end();
+rawsocket_type* socket(iterator pos);
+
+const_iterator begin() const;
+const_iterator end() const;
+const rawsocket_type* socket(const_iterator pos) const;
+</pre>
+
+<p>start() メソッドは引数なしの場合，sockmanager に登録されているソケット数がゼロになるか，
+stop() メソッドが呼ばれるまで監視（ブロック）し続けます．引数に時間を指定した場合は，
+指定した時間が経過すると監視を終了します．時間は，timeval 構造体，
+もしくは秒単位の double 型で指定します．引数として 1 時間を指定する場合は，
+対応する秒数を直接指定する他に hours(1) と記述することもできます．
+同様の補助関数として，hours()，minutes()，seconds()，microsec() を定義しています．
+尚，double 型で指定した値が負である場合は，引数なしで呼び出した場合と同じ振る舞いをします．</p>
+
+<h1>Related Pages</h1>
+<ol>
+<li><a href="sockhandler.html">CLX C++ Libraries - sockhandler</a></li>
+<li><a href="sslmanager.html">CLX C++ Libraries - ssl::sockmanager</a></li>
+</ol>
+
+<h1>References</h1>
+<ol>
+<li><a href="http://d.hatena.ne.jp/tt_clown/20080730/p1" target="_blank">
+Life like a clown - ICMPパケットを利用したパケット間隔ベースの帯域計測方法</a></li>
+<li><a href="http://d.hatena.ne.jp/tt_clown/20080715/p1" target="_blank">
+Life like a clown - ネットワーク帯域計測プログラム</a></li>
+<li><a href="http://www.boost.org/doc/libs/1_35_0/libs/smart_ptr/smart_ptr.htm"
+target="_blank">Boost C++ Libraries - Smart Pointers</a></li>
+</ol>
+
+</div>
+<!-- end of main text -->
+
+<!-- footer -->
+<div class="foot">
+<address class="copyright">
+Copyright &copy; 2004 - 2008, clown. All rights reserved.
+Mailto: tt.clown(a)gmail.com
+</address>
+</div>
+<!-- end of footer -->
+
+</div>
+</body>
+
+</html>

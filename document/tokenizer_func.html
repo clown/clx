@@ -1,0 +1,187 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ja">
+
+<head>
+<meta name="author" content="clown">
+<meta http-equiv="Content-type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<meta http-equiv="Content-Script-Type" content="text/javascript">
+
+<script type="text/javascript" src="script/sh_main.js"></script>
+<script type="text/javascript" src="script/sh_cpp.js"></script>
+
+<link rel="index" href="index.html">
+<link rel="stylesheet" href="style/default.css" type="text/css">
+<link rel="stylesheet" href="style/hilight.css" type="text/css">
+
+<title>CLX C++ Libraries - tokenizer_func</title>
+</head>
+
+<body onload="sh_highlightDocument()">
+<div class="contents">
+
+<!-- header -->
+<div class="title">
+<a href="http://clx.cielquis.net/">CLX C++ Libraries</a>
+<a href="http://b.hatena.ne.jp/entry/http://clx.cielquis.net/tokenizer_func.html">
+<img src="http://d.hatena.ne.jp/images/b_entry.gif"
+  width="16" height="12" border="0">
+</a>
+</div>
+<div class="head"><a href="index.html">Home</a> &gt;&gt;
+<a href="tokenizer.html">tokenizer</a> &gt;&gt;
+<a href="tokenizer_func.html">tokenizer_func</a></div>
+<!-- end of header -->
+
+<!-- main text -->
+<div class="main">
+
+<h1>Overview</h1>
+<p>TokenizerFunc は，<a href="tokenizer.html">tokenizer</a> が文字列の分割を行う際の，
+分割方法を定義した Functor です．現在，char_separator，escape_separator，format_separator
+の 3 種類を提供しています．</p>
+
+<h2>char_separator</h2>
+<pre class="sh_cpp">
+template &lt;
+    class CharT,
+    class Traits = std::char_traits&lt;CharT&gt;
+&gt;
+class char_separator {
+public:
+    typedef CharT char_type;
+    typedef typename std::basic_string&lt;CharT, Traits&gt; string_type;
+    
+    char_separator();
+    explicit char_separator(char_type c, bool x = false);
+    explicit char_separator(const char_type* c, bool x = false);
+    explicit char_separator(const string_type&amp; c, bool x = false);
+};
+</pre>
+
+<p>char_separator は，ある文字を区切り文字として文字列を分割するための Functor
+です．<a href="http://www.boost.org/doc/libs/1_35_0/libs/tokenizer/char_separator.htm"
+target="_blank">boost::char_separator</a> と同様の働きをします．
+char_separator は，引数 <em>c</em> に1文字を指定した場合はその文字を，
+文字列を指定した場合はその文字列に含まれる全ての文字を区切り文字として分割します．
+デフォルトのコンストラクタを呼び出した場合，<em>c</em>は空白文字となります．</p>
+
+<p>引数 <em>x</em> は空のトークンを許すかどうかを指定するための引数で，true
+の場合は，連続する 2 つの区切り文字が現れた場合に 2 つのトークンとして文字列を分割します
+（片方のトークンは空）．</p>
+
+<h2>escape_separator</h2>
+<pre class="sh_cpp">
+template &lt;
+    class CharT,
+    class Traits = std::char_traits&lt;CharT&gt;
+&gt;
+class escape_separator {
+public:
+    typedef CharT char_type;
+    typedef typename std::basic_string&lt;CharT, Traits&gt; string_type;
+    
+    escape_separator();
+    explicit escape_separator(char_type c, char_type q, char_type e, bool x = false);
+    explicit escape_separator(const char_type* c, const char_type* q,
+        const char_type* e, bool x = false);
+    explicit escape_separator(const string_type&amp; c, const string_type&amp; q,
+        const string_type&amp; e, bool x = false);
+};
+</pre>
+
+<p>escape_separator は，CSV のような規則に基づいて文字列を分割するための Functor
+です．<a href="http://www.boost.org/doc/libs/1_35_0/libs/tokenizer/escaped_list_separator.htm"
+target="_blank">boost::escaped_list_separator</a> と同様の働きをします．
+escape_separator は，引数 <em>c</em> で与えられた文字（または，
+与えられた文字列に含まれる全ての文字）を区切り文字として文字列を分割します．
+ただし，文字 <em>q</em> で括られた中の文字列に関しては，区切り文字も通常の文字として扱い，
+分割は行いません．また，文字 <em>e</em> の直後にある文字は必ず通常の文字として扱い，
+区切り文字であったとしても分割は行いません．デフォルトのコンストラクタが呼び出された場合，
+<em>c</em> は &quot;,&quot;（カンマ），<em>q</em> は &quot;&quot;&quot;（引用符），
+<em>e</em> は &quot;\&quot;（バックスラッシュ，または円マーク）となります．</p>
+
+<p>引数 <em>x</em> は空のトークンを許すかどうかを指定するための引数で，true
+の場合は，連続する 2 つの区切り文字が現れた場合に 2 つのトークンとして文字列を分割します
+（片方のトークンは空）．</p>
+
+<h2>format_separator</h2>
+<pre class="sh_cpp">
+template &lt;
+    class CharT,
+    class Traits = std::char_traits&lt;CharT&gt;
+&gt;
+class format_separator {
+public:
+    typedef CharT char_type;
+    typedef typename std::basic_string&lt;CharT, Traits&gt; string_type;
+    typedef typename string_type::iterator iterator;
+    
+    format_separator();
+    explicit format_separator(const char_type* fmt, char_type idset = 's',
+        bool x = true);
+    explicit format_separator(const string_type&amp; fmt, char_type idset = 's',
+        bool x = true);
+    explicit format_separator(const char_type* fmt, const char_type* idset,
+        bool x = true);
+    explicit format_separator(const string_type&amp; fmt, const string_type&amp; idset,
+        bool x = true);
+};
+</pre>
+
+<p>format_separator は，scanf() のように書式に基づいて文字列を分割するための Functor
+です．format_separator は，引数 <em>fmt</em> で与えられた文字列に基づいて文字列を分割します．
+デフォルトのコンストラクタが呼び出された場合，<em>fmt</em> は &quot;%s&quot; となります
+（すなわち，与えられた文字列が 1 つのトークンと見なされ，分割は行われない）．
+
+<p>引数 <em>idset</em> には，型修飾子として許す文字列を指定します（<a href="tokenmap.html">
+tokenmap</a> の Functor として用いるときに使用するもので，<a href="tokenizer.html">
+tokenizer</a> では基本的に &quot;s&quot; に固定）．</p>
+
+<p>引数 <em>x</em> は空白文字を読み飛ばすかどうかを指定するための変数で，true
+の場合は文字列に含まれる空白文字は意味を持たなくなります．ただし，引数 <em>fmt</em>
+に空白文字が含まれる場合は，該当箇所に空白文字が含まれていないとマッチしません．</p>
+
+<h1>Information</h1>
+<p>独自に TokenizerFunc を作成する場合には，以下の型およびメソッドを定義する必要があります．</p>
+<pre class="sh_cpp">
+template &lt;class CharT&gt;
+class separator {
+public:
+    typedef CharT char_type;
+    
+    void reset();
+    template &lt;class InIter, class Token&gt;
+    bool operator()(InIter&amp; next, InIter last, Token&amp; dest);
+};
+</pre>
+
+<h1>Related Pages</h1>
+<ol>
+<li><a href="tokenizer.html">CLX C++ Libraries - tokenizer</a></li>
+<li><a href="tokenmap.html">CLX C++ Libraries - tokenmap</a></li>
+</ol>
+
+<h1>References</h1>
+<ol>
+<li><a href="http://www.boost.org/doc/libs/1_35_0/libs/tokenizer/tokenizerfunction.htm"
+target="_blank">Boost C++ Libraries - TokenizerFunction Concept</a></li>
+</ol>
+
+</div>
+<!-- end of main text -->
+
+<!-- footer -->
+<div class="foot">
+<address class="copyright">
+Copyright &copy; 2004 - 2008, clown. All rights reserved.
+Mailto: tt.clown(a)gmail.com
+</address>
+</div>
+<!-- end of footer -->
+
+</div>
+</body>
+
+</html>

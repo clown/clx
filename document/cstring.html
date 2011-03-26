@@ -1,0 +1,170 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ja">
+
+<head>
+<meta name="author" content="clown">
+<meta http-equiv="Content-type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<meta http-equiv="Content-Script-Type" content="text/javascript">
+
+<script type="text/javascript" src="script/sh_main.js"></script>
+<script type="text/javascript" src="script/sh_cpp.js"></script>
+
+<link rel="index" href="index.html">
+<link rel="stylesheet" href="style/default.css" type="text/css">
+<link rel="stylesheet" href="style/hilight.css" type="text/css">
+
+<title>CLX C++ Libraries - cstring</title>
+</head>
+
+<body onload="sh_highlightDocument()">
+<div class="contents">
+
+<!-- header -->
+<div class="title">
+<a href="http://clx.cielquis.net/">CLX C++ Libraries</a>
+<a href="http://b.hatena.ne.jp/entry/http://clx.cielquis.net/cstring.html">
+<img src="http://d.hatena.ne.jp/images/b_entry.gif"
+  width="16" height="12" border="0">
+</a>
+</div>
+<div class="head"><a href="index.html">Home</a> &gt;&gt;
+<a href="cstring.html">cstring</a></div>
+<!-- end of header -->
+
+<!-- main text -->
+<div class="main">
+
+<h1>Declaration</h1>
+<pre class="sh_cpp">
+size_t strlen(const CharT* str);
+int strcmp(const CharT* s1, const CharT* s2);
+int strncmp(const CharT* s1, const CharT* s2, size_t n);
+int strcoll(const CharT* s1, const CharT* s2);
+CharT* strcpy(CharT* dest, const CharT* src);
+CharT* strncpy(CharT* dest, const CharT* src, size_t n);
+CharT* strcat(CharT* dest, const CharT* src);
+CharT* strncat(CharT* dest, const CharT* src, size_t n);
+const CharT* strchr(const CharT* str, CharT c);
+CharT* strchr(CharT* str, CharT c);
+const CharT* strrchr(const CharT* str, CharT c);
+CharT* strrchr(CharT* str, CharT c);
+const CharT* strstr(const CharT* str, const CharT* substr);
+CharT* strstr(CharT* str, const CharT* substr);
+size_t strspn(const CharT* str, const CharT* spanset);
+size_t strcspn(const CharT* src, const CharT* spanset);
+const CharT* strpbrk(const CharT* str, const CharT* spanset);
+CharT* strpbrk(CharT* str, const CharT* spanset);
+long int wcstol(const CharT* str, CharT** end, int base);
+unsigned long int strtoul(const CharT* str, CharT** end, int base);
+double strtod(const CharT* str, CharT** end);
+size_t strftime(CharT* str, size_t n, const CharT* fmt, const tm* tmptr);
+size_t strxfrm(CharT* dest, const CharT* src, size_t n);
+</pre>
+
+<h1>Overview</h1>
+<p>cstring は，C の文字列操作関数を char/wchar_t に関わらず同じ関数名で呼ぶためのラッパ関数群です．
+引数として char 型の変数が指定された場合は std::strxxx を呼び，wchar_t 型の変数が指定された場合は
+std::wcsxxx を呼びます．尚，std::strtok() と std::wcstok() は関数の仕様が異なるため，strtok()
+は定義していません．</p>
+
+<h1>Example</h1>
+<p><a href="example/example_cstring.cpp">example_cstring.cpp</a></p>
+
+<pre class="sh_cpp">
+#include &lt;iostream&gt;
+#include &quot;clx/cstring.h&quot;
+
+int main(int argc, char* argv[]) {
+    char s1[256] = &quot;Hello, world!&quot;;
+    char s2[256] = &quot;Hello, world.&quot;;
+    char s3[256] = &quot;3.1415926&quot;;
+    
+    std::cout &lt;&lt; &quot;string: &quot; &lt;&lt; s1 &lt;&lt; std::endl;
+    if (clx::strcmp(s1, s2) == 0) std::cout &lt;&lt; &quot;strcmp: match&quot; &lt;&lt; std::endl;
+    else std::cout &lt;&lt; &quot;strcmp: unmatch&quot; &lt;&lt; std::endl;
+    
+    std::cout &lt;&lt; &quot;strlen: &quot; &lt;&lt; clx::strlen(s1) &lt;&lt; std::endl;
+    
+    clx::strcat(s1, s2);
+    std::cout &lt;&lt; &quot;strcat: &quot; &lt;&lt; s1 &lt;&lt; std::endl;
+    
+    char* last = NULL;
+    double pi = clx::strtod(s3, &amp;last);
+    std::cout &lt;&lt; &quot;strtod: &quot; &lt;&lt; pi &lt;&lt; std::endl;
+    
+    return 0;
+}
+</pre>
+
+<pre>
+<strong>Result</strong>
+string: Hello, world!
+strcmp: unmatch
+strlen: 13
+strcat: Hello, world!Hello, world.
+strtod: 3.14159
+</pre>
+
+<p><a href="example/example_wcstring.cpp">example_wcstring.cpp</a></p>
+
+<pre class="sh_cpp">
+#ifndef CLX_USE_WCHAR
+#define CLX_USE_WCHAR
+#endif
+
+#include &lt;iostream&gt;
+#include &quot;clx/cstring.h&quot;
+
+int main(int argc, char* argv[]) {
+    std::wcout.imbue(std::locale(&quot;japanese&quot;));
+    
+    wchar_t s1[256] = L&quot;こんにちは、こんにちは。&quot;;
+    wchar_t s2[256] = L&quot;こんにちは！こんにちは！&quot;;
+    wchar_t s3[256] = L&quot;3.1415926&quot;;
+    
+    std::wcout &lt;&lt; L&quot;string: &quot; &lt;&lt; s1 &lt;&lt; std::endl;
+    if (clx::strcmp(s1, s2) == 0) std::wcout &lt;&lt; L&quot;strcmp: match&quot; &lt;&lt; std::endl;
+    else std::wcout &lt;&lt; L&quot;strcmp: unmatch&quot; &lt;&lt; std::endl;
+    
+    std::wcout &lt;&lt; L&quot;strlen: &quot; &lt;&lt; clx::strlen(s1) &lt;&lt; std::endl;
+    
+    clx::strcat(s1, s2);
+    std::wcout &lt;&lt; L&quot;strcat: &quot; &lt;&lt; s1 &lt;&lt; std::endl;
+    
+    wchar_t* last = NULL;
+    double pi = clx::strtod(s3, &amp;last);
+    std::wcout &lt;&lt; L&quot;strtod: &quot; &lt;&lt; pi &lt;&lt; std::endl;
+    
+    return 0;
+}
+</pre>
+
+<pre>
+<strong>Result</strong>
+string: こんにちは、こんにちは。
+strcmp: unmatch
+strlen: 12
+strcat: こんにちは、こんにちは。こんにちは！こんにちは！
+strtod: 3.14159
+</pre>
+
+</div>
+<!-- end of main text -->
+
+<!-- footer -->
+<div class="foot">
+<address class="copyright">
+Copyright &copy; 2004 - 2008, clown. All rights reserved.
+Mailto: tt.clown(a)gmail.com
+</address>
+</div>
+<!-- end of footer -->
+
+</div>
+</body>
+
+</html>
+
+

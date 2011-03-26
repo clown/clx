@@ -1,0 +1,106 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ja">
+
+<head>
+<meta name="author" content="clown">
+<meta http-equiv="Content-type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<meta http-equiv="Content-Script-Type" content="text/javascript">
+
+<script type="text/javascript" src="script/sh_main.js"></script>
+<script type="text/javascript" src="script/sh_cpp.js"></script>
+
+<link rel="index" href="index.html">
+<link rel="stylesheet" href="style/default.css" type="text/css">
+<link rel="stylesheet" href="style/hilight.css" type="text/css">
+
+<title>CLX C++ Libraries - uri</title>
+</head>
+
+<body onload="sh_highlightDocument()">
+<div class="contents">
+
+<!-- header -->
+<div class="title">
+<a href="http://clx.cielquis.net/">CLX C++ Libraries</a>
+<a href="http://b.hatena.ne.jp/entry/http://clx.cielquis.net/uri.html">
+<img src="http://d.hatena.ne.jp/images/b_entry.gif"
+  width="16" height="12" border="0">
+</a>
+</div>
+<div class="head"><a href="index.html">Home</a> &gt;&gt;
+<a href="uri.html">uri</a></div>
+<!-- end of header -->
+
+<!-- main text -->
+<div class="main">
+
+<h1>Declrations</h1>
+<pre class="sh_cpp">
+namespace uri {
+    template &lt;class Ch, class Tr&gt;
+    std::basic_string&lt;Ch, Tr&gt; encode(const std::basic_string&lt;Ch, Tr&gt;&amp; s);
+    
+    template &lt;class CharT&gt;
+    std::basic_string&lt;CharT&gt; encode(const CharT* s);
+    
+    template &lt;class Ch, class Tr&gt;
+    std::basic_string&lt;Ch, Tr&gt; decode(const std::basic_string&lt;Ch, Tr&gt;&amp; s);
+    
+    template &lt;class CharT&gt;
+    std::basic_string&lt;CharT&gt; decode(const CharT* s);
+}
+</pre>
+
+<h1>Overview</h1>
+<p>uri::encode，uri::decode は，URI の encode/decode を行うための関数です．
+<a href="http://diaspar.jp/node/148" target="_blank">Diaspar Journal - URI
+エンコード（URL エンコード）</a>を参考に実装しています（JavaScript の
+encodeURI 相当）．</p>
+
+<h1>Example</h1>
+<p><a href="example/example_uri.cpp">example_uri.cpp</a></p>
+
+<pre class="sh_cpp">
+#include &lt;iostream&gt;
+#include &lt;string&gt;
+#include &quot;clx/uri.h&quot;
+#include &quot;clx/html.h&quot;
+
+int main(int argc, char* argv[]) {
+    if (argc &lt; 2) return -1;
+    std::string src(argv[1]);
+    
+    std::string dest = clx::uri::encode(src);
+    std::cout &lt;&lt; &quot;encode: &quot; &lt;&lt; dest &lt;&lt; std::endl;
+    std::cout &lt;&lt; &quot;decode: &quot; &lt;&lt; clx::uri::decode(dest) &lt;&lt; std::endl;
+    std::cout &lt;&lt; &quot;escape+encode: &quot; &lt;&lt; clx::uri::encode(clx::html::escape(src))
+        &lt;&lt; std::endl;
+    
+    return 0;
+}
+</pre>
+
+<h1>Reference</h1>
+<ol>
+<li><a href="http://diaspar.jp/node/148" target="_blank">
+Diaspar Journal - URI エンコード（URL エンコード）</a></li>
+</ol>
+
+</div>
+<!-- end of main text -->
+
+<!-- footer -->
+<div class="foot">
+<address class="copyright">
+Copyright &copy; 2004 - 2009, clown. All rights reserved.
+Mailto: tt.clown(a)gmail.com
+</address>
+</div>
+<!-- end of footer -->
+
+</div>
+</body>
+
+</html>

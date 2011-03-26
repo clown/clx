@@ -1,0 +1,186 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ja">
+
+<head>
+<meta name="author" content="clown">
+<meta http-equiv="Content-type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Script-Type" content="text/javascript">
+
+<script type="text/javascript" src="script/sh_main.js"></script>
+<script type="text/javascript" src="script/sh_cpp.js"></script>
+
+<link rel="index" href="index.html">
+<link rel="stylesheet" href="style/default.css" type="text/css">
+<link rel="stylesheet" href="style/hilight.css" type="text/css">
+
+<title>CLX C++ Libraries - md5</title>
+</head>
+
+<body onload="sh_highlightDocument()">
+<div class="contents">
+
+<!-- header -->
+<div class="title">
+<a href="http://clx.cielquis.net/">CLX C++ Libraries</a>
+<a href="http://b.hatena.ne.jp/entry/http://clx.cielquis.net/md5.html">
+<img src="http://d.hatena.ne.jp/images/b_entry.gif"
+  width="16" height="12" border="0">
+</a>
+</div>
+<div class="head"><a href="index.html">Home</a> &gt;&gt;
+<a href="md5.html">md5</a></div>
+<!-- end of header -->
+
+<!-- main text -->
+<div class="main">
+
+<h1>Declaration</h1>
+<pre class="sh_cpp">
+class md5;
+</pre>
+
+<h1>Overview</h1>
+<p>md5 は，引数に指定された文字列，または1Byte（char 型）の配列に対して MD5
+方式でハッシュ値を計算するためのクラスです．使用方法は以下のようになります．</p>
+<ol>
+<li>reset() メソッドで初期化を行う．</li>
+<li>update() メソッドに計算を行うためのデータを指定して呼び出す．update()
+メソッドは，複数回呼び出すことも可能．</li>
+<li>finish() メソッドで計算処理を終了する．</li>
+</ol>
+
+<p>一度に全てのデータを渡せる場合，これらのメソッドを順番に呼び出す代わりに
+encode() メソッドを用いることもできます．encode() メソッドは，reset()，update()，
+finish() メソッドを一度に呼び出します．</p>
+
+<h1>Example</h1>
+<p><a href="example/example_md5.cpp">example_md5.cpp</a></p>
+
+<pre class="sh_cpp">
+#include &lt;iostream&gt;
+#include &lt;string&gt;
+#include &quot;clx/md5.h&quot;
+
+int main(int argc, char* argv[]) {
+    std::string s1 = &quot;&quot;;
+    std::string s2 = &quot;a&quot;;
+    std::string s3 = &quot;abc&quot;;
+    std::string s4 = &quot;message digest&quot;;
+    std::string s5 = &quot;abcdefghijklmnopqrstuvwxyz&quot;;
+    std::string s6 = &quot;ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789&quot;;
+    
+    clx::md5 md;
+    
+    std::cout &lt;&lt; &quot;str: &quot; &lt;&lt; s1 &lt;&lt; std::endl;
+    std::cout &lt;&lt; &quot;md5: &quot; &lt;&lt; md.encode(s1).to_string() &lt;&lt; std::endl;
+    std::cout &lt;&lt; std::endl;
+    
+    std::cout &lt;&lt; &quot;str: &quot; &lt;&lt; s2 &lt;&lt; std::endl;
+    std::cout &lt;&lt; &quot;md5: &quot; &lt;&lt; md.encode(s2).to_string() &lt;&lt; std::endl;
+    std::cout &lt;&lt; std::endl;
+    
+    std::cout &lt;&lt; &quot;str: &quot; &lt;&lt; s3 &lt;&lt; std::endl;
+    std::cout &lt;&lt; &quot;md5: &quot; &lt;&lt; md.encode(s3).to_string() &lt;&lt; std::endl;
+    std::cout &lt;&lt; std::endl;
+    
+    std::cout &lt;&lt; &quot;str: &quot; &lt;&lt; s4 &lt;&lt; std::endl;
+    std::cout &lt;&lt; &quot;md5: &quot; &lt;&lt; md.encode(s4).to_string() &lt;&lt; std::endl;
+    std::cout &lt;&lt; std::endl;
+    
+    std::cout &lt;&lt; &quot;str: &quot; &lt;&lt; s5 &lt;&lt; std::endl;
+    std::cout &lt;&lt; &quot;md5: &quot; &lt;&lt; md.encode(s5).to_string() &lt;&lt; std::endl;
+    std::cout &lt;&lt; std::endl;
+    
+    std::cout &lt;&lt; &quot;str: &quot; &lt;&lt; s6 &lt;&lt; std::endl;
+    std::cout &lt;&lt; &quot;md5: &quot; &lt;&lt; md.encode(s6).to_string() &lt;&lt; std::endl;
+    std::cout &lt;&lt; std::endl;
+    
+    return 0;
+}
+</pre>
+
+<pre>
+<strong>Result</strong>
+str: 
+md5: d41d8cd98f00b204e9800998ecf8427e
+
+str: a
+md5: 0cc175b9c0f1b6a831c399e269772661
+
+str: abc
+md5: 900150983cd24fb0d6963f7d28e17f72
+
+str: message digest
+md5: f96b697d7cb7938d525a2f31aaf161d0
+
+str: abcdefghijklmnopqrstuvwxyz
+md5: c3fcd3d76192e4007dfb496cca67e13b
+
+str: ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789
+md5: d174ab98d277d9f5a5611c2c9f419d9f
+</pre>
+
+<h1>Related Types</h1>
+<pre class="sh_cpp">
+typedef unsigned char uchar_t;
+typedef char char_type;
+typedef std::string string_type;
+</pre>
+
+<h1>Construction and Member Functions</h1>
+<pre class="sh_cpp">
+md5();
+explicit md5(const char_type* src, size_t n);
+explicit md5(const string_type&amp; src);
+</pre>
+
+<pre class="sh_cpp">
+md5&amp; encode(const char_type* src, size_t n);
+md5&amp; encode(const string_type&amp; src);
+
+void reset();
+void update(const char_type* src, size_t n);
+void finish();
+</pre>
+
+<p>MD5 方式のハッシュ値を計算する場合は，encode() メソッドか，reset()，update()，
+finish() メソッド群のどちらかを使用します．後者のメソッド群は，
+データサイズが大きいなどの理由で一度に全てのデータを渡すことができない場合に使用します．</p>
+
+<pre class="sh_cpp">
+int size() const;
+const uchar_t* code() const;
+string_type to_string() const;
+</pre>
+
+<p>size() メソッドは，計算結果のハッシュ値のデータサイズを返します．code() メソッドは，
+計算結果のハッシュ値を返します．to_string() メソッドは，計算結果を数値文字列に変換したものを返します．</p>
+
+<h1>Related Page</h1>
+<ol>
+<li><a href="sha1.html">CLX C++ Libraries - sha1</a></li>
+</ol>
+
+<h1>Referrence</h1>
+<ol>
+<li><a href="http://www.faqs.org/rfcs/rfc1321.html" target="_blank">
+RFC1321 - The MD5 Message-Digest Algorithm</a></li>
+</ol>
+
+</div>
+<!-- end of main text -->
+
+<!-- footer -->
+<div class="foot">
+<address class="copyright">
+Copyright &copy; 2004 - 2008, clown. All rights reserved.
+Mailto: tt.clown(a)gmail.com
+</address>
+</div>
+<!-- end of footer -->
+
+</div>
+</body>
+
+</html>

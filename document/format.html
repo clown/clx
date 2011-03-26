@@ -1,0 +1,214 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ja">
+
+<head>
+<meta name="author" content="clown">
+<meta http-equiv="Content-type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<meta http-equiv="Content-Script-Type" content="text/javascript">
+
+<script type="text/javascript" src="script/sh_main.js"></script>
+<script type="text/javascript" src="script/sh_cpp.js"></script>
+
+<link rel="index" href="index.html">
+<link rel="stylesheet" href="style/default.css" type="text/css">
+<link rel="stylesheet" href="style/hilight.css" type="text/css">
+
+<title>CLX C++ Libraries - format</title>
+</head>
+
+<body onload="sh_highlightDocument()">
+<div class="contents">
+
+<!-- header -->
+<div class="title">
+<a href="http://clx.cielquis.net/">CLX C++ Libraries</a>
+<a href="http://b.hatena.ne.jp/entry/http://clx.cielquis.net/format.html">
+<img src="http://d.hatena.ne.jp/images/b_entry.gif"
+  width="16" height="12" border="0">
+</a>
+</div>
+<div class="head"><a href="index.html">Home</a> &gt;&gt;
+<a href="format.html">format</a></div>
+<!-- end of header -->
+
+<!-- main text -->
+<div class="main">
+
+<h1>Declarations</h1>
+<pre class="sh_cpp">
+template &lt;
+    class CharT,
+    class Traits = std::char_traits&lt;CharT&gt;
+&gt;
+class basic_format;
+
+typedef basic_format&lt;char&gt; format;
+#ifdef CLX_USE_WCHAR
+typedef basic_tormat&lt;wchar_t&gt; wformat;
+#endif
+
+template &lt;class Ch, class Tr&gt;
+std::basic_string&lt;Ch, Tr&gt; str(const basic_format&lt;Ch, Tr&gt;&amp; f);
+</pre>
+
+<h1>Overview</h1>
+<p>format は，C標準ライブラリにおける printf()，sprintf(), fprintf()
+のような書式付き出力を行うためのクラスです．printf() などとは異なり，
+format には出力する順番を指定することはできません．format は，
+書式文字列を基にして std::ostream に対してマニピュレータを設定することで，
+printf() などと同じ動きをするように実装しています．</p>
+
+<p>書式文字列には，通常文字と変換指定が存在します．通常文字とは % 以外の文字を表し，
+出力ストリームにそのままコピーされます．一方，各変換指定は文字 % で始まり，
+変換指定子で終わります．% と変換指定子の間には，0 個以上のフラグ，最小フィールド幅，
+精度を（この順序で）記述することができます．</p>
+
+<h2>フラグ文字</h2>
+<dl compact>
+<dt>#</dt><dd>x,X 変換の場合先頭に &quot;0x&quot;，o 変換の場合先頭に &quot;0&quot;
+が付加されます．</dd>
+<dt>0</dt><dd>値をゼロで埋めます．0 と - が両方とも指定された場合は，
+0 フラグは無視されます．</dd>
+<dt>-</dt><dd>値をフィールド境界で左揃えにします（デフォルトは右揃え）．</dd>
+<dt>' '</dt><dd>（1個の半角スペース）数字の前に空白が置かれます．</dd>
+<dt>+</dt><dd>符号付き変換によって出力される数字の前に，常に符号（+ か -）
+が置かれます．</dt>
+</dl>
+
+<h2>フィールド幅</h2>
+<p>最小のフィールド幅を指定する 10 進数の数字文字列（文字列の最初の文字はゼロ以外）
+です．本項目は，オプションです．変換された値の文字数がフィールド長よりも少ない場合，
+フィールドの左側を指定された文字（半角スペース，またゼロ）で埋めます．</p>
+
+<h2>精度</h2>
+<p>オプションである精度は，ピリオド (&quot;.&quot;) とそれに続く
+10 進数という形式で指定します（10 進数はオプション）．精度として &quot;.&quot;
+だけが指定された場合，精度はゼロと見なされます．</p>
+
+<h2>変換指定子</h2>
+<p>適用される変換の型を指定する文字．現状，&quot;oxX&quot; 以外の指定子には，
+意味がありません．ここで指定した型と実際の引数の型が異なる場合は，
+引数の型が優先されます．</p>
+<dl>
+<dt>d,i</dt><dd>int 引数を符号付き 10 進表記に変換します．</dd>
+<dt>o,u,x,X</dt><dd>unsigned int 引数を符号なし 8 進数 (o)，符号なし 10 進数 (u)，
+符号なし 16 進数 (x,X) に変換します．x 変換では abcdef が使用され，X 変換では
+ABCDEF が使用されます．</dd>
+<dt>e,E</dt><dd>double 引数を丸めて [-]d.ddde&plusmn;xx の形に変換します．
+小数点の前には一桁の数字があり，小数点以下の桁数は精度で指定された桁数になります．
+精度は指定されなかった場合は 6 桁と見なされます．E 変換では，指数を表現するときに
+E が使用されます．</dd>
+<dt>f,F</dt><dd>double 引数を丸めて [-]ddd.ddd の形に変換します．小数点の後の桁数は，
+精度で指定された値となります．制度が指定されなかった場合は 6 桁と見なされます．</dd>
+<dt>g,G</dt><dd>double 引数を f か e（G 変換の場合は F か E）の形式に変換します．
+精度は表示する桁数を指定します．精度が指定されない場合は，6 桁と見なされます．</dd>
+<dt>c</dt><dd>unsigned char に変換して，その結果に対応する文字を出力します．</dd>
+<dt>s</dt><dd>const char* 型または std::string を引数に取り，その文字列を出力します．</dd>
+</dl>
+
+<h1>Example</h1>
+<p><a href="example/example_format.cpp">example_format.cpp</a></p>
+
+<pre class="sh_cpp">
+#include &lt;iostream&gt;
+#include &lt;string&gt;
+#include &lt;cstdio&gt;
+#include &quot;clx/format.h&quot;
+
+int main(int argc, char* argv[]) {
+    double pi = 3.141592684;
+    std::string hello = &quot;Hello, world. This is a test program&quot;;
+    std::string test = &quot;Output pi with two kinds of format&quot;;
+    std::string fmt = &quot;%s.\n%s: %#+10.7f, %.5e.&quot;;
+    
+    std::cout &lt;&lt; &quot;Output by using format class.&quot; &lt;&lt; std::endl;
+    std::cout &lt;&lt; &quot;---&quot; &lt;&lt; std::endl;
+    std::cout &lt;&lt; clx::format(fmt) % hello % test % pi % pi &lt;&lt; std::endl;
+    std::cout &lt;&lt; std::endl;
+    
+    // compared with the printf() function
+    printf(&quot;Output by using printf function\n&quot;);
+    printf(&quot;---\n&quot;);
+    printf(fmt.c_str(), hello.c_str(), test.c_str(), pi, pi);
+    
+    std::cout &lt;&lt; &quot;Test of str() function&quot; &lt;&lt; std::endl;
+    std::cout &lt;&lt; &quot;---&quot; &lt;&lt; std::endl;
+    std::string dest = clx::str(clx::format(fmt) % hello % test % pi % pi);
+    std::cout &lt;&lt; dest &lt;&lt; std::endl;
+    
+    return 0;
+}
+</pre>
+
+<pre>
+<strong>Result</strong>
+Output by using format class.
+---
+Hello, world. This is a test program.
+Output pi with two kinds of format: +3.1415927, 3.14159e+00.
+
+Output by using printf function
+---
+Hello, world. This is a test program.
+Output pi with two kinds of format: +3.1415927, 3.14159e+00.
+
+Test of str() function
+---
+Hello, world. This is a test program.
+Output pi with two kinds of format: +3.1415927, 3.14159e+00.
+</pre>
+
+<h1>Template Parameters</h1>
+<dl>
+<dt>CharT</dt><dd>文字の型を指定します．</dd>
+<dt>Traits</dt><dd>文字列を扱うためのtraitsを指定します．デフォルト値は，
+std::char_traits&lt;CharT&gt;．</dd>
+</dl>
+
+<h1>Related Types</h1>
+<pre class="sh_cpp">
+typedef CharT char_type;
+typedef unsigned int size_type;
+typedef typename std::basic_string&lt;CharT, Traits&gt; string_type;
+</pre>
+
+<h1>Construction and Member Functions</h1>
+<pre class="sh_cpp">
+basic_format()
+explicit basic_format(const char_type* fmt);
+explicit basic_format(const string_type&amp; fmt);
+
+template &lt;class ValueT&gt;
+basic_format&amp; operator%(const ValueT&amp; x);
+
+string_type str() const;
+
+template &lt;class Ch, class Tr&gt;
+friend std::basic_ostream&lt;Ch, Tr&gt;&amp; operator&lt;&lt;(
+    std::basic_ostream&lt;Ch, Tr&gt;&amp; sout, const basic_format&lt;Ch, Tr&gt;&amp; f);
+</pre>
+
+<h1>References</h1>
+<ol>
+<li><a href="http://www.linux.or.jp/JM/html/LDP_man-pages/man3/printf.3.html"
+target="_blank">Manpage of PRINTF</a></li>
+<li><a href="http://www.boost.org/doc/libs/1_35_0/libs/format/index.html"
+target="_blank">Boost C++ Libraries - The Boost Format library</a></li>
+</div>
+<!-- end of main text -->
+
+<!-- footer -->
+<div class="foot">
+<address class="copyright">
+Copyright &copy; 2004 - 2008, clown. All rights reserved.
+Mailto: tt.clown(a)gmail.com
+</address>
+</div>
+<!-- end of footer -->
+
+</div>
+</body>
+
+</html>

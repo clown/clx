@@ -1,0 +1,143 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ja">
+
+<head>
+<meta name="author" content="clown">
+<meta http-equiv="Content-type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<meta http-equiv="Content-Script-Type" content="text/javascript">
+
+<script type="text/javascript" src="script/sh_main.js"></script>
+<script type="text/javascript" src="script/sh_cpp.js"></script>
+
+<link rel="index" href="index.html">
+<link rel="stylesheet" href="style/default.css" type="text/css">
+<link rel="stylesheet" href="style/hilight.css" type="text/css">
+
+<title>CLX C++ Libraries - pop3s</title>
+</head>
+
+<body onload="sh_highlightDocument()">
+<div class="contents">
+
+<!-- header -->
+<div class="title">
+<a href="http://clx.cielquis.net/">CLX C++ Libraries</a>
+<a href="http://b.hatena.ne.jp/entry/http://clx.cielquis.net/pop3s.html">
+<img src="http://d.hatena.ne.jp/images/b_entry.gif"
+  width="16" height="12" border="0">
+</a>
+</div>
+<div class="head"><a href="index.html">Home</a> &gt;&gt;
+<a href="pop3.html">pop3</a> &gt;&gt;
+<a href="pop3s.html">pop3s</a></div>
+<!-- end of header -->
+
+<!-- main text -->
+<div class="main">
+
+<h1>Declaration</h1>
+<pre class="sh_cpp">
+typedef basic_pop3&lt;ssl::socket&gt; pop3s;
+</pre>
+
+<h1>Overview</h1>
+<p>pop3s は，POP3S (SMTP over SSL) 通信を行うためのクラスです．<a href="tcp.html">tcp::socket</a>
+の代わりに <a href="ssl.html">ssl::socket</a> を用いることで実現しています．
+インターフェースは <a href="pop3.html">pop3</a> クラスと同様です．ただし，
+サーバ側の証明書の認証を行う場合は，サーバと接続する（start() メソッドを実行する）
+前に verify_locations() メソッドで rootCA 認証書のファイル/ディレクトリ名を指定しておく必要があります
+（詳細は，<a href="ssl.html">ssl::socket</a> を参照して下さい）．</p>
+
+<p>CLX における SSL 通信は OpenSSL を用いて実装しています．
+そのため，SSL 通信関連ライブラリを使用する際には環境に OpenSSL
+ライブラリがインストールされている必要があります．OpenSSL に関する詳細は，
+<a href="http://www.openssl.org/" target="_blank">OpenSSL: The Open Source toolkit
+for SSL/TLS</a> ( <a href="http://www.infoscience.co.jp/technical/openssl/"
+target="_blank">OpenSSL 日本語サイト</a> ) を参照して下さい．</p>
+
+<h1>Example</h1>
+<p><a href="example/example_pop3s.cpp">example_pop3s.cpp</a></p>
+
+<pre class="sh_cpp">
+#include &lt;iostream&gt;
+#include &lt;string&gt;
+#include &quot;clx/pop3s.h&quot;
+
+int main(int argc, char* argv[]) {
+    if (argc &lt; 4) std::exit(-1);
+    
+    try {
+        clx::pop3s session(argv[1], 995);
+        
+        // APOP が使用できるなら APOP 認証を用いる．
+        session.login(argv[2], argv[3], session.apop_support());
+        
+        std::cout &lt;&lt; &quot;status: &quot; &lt;&lt; session.status() &lt;&lt; std::endl;
+        
+        // LIST コマンド
+        clx::pop3s::list_type list = session.list();
+        std::cout &lt;&lt; &quot;mail list&quot; &lt;&lt; std::endl;
+        std::cout &lt;&lt; &quot;-----&quot; &lt;&lt; std::endl;
+        for (size_t i = 0; i &lt; list.size(); ++i) {
+            std::cout &lt;&lt; list[i] &lt;&lt; std::endl;
+        }
+        std::cout &lt;&lt; &quot;-----&quot; &lt;&lt; std::endl;
+        
+        // TOP コマンド
+        std::cout &lt;&lt; &quot;top [1]&quot; &lt;&lt; std::endl;
+        std::cout &lt;&lt; &quot;-----&quot; &lt;&lt; std::endl;
+        std::cout &lt;&lt; session.top(1, 0) &lt;&lt; std::endl;
+        std::cout &lt;&lt; &quot;-----&quot; &lt;&lt; std::endl;
+        
+        session.finish();
+    }
+    catch (clx::pop3_error&amp; e) {
+        std::cerr &lt;&lt; e.what() &lt;&lt; std::endl;
+        std::exit(-1);
+    }
+    catch (clx::socket_error&amp; e) {
+        std::cerr &lt;&lt; e.what() &lt;&lt; std::endl;
+        std::exit(-1);
+    }
+    catch (std::runtime_error&amp; e) {
+        std::cerr &lt;&lt; e.what() &lt;&lt; std::endl;
+        std::exit(-1);
+    }
+    
+    return 0;
+}
+</pre>
+
+<h1>Related Pages</h1>
+<ol>
+<li><a href="ssl.html">CLX C++ Libraries - ssl::socket</a></li>
+<li><a href="pop3.html">CLX C++ Libraries - pop3</a></li>
+</ol>
+
+<h1>References</h1>
+<ol>
+<li><a href="http://www.openssl.org/" target="_blank">OpenSSL: The Open Source toolkit
+for SSL/TLS</a></li>
+<li><a href="http://www.infoscience.co.jp/technical/openssl/" target="_blank">
+OpenSSL 日本語サイト:  The Open Source toolkit for SSL/TLS</a></li>
+<li><a href="http://thinkit.jp/article/737/1/" target="_blank">
+ThikIT - 暗号化した通信はtcpdumpでどう見えるか</a></li>
+</ol>
+</div>
+<!-- end of main text -->
+
+<!-- footer -->
+<div class="foot">
+<address class="copyright">
+Copyright &copy; 2004 - 2008, clown. All rights reserved.
+Mailto: tt.clown(a)gmail.com
+</address>
+</div>
+<!-- end of footer -->
+
+</div>
+</body>
+
+</html>

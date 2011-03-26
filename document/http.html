@@ -1,0 +1,232 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ja">
+
+<head>
+<meta name="author" content="clown">
+<meta http-equiv="Content-type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<meta http-equiv="Content-Script-Type" content="text/javascript">
+
+<script type="text/javascript" src="script/sh_main.js"></script>
+<script type="text/javascript" src="script/sh_cpp.js"></script>
+
+<link rel="index" href="index.html">
+<link rel="stylesheet" href="style/default.css" type="text/css">
+<link rel="stylesheet" href="style/hilight.css" type="text/css">
+
+<title>CLX C++ Libraries - http</title>
+</head>
+
+<body onload="sh_highlightDocument()">
+<div class="contents">
+
+<!-- header -->
+<div class="title">
+<a href="http://clx.cielquis.net/">CLX C++ Libraries</a>
+<a href="http://b.hatena.ne.jp/entry/http://clx.cielquis.net/http.html">
+<img src="http://d.hatena.ne.jp/images/b_entry.gif"
+  width="16" height="12" border="0">
+</a>
+</div>
+<div class="head"><a href="index.html">Home</a> &gt;&gt;
+<a href="http.html">http</a></div>
+<!-- end of header -->
+
+<!-- main text -->
+<div class="main">
+
+<h1>Declaration</h1>
+<pre class="sh_cpp">
+template &lt;class Socket&gt;
+class basic_http : public Socket;
+
+typedef basic_http&lt;tcp::socket&gt; http;
+</pre>
+
+<h1>Overview</h1>
+<p>http は，指定したホスト名 + パス名に HTTP リクエストを送信して内容を取得するためのクラスです．
+get() メソッド，および post() メソッドはそれぞれ GET，POST リクエストに対応しています．
+取得された内容は，ステータスコード，ヘッダ，本文に分割して記憶します．ユーザは，それぞれ
+code()，head()，body() メソッドで結果を取得することができます．</p>
+
+<h1>Example</h1>
+<p><a href="example/example_http.cpp">example_http.cpp</a></p>
+
+<pre class="sh_cpp">
+#include &lt;iostream&gt;
+#include &quot;clx/http.h&quot;
+#include &quot;clx/uri.h&quot;
+
+int main(int argc, char* argv[]) {
+    if (argc &lt; 3) return -1;
+    
+    try {
+        clx::http session(clx::uri::encode(argv[1]), 80);
+        session.get(clx::uri::encode(argv[2]));
+        
+        std::cout &lt;&lt; &quot;code: &quot; &lt;&lt; session.code() &lt;&lt; std::endl;
+        std::cout &lt;&lt; std::endl;
+        
+        std::cout &lt;&lt; &quot;head&quot; &lt;&lt; std::endl;
+        std::cout &lt;&lt; &quot;--&quot; &lt;&lt; std::endl;
+        for (clx::http::head_iterator pos = session.head().begin();
+            pos != session.head().end(); pos++) {
+            std::cout &lt;&lt; pos-&gt;first &lt;&lt; &quot;: &quot; &lt;&lt; pos-&gt;second &lt;&lt; std::endl;
+        }
+        std::cout &lt;&lt; std::endl;
+        
+        std::cout &lt;&lt; &quot;body&quot; &lt;&lt; std::endl;
+        std::cout &lt;&lt; &quot;--&quot; &lt;&lt; std::endl;
+        std::cout &lt;&lt; session.body() &lt;&lt; std::endl;
+    }
+    catch (clx::socket_error&amp; e) {
+        std::cerr &lt;&lt; e.what() &lt;&lt; std::endl;
+        std::exit(-1);
+    }
+    
+    return 0;
+}
+</pre>
+
+<pre>
+<strong>Result</strong>
+$ ./test clx.cielquis.net /index.html
+code: 200
+
+head
+--
+Accept-Ranges: bytes
+Connection: close
+Content-Length: 14775
+Content-Type: text/html
+Date: Fri, 29 Aug 2008 06:14:21 GMT
+ETag: &quot;c5fe8e-39b7-48b704e8&quot;
+Last-Modified: Thu, 28 Aug 2008 20:04:56 GMT
+Server: Apache
+
+body
+--
+&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.01 Transitional//EN&quot;
+  &quot;http://www.w3.org/TR/html4/loose.dtd&quot;&gt;
+&lt;html lang=&quot;ja&quot;&gt;
+
+&lt;head&gt;
+&lt;meta name=&quot;author&quot; content=&quot;clown&quot;&gt;
+&lt;meta http-equiv=&quot;Content-type&quot; content=&quot;text/html; charset=UTF-8&quot;&gt;
+&lt;meta http-equiv=&quot;Content-Style-Type&quot; content=&quot;text/css&quot;&gt;
+
+&lt;link rel=&quot;index&quot; href=&quot;index.html&quot;&gt;
+&lt;link rel=&quot;stylesheet&quot; href=&quot;style/default.css&quot; type=&quot;text/css&quot;&gt;
+
+・・・（以下略）・・・
+</pre>
+
+<h1>Template Parameters</h1>
+<dl>
+<dt>Socket</dt><dd>ソケットクラスを指定します．</dd>
+</dl>
+
+<h1>Related Types</h1>
+<pre class="sh_cpp">
+typedef char char_type;
+typedef std::basic_string&lt;char_type&gt; string_type;
+typedef std::map&lt;string_type, string_type&gt; head_type;
+typedef typename head_type::iterator head_iterator;
+typedef typename head_type::const_iterator const_head_iterator;
+</pre>
+
+<h1>Construction and Member Functions</h1>
+<pre class="sh_cpp">
+basic_http();
+explicit basic_http(const socket_type& cp);
+explicit basic_http(const string_type&amp; host, int port = 80);
+explicit basic_http(const char_type* host, int port = 80);
+virtual ~basic_http();
+
+basic_http&amp; start(const string_type&amp; host, int port = 80);
+basic_http&amp; start(const char_type* host, int port = 80);
+void finish();
+
+basic_http&amp; request(const string_type&amp; query);
+basic_http&amp; request(const char_type* query);
+bool response(double timeout = -1.0);
+
+</pre>
+
+<p>start() メソッドで指定したホストと接続を試みます．request() メソッドは，
+引数として指定された文字列を接続したサーバへ送信します．response() メソッドは，
+request() メソッドで送信した HTTP リクエストに対する応答を受信し，内部変数に記憶します．
+<em>timeout</em> に0以上の値を指定すると，<em>timeout</em> 秒経過しても応答がない場合
+false を返して終了します．</p>
+
+<pre class="sh_cpp">
+bool head(const string_type&amp; path,
+    const head_type&amp; head = head_type(), double timeout = -1.0);
+bool head(const char_type* path,
+    const head_type&amp; head = head_type(), double timeout = -1.0);
+
+bool get(const string_type&amp; path,
+    const head_type&amp; head = head_type(), double timeout = -1.0);
+bool get(const char_type* path,
+    const head_type&amp; head = head_type(), double timeout = -1.0);
+
+bool post(const string_type&amp; path, const string_type&amp; data,
+    const head_type&amp; head = head_type(), double timeout = -1.0);
+bool post(const char_type* path, const char_type* data,
+    const head_type&amp; head = head_type(), double timeout = -1.0);
+</pre>
+
+<p>head()，get()，および post() メソッドは，<em>path</em> で指定された Web
+ページの内容を取得するための HTTP リクエストを作成した後，request()，response()
+メソッドを自動的に呼び出します．これらのメソッドは <em>head</em> を指定した場合，
+送信する HTTP リクエストに指定されたヘッダ情報を付加します．head は [ヘッダ名，内容]
+の std::map&lt;std::string, std::string&gt; 形式で指定して下さい．尚，
+デフォルトの状態では，head()，get() メソッドは Host ヘッダ，pos() メソッドは
+Host，および Content-Length ヘッダを付加します．</p>
+
+<pre class="sh_cpp">
+int code() const;
+const string_type&amp; message() const;
+const head_type&amp; head() const;
+head_type&amp; head();
+const string_type&amp; body() const;
+</pre>
+
+<p>response() メソッドで取得した内容にアクセスするためのメソッド群です．それぞれ，
+ステータスコード，ステータスコードに対応する文字列，ヘッダ情報，本文を取得します．</p>
+
+<pre class="sh_cpp">
+double&amp; version();
+double version() const;
+</pre>
+
+<p>HTTP バージョンの内容を設定/取得するためのメソッドです．
+get()，post() メソッドは，ここで設定された値を基に HTTP リクエストを作成します．</p>
+
+<h1>Related Page</h1>
+<ol>
+<li><a href="https.html">CLX C++ Libraries - https</a></li>
+</ol>
+
+<h1>Referrence</h1>
+<ol>
+<li><a href="http://d.hatena.ne.jp/tt_clown/20080829/p1" target="_blank">
+Life like a clown - ワイド文字と codecvt</a></li>
+</ol>
+</div>
+<!-- end of main text -->
+
+<!-- footer -->
+<div class="foot">
+<address class="copyright">
+Copyright &copy; 2004 - 2008, clown. All rights reserved.
+Mailto: tt.clown(a)gmail.com
+</address>
+</div>
+<!-- end of footer -->
+
+</div>
+</body>
+
+</html>

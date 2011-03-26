@@ -1,0 +1,223 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ja">
+
+<head>
+<meta name="author" content="clown">
+<meta http-equiv="Content-type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<meta http-equiv="Content-Script-Type" content="text/javascript">
+
+<script type="text/javascript" src="script/sh_main.js"></script>
+<script type="text/javascript" src="script/sh_cpp.js"></script>
+
+<link rel="index" href="index.html">
+<link rel="stylesheet" href="style/default.css" type="text/css">
+<link rel="stylesheet" href="style/hilight.css" type="text/css">
+
+<title>CLX C++ Libraries - ini</title>
+</head>
+
+<body onload="sh_highlightDocument()">
+<div class="contents">
+
+<!-- header -->
+<div class="title">
+<a href="http://clx.cielquis.net/">CLX C++ Libraries</a>
+<a href="http://b.hatena.ne.jp/entry/http://clx.cielquis.net/ini.html">
+<img src="http://d.hatena.ne.jp/images/b_entry.gif"
+  width="16" height="12" border="0">
+</a>
+</div>
+<div class="head"><a href="index.html">Home</a> &gt;&gt;
+<a href="ini.html">ini</a></div>
+<!-- end of header -->
+
+<!-- main text -->
+<div class="main">
+
+<h1>Declaration</h1>
+<pre class="sh_cpp">
+template &lt;
+    class Type,
+    class CharT = char,
+    class Traits = std::char_traits&lt;CharT&gt;
+&gt;
+class basic_ini : public map_wrapper&lt;std::basic_string&lt;CharT, Traits&gt;,
+    ini_container&lt;Type, CharT, Traits&gt; &gt;;
+
+typedef basic_ini&lt;std::basic_string&lt;char&gt; &gt; ini;
+#ifdef CLX_USE_WCHAR
+typedef basic_ini&lt;std::basic_string&lt;wchar_t&gt; &gt; wini;
+#endif
+</pre>
+
+<h1>Overview</h1>
+<p>Windows で用いられていた INI ファイルを扱うためのクラスです．
+指定したファイルを読み込み，[&quot;セクション名&quot;][&quot;キー名&quot;]
+という形で対応する値にアクセスすることができます．また，insert()
+メソッドを用いて新たなセクション名をオブジェクトに挿入することも可能です
+（挿入した時点では，そのセクションに属するキーは存在しない）．</p>
+
+<p>二次元連想配列 (map) を用いて実装しているため，[] 演算子でアクセスした際に，
+対応するセクション and/or キーが存在しない場合は，新たに作成されることになります．</p>
+
+<h1>Example</h1>
+<p><a href="example/example_ini.cpp">example_ini.cpp</a></p>
+
+<pre class="sh_cpp">
+#include &lt;iostream&gt;
+#include &quot;clx/ini.h&quot;
+
+int main(int argc, char* argv[]) {
+    if (argc &lt; 2) std::exit(-1);
+    
+    try {
+        clx::ini ini(argv[1]);
+        
+        ini.insert(&quot;hoge&quot;);
+        ini[&quot;hoge&quot;][&quot;fuga&quot;] = &quot;foo&quot;;
+        for (clx::ini::iterator p = ini.begin(); p != ini.end(); p++) {
+            std::cout &lt;&lt; &quot;***&quot; &lt;&lt; p-&gt;first &lt;&lt; &quot;***&quot; &lt;&lt; std::endl;
+            for (clx::ini::sub_iterator q = p-&gt;second.begin();
+                q != p-&gt;second.end(); q++) {
+                std::cout &lt;&lt; '&lt;' &lt;&lt; q-&gt;first &lt;&lt; &quot;&gt;&lt;&quot;
+                    &lt;&lt; q-&gt;second &lt;&lt; '&gt;' &lt;&lt; std::endl;
+            }
+        }
+        
+        if (ini.exist(&quot;Settings&quot;, &quot;AnonymousRecipient&quot;)) {
+            std::cout &lt;&lt; &quot;found!&quot; &lt;&lt; std::endl;
+        }
+    }
+    catch (clx::syntax_error&amp; e) {
+        std::cerr &lt;&lt; argv[1] &lt;&lt; ':' &lt;&lt; e.line() &lt;&lt; &quot;: error: &quot;
+            &lt;&lt; e.what() &lt;&lt; std::endl;
+        std::exit(-1);
+    }
+    catch (std::runtime_error&amp; e) {
+        std::cerr &lt;&lt; e.what() &lt;&lt; std::endl;
+        std::exit(-1);
+    }
+    
+    return 0;
+}
+</pre>
+
+<pre>
+<strong>Result</strong> (<a href="testdata/test.ini">test.ini</a>)
+***Debug***
+&lt;LogFile&gt;&lt;0&gt;
+***Output***
+&lt;Charset&gt;&lt;euc-jp&gt;
+***Settings***
+&lt;AnonymousRecipient&gt;&lt;0&gt;
+&lt;CmdName&gt;&lt;gpg.exe&gt;
+&lt;DefUserID&gt;&lt;&gt;
+&lt;EnableBccUser&gt;&lt;0&gt;
+&lt;EnableCcUser&gt;&lt;0&gt;
+&lt;EnableDefUser&gt;&lt;0&gt;
+&lt;EnableFromUser&gt;&lt;0&gt;
+&lt;EnableTextModeSig&gt;&lt;0&gt;
+&lt;OpenPGP&gt;&lt;0&gt;
+&lt;PGPCompatible&gt;&lt;1&gt;
+&lt;PGPMIME&gt;&lt;1&gt;
+&lt;RFC1991&gt;&lt;0&gt;
+&lt;ShowPassphrase&gt;&lt;0&gt;
+&lt;UseMD5&gt;&lt;0&gt;
+***hoge***
+&lt;fuga&gt;&lt;foo&gt;
+found!
+</pre>
+
+<h1>Template Parameter</h1>
+<dl>
+<dt>Type</dt><dd>値の型を指定します．</dd>
+<dt>CharT</dt><dd>文字の型を指定します．デフォルト値は，char．</dd>
+<dt>Traits</dt><dd>文字列を扱うためのtraitsを指定します．デフォルト値は，
+std::char_traits&lt;CharT&gt;．</dd>
+</dl>
+
+<h1>Related Types</h1>
+<pre class="sh_cpp">
+typedef CharT char_type;
+typedef std::basic_string&lt;CharT, Traits&gt; string_type;
+
+typedef string_type key_type;
+typedef Type value_type;
+
+typedef ini_container&lt;Type, CharT, Traits&gt; subcontainer;
+typedef typename subcontainer::iterator sub_iterator;
+typedef typename subcontainer::const_iterator const_sub_iterator;
+typedef std::map&lt;string_type, subcontaine&gt; container;
+</pre>
+
+<h1>Construction and Member Functions</h1>
+<pre class="sh_cpp">
+basic_ini();
+
+template &lt;class Ch, classTr&gt;
+explicit basic_ini(std::basic_istream&lt;Ch, Tr&gt;&amp sin);
+
+explicit basic_ini(const string_type&amp; path);
+explicit basic_ini(const char_type* path);
+
+virtual ~basic_ini();
+</pre>
+
+<p>コンストラクタは，指定された引数で read() メソッドを実行します．
+read() メソッドに関しては後述します．</p>
+
+<pre class="sh_cpp">
+template &lt;class Ch, class Tr&gt;
+basic_ini&amp; read(std::basic_istream&lt;Ch, Tr&gt;&amp; sin);
+
+basic_ini&amp; read(const string_type&amp; path);
+basic_ini&amp; read(const char_type* path);
+</pre>
+
+<p>read() メソッドには入力ストリーム，または INI ファイルのパスを指定します．
+read() メソッドによって解析された結果へのアクセスは，std::map で提供されている
+各メソッドを利用して行います．std::map（の継承）に関する詳細は，
+<a href="container_wrapper.html">container_wrapper</a> を参照して下さい．</p>
+
+<pre class="sh_cpp">
+template &lt;class Ch, class Tr&gt;
+basic_ini&amp; write(std::basic_istream&lt;Ch, Tr&gt;&amp; sin);
+
+basic_ini&amp; write(const string_type&amp; path);
+basic_ini&amp; write(const char_type* path);
+</pre>
+
+<p>write() メソッドには出力ストリーム，または出力ファイルのパスを指定します．
+指定されたパスのファイルが既に存在している場合には，上書きします．</p>
+
+<pre class="sh_cpp">
+bool insert(const key_type&amp; section);
+</pre>
+
+<p>insert() メソッドは，新たなセクションを作成する時に使用します．引数 <em>section</em>
+を指定して insert() メソッドを呼ぶと ini はキーを一つも持たない空のセクションを作成し，
+INI 情報を管理しているコンテナへ追加します．</p>
+
+<h1>Related Pages</h1>
+<ol>
+<li><a href="container_wrapper.html">CLX C++ Libraries - container_wrapper</a></li>
+</ol>
+
+</div>
+<!-- end of main text -->
+
+<!-- footer -->
+<div class="foot">
+<address class="copyright">
+Copyright &copy; 2004 - 2009, clown. All rights reserved.
+Mailto: tt.clown(a)gmail.com
+</address>
+</div>
+<!-- end of footer -->
+
+</div>
+</body>
+
+</html>

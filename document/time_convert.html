@@ -1,0 +1,147 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ja">
+
+<head>
+<meta name="author" content="clown">
+<meta http-equiv="Content-type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<meta http-equiv="Content-Script-Type" content="text/javascript">
+
+<script type="text/javascript" src="script/sh_main.js"></script>
+<script type="text/javascript" src="script/sh_cpp.js"></script>
+
+<link rel="index" href="index.html">
+<link rel="stylesheet" href="style/default.css" type="text/css">
+<link rel="stylesheet" href="style/hilight.css" type="text/css">
+
+<title>CLX C++ Libraries - date_time - string conversion</title>
+</head>
+
+<body onload="sh_highlightDocument()">
+<div class="contents">
+
+<!-- header -->
+<div class="title">
+<a href="http://clx.cielquis.net/">CLX C++ Libraries</a>
+<a href="http://b.hatena.ne.jp/entry/http://clx.cielquis.net/time_convert.html">
+<img src="http://d.hatena.ne.jp/images/b_entry.gif"
+  width="16" height="12" border="0">
+</a>
+</div>
+<div class="head"><a href="index.html">Home</a> &gt;&gt;
+<a href="date_time.html">date_time</a> &gt;&gt;
+<a href="time_convert.html">string conversion</a></div>
+<!-- end of header -->
+
+<!-- main text -->
+<div class="main">
+
+<h1>Overview</h1>
+<p>date_time クラスには，与えられた書式にしたがって文字列を解析するメソッド
+from_string()，および与えられた書式にしたがって時刻を出力するメソッド
+to_string&lt;CharT&gt;() が定義されています．to_string&lt;CharT&gt;() の CharT には
+char，または wchar_t を指定します．これらのメソッドはそれぞれ
+<a href="http://www.linux.or.jp/JM/html/LDP_man-pages/man3/strptime.3.html"
+target="_blank">strptime()</a>，<a href="http://www.linux.or.jp/JM/html/LDP_man-pages/man3/strftime.3.html"
+target="_blank">strftime()</a> 関数を用いて実現しています．
+ただし，Windows の場合は strptime() が存在しないため，機能を制限して独自に実装しています．
+主な書式は以下の通りです．</p>
+
+<p>*1 from_string() メソッドを Windows で使用する場合は指定できません．</p>
+
+<dl>
+<dt>%a</dt><dd>現在のロケールにおける曜日の省略名．</dd>
+<dt>%A</dt><dd>現在のロケールにおける曜日の完全な名前．</dd>
+<dt>%b</dt><dd>現在のロケールにおける月の省略名．</dd>
+<dt>%B</dt><dd>現在のロケールにおける月の完全な名前．</dd>
+<dt>%c *1</dt><dd>現在のロケールにおいて一般的な日付・時刻の表記．</dd>
+<dt>%d </dt><dd>月内通算日（10 進数表記）．</dd>
+<dt>%e </dt><dd>%dと同様に月内通算日を 10 進数で表現するが，1 桁の場合 10 の位にゼロを置かずスペースを置く．</dd>
+<dt>%F </dt><dd>%Y-%m-%d と等価．</dd>
+<dt>%H</dt><dd>24 時間表記での時．</dd>
+<dt>%I *1</dt><dd>12 時間表記での時．</dd>
+<dt>%j </dt><dd>年の初めから通算の日数．</dd>
+<dt>%k </dt><dd>24 時間表記での時．1 桁の場合には前にゼロでなくスペースが置かれる．</dd>
+<dt>%l *1</dt><dd>12 時間表記での時．1 桁の場合には前にゼロでなくスペースが置かれる．</dd>
+<dt>%m</dt><dd>月．</dd>
+<dt>%M</dt><dd>分．</dd>
+<dt>%p *1</dt><dd>現在のロケールにおける“午前”，“午後”に相当する文字列．</dd>
+<dt>%S</dt><dd>秒．</dd>
+<dt>%T </dt><dd>24 時間表記の時間（%H:%M:%S）．</dd>
+<dt>%u</dt><dd>週の何番目の日か．月曜日を 1 とする (1--7)．</dd>
+<dt>%U *1</dt><dd>年の初めからの通算の週数．その年の最初の日曜日を第 1 週の始まりとして計算する．</dd>
+<dt>%w</dt><dd>週の何番目の日か．日曜日を 0 とする (0--6)．</dd>
+<dt>%W *1</dt><dd>年の初めからの通算の週数．その年の最初の月曜日を第 1 週の始まりとして計算する．</dd>
+<dt>%x *1</dt><dd>現在のロケールで一般的な日付表記．時刻は含まない．</dd>
+<dt>%X *1</dt><dd>現在のロケールで一般的な時刻表記．日付は含まない．</dd>
+<dt>%y</dt><dd>西暦の下 2 桁．</dd>
+<dt>%Y</dt><dd>世紀部分を含めた 4 桁の西暦年．</dd>
+</dl>
+
+<h1>Example</h1>
+<p><a href="example/example_ioftime.cpp">example_ioftime.cpp</a></p>
+
+<pre class="sh_cpp">
+#include &lt;iostream&gt;
+#include &lt;string&gt;
+#include &quot;clx/date_time.h&quot;
+
+int main(int argc, char* argv[]) {
+    std::string str = &quot;Sat 17 Mar 2007 19:56:19 JST&quot;;
+    std::string infmt = &quot;%a %d %b %Y %H:%M:%S JST&quot;;
+    std::cout &lt;&lt; &quot;Input string: &quot; &lt;&lt; str &lt;&lt; std::endl;
+    std::cout &lt;&lt; &quot;Input format: &quot; &lt;&lt; infmt &lt;&lt; std::endl;
+    std::cout &lt;&lt; std::endl;
+    
+    // 文字列strをinfmtにしたがって解析する．
+    clx::date_time input;
+    input.from_string(str, infmt);
+    
+    // 時刻をoutfmtのフォーマットで出力する．
+    std::string outfmt = &quot;%x %X&quot;;
+    std::cout &lt;&lt; &quot;Output format: &quot; &lt;&lt; outfmt &lt;&lt; std::endl;
+    std::cout &lt;&lt; &quot;Result: &quot; &lt;&lt; input.to_string&lt;char&gt;(outfmt) &lt;&lt; std::endl;
+    
+    return 0;
+}
+</pre>
+
+<pre>
+<strong>Result</strong>
+Input string: Sat 17 Mar 2007 19:56:19 JST
+Input format: %a %d %b %Y %H:%M:%S JST
+
+Output format: %x %X
+Result: 03/17/07 19:56:19
+</pre>
+
+<h1>Related Page</h1>
+<ol>
+<li><a href="date_time.html">CLX C++ Libraries - date_time</a></li>
+</ol>
+
+<h1>References</h1>
+<ol>
+<li><a href="http://www.linux.or.jp/JM/html/LDP_man-pages/man3/strptime.3.html"
+target="_blank">Manpage of STRPTIME</a></li>
+<li><a href="http://www.linux.or.jp/JM/html/LDP_man-pages/man3/strftime.3.html"
+target="_blank">Manpage of STRFTIME</a></li>
+</ol>
+
+</div>
+<!-- end of main text -->
+
+<!-- footer -->
+<div class="foot">
+<address class="copyright">
+Copyright &copy; 2004 - 2008, clown. All rights reserved.
+Mailto: tt.clown(a)gmail.com
+</address>
+</div>
+<!-- end of footer -->
+
+</div>
+</body>
+
+</html>

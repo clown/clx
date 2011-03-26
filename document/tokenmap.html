@@ -1,0 +1,204 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ja">
+
+<head>
+<meta name="author" content="clown">
+<meta http-equiv="Content-type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<meta http-equiv="Content-Script-Type" content="text/javascript">
+
+<script type="text/javascript" src="script/sh_main.js"></script>
+<script type="text/javascript" src="script/sh_cpp.js"></script>
+
+<link rel="index" href="index.html">
+<link rel="stylesheet" href="style/default.css" type="text/css">
+<link rel="stylesheet" href="style/hilight.css" type="text/css">
+
+<title>CLX C++ Libraries - tokenmap</title>
+</head>
+
+<body onload="sh_highlightDocument()">
+<div class="contents">
+
+<!-- header -->
+<div class="title">
+<a href="http://clx.cielquis.net/">CLX C++ Libraries</a>
+<a href="http://b.hatena.ne.jp/entry/http://clx.cielquis.net/tokenmap.html">
+<img src="http://d.hatena.ne.jp/images/b_entry.gif"
+  width="16" height="12" border="0">
+</a>
+</div>
+<div class="head"><a href="index.html">Home</a> &gt;&gt;
+<a href="tokenmap.html">tokenmap</a></div>
+<!-- end of header -->
+
+<!-- main text -->
+<div class="main">
+
+<h1>Declaration</h1>
+<pre class="sh_cpp">
+template &lt;
+    class TokenizerFunc,
+    class KeyT = char,
+    class ValueT = std::string,
+    class Container = std::map&lt;KeyT, ValueT&gt;
+&gt;
+class basic_tokenmap : private comparable_container_generator&lt;Container&gt;,
+    public map_accessor&lt;Container&gt;;
+
+typedef basic_tokenmap&lt;format_separator&lt;char&gt;, char, std::string&gt; tokenmap;
+#ifdef CLX_USE_WCHAR
+typedef basic_tokenmap&lt;format_separator&lt;char&gt;, wchar_t, std::wstring&gt; wtokenmap;
+#endif
+</pre>
+
+<h1>Overview</h1>
+<p>tokenmap クラスは，分割されたトークンに対して何らかの識別子を割り当て，
+連想配列を用いて各トークンを管理するためのクラスです．例えば，y(=year)，m(=month)，
+d(=date)，...と言ったように日付・時刻に識別子を設定し，分割後はx['y']と言った形式で，
+それぞれの要素へアクセスします．ポリシークラス（TokenizerFunc）を作成する場合には，
+以下の型およびメソッドを定義する必要があります．</p>
+
+<pre class="sh_cpp">
+template &lt;class CharT&gt;
+class separator {
+public:
+    typedef CharT char_type;
+    
+    void reset();
+    template &lt;class InIter, class Key, class Token&gt;
+    bool operator()(InIter&amp; next, InIter last, Key&amp; key, Token&amp; dest);
+};
+</pre>
+
+<p>尚，tokenizer のためにあらかじめ用意してあるのポリシークラス(<a
+href="tokenizer_func.html">tokenizer_func</a>) のうち，format_separator は tokenmap
+のポリシークラスとしても使用することができます．tokenmap で format_separator
+をポリシークラスとして使用する場合，変換指定の最後に，&quot;s&quot;
+ではなく前述した識別子（日付を分割する場合は &quot;ymd&quot; など）
+を指定します．この場合に指定できる識別子は，&quot;一文字の文字&quot;となります．
+ただし，&quot;%&quot;，&quot; &quot;（一文字の半角スペース）
+を識別子として指定することはできません．</p>
+
+<h1>Example</h1>
+<p><a href="example/example_tokenmap.cpp">example_tokenmap.cpp</a></p>
+
+<pre class="sh_cpp">
+#include &lt;iostream&gt;
+#include &lt;string&gt;
+#include &quot;clx/tokenmap.h&quot;
+
+typedef clx::basic_tokenmap&lt;clx::format_separator&lt;char&gt; &gt; date_map;
+
+int main(int argc, char* argv[]) {
+    std::string dateset = "ymdHMS";
+    std::string infmt = &quot;%04y/%02m/%02d %2H:%02M:%02S&quot;;
+    std::string sdate = &quot;2006/06/06 17:27:00&quot;;
+    std::cout &lt;&lt; &quot;Format: &quot; &lt;&lt; infmt &lt;&lt; std::endl;
+    std::cout &lt;&lt; &quot;Input: &quot; &lt;&lt; sdate &lt;&lt; std::endl;
+    
+    clx::format_separator&lt;char&gt; f(infmt, dateset);
+    date_map m(f);
+    m.assign(sdate);
+    
+    std::cout &lt;&lt; std::endl;
+    std::cout &lt;&lt; &quot;Result&quot; &lt;&lt; std::endl;
+    std::cout &lt;&lt; &quot;--------------------&quot; &lt;&lt; std::endl;
+    for (clx::tokenmap::const_iterator p = m.begin(); p != m.end(); p++) {
+        std::cout &lt;&lt; &quot;map[&quot; &lt;&lt; p-&gt;first &lt;&lt; &quot;] = &quot; &lt;&lt; p-&gt;second &lt;&lt; std::endl;
+    }
+    
+    return 0;
+}
+</pre>
+
+<pre>
+<strong>Result</strong>
+Format: %04y/%02m/%02d %2H:%02M:%02S
+Input: 2006/06/06 17:27:00
+
+Result
+--------------------
+map[H] = 17
+map[M] = 27
+map[S] = 00
+map[d] = 06
+map[m] = 06
+map[y] = 2006
+</pre>
+
+<h1>Template Parameters</h1>
+<dl>
+<dt>TokenizerFunc</dt><dd>文字列を分割するためのポリシーを指定します．</dd>
+<dt>Container</dt><dd>分割した文字列群を格納するためのコンテナを指定します．
+デフォルト値は，std::map&lt;char, std::string&gt;</dd>
+</dd>
+</dl>
+
+<h1>Related Types</h1>
+<pre class="sh_cpp">
+typedef TokenizerFunc functor;
+typedef typename functor::char_type char_type;
+typedef std::basic_string&lt;char_type&gt; string_type;
+typedef KeyT key_type;
+typedef ValueT value_type;
+typedef Container container;
+</pre>
+
+<h1>Construction and Member Functions</h1>
+<pre class="sh_cpp">
+explicit basic_tokenmap(functor f = functor());
+explicit basic_tokenmap(const string_type&amp; s, functor f = functor());
+explicit basic_tokenmap(const char_type* s, functor f = functor());
+
+template &lt;class InIter&gt;
+basic_tokenmap(IntIter first, InIter last, functor f = functor());
+
+virtual ~basic_tokenmap() throw();
+</pre>
+
+<p>コンストラクタには，分割を行う文字列，または文字列のイテレータを指定します．
+コンストラクタは，assign() メソッドを実行して指定された文字列を分割します．
+assign() メソッドに関しては後述します．</p>
+
+<pre class="sh_cpp">
+basic_tokenmap&amp; assign(const string_type&amp; s);
+basic_tokenmap&amp; assign(const char_type* s);
+
+template &lt;class InIter&gt;
+basic_tokenmap&amp; assign(InIter first, InIter last);
+
+void reset();
+</pre>
+
+<p>assign() メソッドは，TokenizerFunc にしたがって指定された文字列を分割します．
+分割した文字列は Container で指定されたクラスへ格納されます．tokenmap は，
+Container クラスを継承しているので，分割された各トークンへのアクセスは
+Container で提供されている各メソッドを利用して行います．</p>
+
+<p>Container （の継承）に関する詳細は，<a href="container_wrapper.html">container_wrapper</a>
+を参照して下さい．</p>
+
+<h1>Related Pages</h1>
+<ol>
+<li><a href="tokenizer_func.html">CLX C++ Libraries - tokenizer_func</a></li>
+<li><a href="container_wrapper.html">CLX C++ Libraries - container_wrapper</a></li>
+</ol>
+
+</div>
+<!-- end of main text -->
+
+<!-- footer -->
+<div class="foot">
+<address class="copyright">
+Copyright &copy; 2004 - 2009, clown. All rights reserved.
+Mailto: tt.clown(a)gmail.com
+</address>
+</div>
+<!-- end of footer -->
+
+</div>
+</body>
+
+</html>

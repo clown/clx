@@ -1,0 +1,141 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ja">
+
+<head>
+<meta name="author" content="clown">
+<meta http-equiv="Content-type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<meta http-equiv="Content-Script-Type" content="text/javascript">
+
+<script type="text/javascript" src="script/sh_main.js"></script>
+<script type="text/javascript" src="script/sh_cpp.js"></script>
+
+<link rel="index" href="index.html">
+<link rel="stylesheet" href="style/default.css" type="text/css">
+<link rel="stylesheet" href="style/hilight.css" type="text/css">
+
+<title>CLX C++ Libraries - timer</title>
+</head>
+
+<body onload="sh_highlightDocument()">
+<div class="contents">
+
+<!-- header -->
+<div class="title">
+<a href="http://clx.cielquis.net/">CLX C++ Libraries</a>
+<a href="http://b.hatena.ne.jp/entry/http://clx.cielquis.net/timer.html">
+<img src="http://d.hatena.ne.jp/images/b_entry.gif"
+  width="16" height="12" border="0">
+</a>
+</div>
+<div class="head"><a href="index.html">Home</a> &gt;&gt;
+<a href="timer.html">timer</a></div>
+<!-- end of header -->
+
+<!-- main text -->
+<div class="main">
+
+<h1>Declaration</h1>
+<pre class="sh_cpp">
+template &lt;class GetTimePolicy = detail::timeval_type&gt;
+class basic_timer;
+
+typedef basic_timer&lt;&gt; timer;
+</pre>
+
+<h1>Overview</h1>
+<p>タイマー用クラスです．オブジェクト生成時，または restart()
+メソッドが呼ばれた時点からの経過時間を記憶します．時刻を取得するために，
+UNIX 系では gettimeofday()，Windows では timeGetTime() を用いています．
+ただし，Windows で使用する際に CLX_USE_HIGH_PRECISION_TIMER を定義した場合，
+timeGetTime() の代わりに QueryPerformanceCounter() を使用します．</p>
+
+<p>timer は，時刻を記憶する領域を 2 つ持っています．もう 1 つの領域は，update()
+メソッドが呼ばれる度に更新されていきます．そのため，elapsed() メソッドは最後に
+update() メソッドが呼ばれてからの経過時間，total_elapsed() メソッドはオブジェクト生成時，
+または restart() メソッドが呼ばれた時点からの経過時間を返します．</p>
+
+<h1>Example</h1>
+<p><a href="example/example_timer.cpp">example_timer.cpp</a></p>
+
+<pre class="sh_cpp">
+#include &lt;iostream&gt;
+#include &quot;clx/timer.h&quot;
+
+int heavy_func(int x) {
+    return x &lt;= 0 ? 1 : heavy_func(x - 1) + heavy_func(x - 1);
+}
+
+int main(int argc, char* argv[]) {
+    clx::timer t;
+    
+    std::cout &lt;&lt; &quot;precision: &quot; &lt;&lt; t.precision() &lt;&lt; &quot; sec.&quot; &lt;&lt; std::endl;
+    std::cout &lt;&lt; &quot;start heavy_func(28)&quot; &lt;&lt; std::endl;
+    heavy_func(28);
+    std::cout &lt;&lt; &quot;total: &quot; &lt;&lt; t.total_elapsed() &lt;&lt; &quot; sec.&quot; &lt;&lt; std::endl;
+    std::cout &lt;&lt; &quot;latest: &quot; &lt;&lt; t.update() &lt;&lt; &quot; sec.&quot; &lt;&lt; std::endl;
+    std::cout &lt;&lt; std::endl;
+    
+    std::cout &lt;&lt; &quot;start heavy_func(25)&quot; &lt;&lt; std::endl;
+    heavy_func(25);
+    std::cout &lt;&lt; &quot;total: &quot; &lt;&lt; t.total_elapsed() &lt;&lt; &quot; sec.&quot; &lt;&lt; std::endl;
+    std::cout &lt;&lt; &quot;latest: &quot; &lt;&lt; t.elapsed() &lt;&lt; &quot; sec.&quot; &lt;&lt; std::endl;
+    
+    return 0;
+}
+</pre>
+
+<pre>
+<strong>Result</strong>
+precision: 1e-06 sec.
+start heavy_func(28)
+total: 14.621 sec.
+latest: 14.621 sec.
+
+start heavy_func(25)
+total: 16.293 sec.
+latest: 1.672 sec.
+</pre>
+
+<h1>Template Parameter</h1>
+<dl>
+<dt>GetTimePolicy</dt><dd>時刻を取得するためのクラスを指定します．</dd>
+</dl>
+
+<h1>Related Types</h1>
+<pre class="sh_cpp">
+typedef GetTimePolicy policy;
+</pre>
+
+<h1>Construction and Member Functions</h1>
+<pre class="sh_cpp">
+basic_timer();
+void restart();
+double update();
+
+double total_elapsed() const;
+double elapsed() const;
+double precision() const;
+</pre>
+
+<p>elapsed() メソッドは最後に update() メソッドが呼ばれてからの経過時間，
+total_elapsed() メソッドはオブジェクト生成時，または restart()
+メソッドが呼ばれた時点からの経過時間を返します．</p>
+
+</div>
+<!-- end of main text -->
+
+<!-- footer -->
+<div class="foot">
+<address class="copyright">
+Copyright &copy; 2004 - 2008, clown. All rights reserved.
+Mailto: tt.clown(a)gmail.com
+</address>
+</div>
+<!-- end of footer -->
+
+</div>
+</body>
+
+</html>

@@ -1,0 +1,292 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ja">
+
+<head>
+<meta name="author" content="clown">
+<meta http-equiv="Content-type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<meta http-equiv="Content-Script-Type" content="text/javascript">
+
+<script type="text/javascript" src="script/sh_main.js"></script>
+<script type="text/javascript" src="script/sh_cpp.js"></script>
+
+<link rel="index" href="index.html">
+<link rel="stylesheet" href="style/default.css" type="text/css">
+<link rel="stylesheet" href="style/hilight.css" type="text/css">
+
+<title>CLX C++ Libraries - smtp</title>
+</head>
+
+<body onload="sh_highlightDocument()">
+<div class="contents">
+
+<!-- header -->
+<div class="title">
+<a href="http://clx.cielquis.net/">CLX C++ Libraries</a>
+<a href="http://b.hatena.ne.jp/entry/http://clx.cielquis.net/smtp.html">
+<img src="http://d.hatena.ne.jp/images/b_entry.gif"
+  width="16" height="12" border="0">
+</a>
+</div>
+<div class="head"><a href="index.html">Home</a> &gt;&gt;
+<a href="smtp.html">smtp</a></div>
+<!-- end of header -->
+
+<!-- main text -->
+<div class="main">
+
+<h1>Declaration</h1>
+<pre class="sh_cpp">
+template &lt;class Socket&gt;
+class basic_smtp : public Socket;
+
+typedef basic_smtp&lt;tcp::socket&gt; smtp;
+
+namespace smtp_auth {
+    enum {
+        none     = 0x01,
+        plain    = 0x02,
+        login    = 0x04,
+        cram_md5 = 0x08,
+        best     = 0x0f
+    };
+}
+</pre>
+
+<h1>Overview</h1>
+<p>smtp クラスは SMTP (Simple Mail Transfer Protocol) でメールを送信するためのクラスです．
+start() メソッドでメールサーバと接続し，login() メソッドでログイン処理を行った後，
+mail() メソッドで実際にメールを送信します．login() メソッドは現在のところ PLAIN, LOGIN,
+CRAM-MD5 方式に対応しており，どの方式を用いるかを login() メソッドの第 3 引数に指定します．</p>
+
+<p>実際にメールを送信する mail() メソッドには，引数としてメールの内容を直接指定する代わりに，
+関数オブジェクト（または，関数ポインタ）を指定することもできます．
+引数として関数オブジェクトが指定された場合，smtp クラスはメールの内容を
+受信するための入力ストリームを関数オブジェクトへ渡します．指定する関数オブジェクト，
+または関数ポインタには以下ような関数が定義されている必要があります．</p>
+
+<pre class="sh_cpp">
+// 関数の場合
+void sendmail(std::ostream&amp; sout);
+
+// 関数オブジェクトの場合
+class sendmail {
+public:
+    template &lt;class OutputStream&gt;
+    void operator()(OutputStream&amp; sout);
+};
+</pre>
+
+<p>smtp クラスは，サーバからエラーメッセージが返された場合には smtp_error を例外として送出します．
+また，smtp クラスはサーバからの応答メッセージを内部に蓄積するように実装しています．
+responses() メソッドを呼ぶと，サーバからの応答メッセージの一覧を取得することができます．</p>
+
+<h1>Example</h1>
+<p><a href="example/example_smtp.cpp">example_smtp.cpp</a></p>
+
+<pre class="sh_cpp">
+#include &lt;iostream&gt;
+#include &lt;string&gt;
+#include &lt;sstream&gt;
+#include &quot;clx/smtp.h&quot;
+#include &quot;clx/date_time.h&quot;
+
+int main(int argc, char* argv[]) {
+    if (argc &lt; 6) {
+        std::cerr &lt;&lt; &quot;usage &quot; &lt;&lt; argv[0] &lt;&lt; &quot; host id pass from to&quot; &lt;&lt; std::endl;
+        std::exit(-1);
+    }
+    
+    try {
+        clx::smtp session(argv[1], 25);
+        
+        /*
+         * 第3引数でSMTP-AUTH の方法を指定する．
+         *   - clx::smtp_auth::plain
+         *   - clx::smtp_auth::login
+         *   - clx::smtp_auth::cram_md5
+         *
+         * clx::smtp_auth::none を指定すると SMTP-AUTH は行わずに EHLO パケット
+         * を送信するのみ．clx::smtp_auth::best を指定すると，
+         * cram_md5 -&gt; plain -&gt; login の順番でサーバがサポートしているかどうか
+         * 調べ，最初にサポートしていた方式で認証を行う．いずれにも対応していない
+         * 場合は，clx::smtp_auth::none を指定した場合と同じ．
+         * 
+         * 第3引数の省略時は，clx::smtp_auth::best．
+         */
+        session.login(argv[2], argv[3]);
+        
+        std::string from(argv[4]);
+        std::string to(argv[5]);
+        
+        // create a sample message
+        std::stringstream msg;
+        clx::date_time now;
+        msg &lt;&lt; &quot;Date: &quot; &lt;&lt; now.to_string&lt;char&gt;(&quot;%a, %d %b %Y %H:%M:%S +0900&quot;) &lt;&lt; &quot;\r\n&quot;;
+        msg &lt;&lt; &quot;From: &quot; &lt;&lt; from &lt;&lt; &quot;\r\n&quot;;
+        msg &lt;&lt; &quot;To: &quot; &lt;&lt; to &lt;&lt; &quot;\r\n&quot;;
+        msg &lt;&lt; &quot;Subject: SMTP test mail\r\n&quot;;
+        msg &lt;&lt; &quot;\r\n&quot;;
+        msg &lt;&lt; &quot;This ia test mail for clx::smtp class.\r\n&quot;;
+        msg &lt;&lt; &quot;.\r\n&quot;;
+        session.mail(from, to, msg.str());
+        session.finish();
+        
+        // print message log
+        clx::smtp::response_array::reverse_iterator pos;
+        for (pos = session.responses().rbegin();
+            pos != session.responses().rend(); ++pos) {
+            std::cout &lt;&lt; pos-&gt;second &lt;&lt; std::endl;
+            std::cout &lt;&lt; std::endl;
+        }
+    }
+    catch (clx::smtp_error&amp; e) {
+        std::cerr &lt;&lt; e.code() &lt;&lt; &quot;: &quot; &lt;&lt; e.what() &lt;&lt; std::endl;
+        std::exit(-1);
+    }
+    catch (clx::socket_error&amp; e) {
+        std::cerr &lt;&lt; e.what() &lt;&lt; std::endl;
+        std::exit(-1);
+    }
+    catch (std::runtime_error&amp; e) {
+        std::cerr &lt;&lt; e.what() &lt;&lt; std::endl;
+        std::exit(-1);
+    }
+    
+    return 0;
+}
+</pre>
+
+<pre>
+<strong>Result</strong>
+s273.xrea.com ESMTP
+
+s273.xrea.com
+AUTH LOGIN CRAM-MD5 PLAIN
+AUTH=LOGIN CRAM-MD5 PLAIN
+PIPELINING
+8BITMIME
+
+PDkwNjcuMTIzMDI0NDMyN0BzMjczLnhyZWEuY29tPg==
+
+ok, go ahead (#2.0.0)
+
+ok
+
+ok
+
+go ahead
+
+ok 1230244328 qp 9069
+
+s273.xrea.com
+</pre>
+
+<p>宛先を複数指定する場合，および mail() メソッドに関数オブジェクトを指定する場合のサンプルコードは
+<a href="example/example_smtp_list.cpp">example_smtp_list.cpp</a> を参照して下さい．</p>
+
+<h1>Template Parameters</h1>
+<dl>
+<dt>Socket</dt><dd>ソケットクラスを指定します．</dd>
+</dl>
+
+<h1>Related Types</h1>
+<pre class="sh_cpp">
+typedef Socket socket_type;
+typedef char char_type;
+typedef std::basic_string&lt;char_type&gt; string_type;
+
+typedef std::pair&lt;int, string_type&gt; response_type;
+typedef std::deque&lt;response_type&gt; response_array;
+</pre>
+
+<h1>Construction and Member Functions</h1>
+<pre class="sh_cpp">
+basic_smtp();
+basic_smtp(const basic_smtp&amp; cp);
+explicit basic_smtp(const string_type&amp; host, int port = 25);
+explicit basic_smtp(const char_type* host, int port = 25);
+virtual ~basic_smtp();
+
+basic_smtp&amp; start(const string_type&amp; host, int port = 25);
+basic_smtp&amp; start(const char_type* host, int port = 25);
+
+void finish();
+
+basic_smtp&amp; login(const string_type&amp; id);
+basic_smtp&amp; login(const char_type* id);
+
+basic_smtp&amp; login(const string_type&amp; id, const string_type&amp; pass,
+    int type = smtp_auth::best);
+basic_smtp&amp; login(const char_type* id, const char_type* pass,
+    int type = smtp_auth::best);
+</pre>
+
+<p>start() メソッドで SMTP サーバと接続し，login() メソッドでログイン処理を行います．
+login() の第 3 引数として指定できる値は，smtp_auth::none, smtp_auth::plain,
+smtp_auth::login, smtp_auth::cram_md5, smtp_auth::best の 5 種類です．</p>
+
+<p>clx::smtp_auth::none を指定すると SMTP-AUTH は行わずに EHLO パケットを送るのみで
+login() を終了します．smtp_auth::plain, smtp_auth::login, smtp_auth::cram_md5
+を指定すると，それぞれ PLAIN, LOGIN, CRAM-MD 方式で認証を試みます．
+smtp_auth::best を指定すると，CRAM-MD5, PLAIN, LOGIN の順序でサーバがその認証方式を
+サポートしているかどうか調べ，最初に見つけた方式で認証を行います．
+いずれの方式にも対応していない場合は，clx::smtp_auth::none を指定した場合と同じ挙動になります．</p>
+
+<p>login() メソッドの第 3 引数を省略した場合は smtp_auth::best が指定されたと見なされます．</p>
+
+<pre class="sh_cpp">
+template &lt;class Functor&gt;
+basic_smtp&amp; mail(const string_type&amp; from, const string_type&amp; to, Functor f);
+
+basic_smtp&amp; mail(const string_type&amp; from, const string_type&amp; to,
+    const string_type&amp; message);
+
+template &lt;class MailingList, class Functor&gt;
+basic_smtp&amp; mail(const string_type&amp; from, const MailingList&amp; to, Functor f);
+
+template &lt;class MailingList&gt;
+basic_smtp&amp; mail(const string_type&amp; from, const MailingList&amp; to,
+    const string_type&amp; message);
+</pre>
+
+<p>実際にメールを送信するときは，送信元，宛先，メールの内容を引数として指定し
+mail() メソッドを実行します．宛先は複数指定することもできます．
+複数の宛先を指定する際には，宛先のリスト (e.g., std::vector&lt;std::string&gt;,
+std::list&lt;std::string&gt;, ...) を作成して第 2 引数に指定して下さい．</p>
+
+<pre class="sh_cpp">
+response_array&amp; responses();
+const response_array&amp; responses() const;
+const response_type&amp; response(size_t index) const;
+</pre>
+
+<p>response() メソッドは，SMTP サーバからの応答メッセージの一覧を取得するためのメソッドです．
+それぞれの応答メッセージ (response_type) は，応答コードとメッセージのペアで構成されています．
+サーバからの応答メッセージはキュー (正確には std::deque) で管理しているため，
+最新のメッセージが先頭に格納されています．</p>
+
+<h1>Related Pages</h1>
+<ol>
+<li><a href="smtps.html">CLX C++ Libraries - smtps</a></li>
+<li><a href="pop3.html">CLX C++ Libraries - pop3</a></li>
+<li><a href="pop3s.html">CLX C++ Libraries - pop3s</a></li>
+</ol>
+
+</div>
+<!-- end of main text -->
+
+<!-- footer -->
+<div class="foot">
+<address class="copyright">
+Copyright &copy; 2004 - 2008, clown. All rights reserved.
+Mailto: tt.clown(a)gmail.com
+</address>
+</div>
+<!-- end of footer -->
+
+</div>
+</body>
+
+</html>

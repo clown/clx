@@ -1,0 +1,102 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ja">
+
+<head>
+<meta name="author" content="clown">
+<meta http-equiv="Content-type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<meta http-equiv="Content-Script-Type" content="text/javascript">
+
+<script type="text/javascript" src="script/sh_main.js"></script>
+<script type="text/javascript" src="script/sh_cpp.js"></script>
+
+<link rel="index" href="index.html">
+<link rel="stylesheet" href="style/default.css" type="text/css">
+<link rel="stylesheet" href="style/hilight.css" type="text/css">
+
+<title>CLX C++ Libraries - adjust</title>
+</head>
+
+<body onload="sh_highlightDocument()">
+<div class="contents">
+
+<!-- header -->
+<div class="title">
+<a href="http://clx.cielquis.net/">CLX C++ Libraries</a>
+<a href="http://b.hatena.ne.jp/entry/http://clx.cielquis.net/adjust.html">
+<img src="http://d.hatena.ne.jp/images/b_entry.gif"
+  width="16" height="12" border="0">
+</a>
+</div>
+<div class="head"><a href="index.html">Home</a> &gt;&gt;
+<a href="salgorithm.html">salgorithm</a> &gt;&gt;
+<a href="adjust.html">adjust</a></div>
+<!-- end of header -->
+
+<!-- main text -->
+<div class="main">
+
+<h1>Declarations</h1>
+<pre class="sh_cpp">
+String&amp; ljust(String&amp; s, unsigned int n, CharT c = ' ');
+String ljust_copy(const String&amp; s, unsigned int n, CharT c = ' ');
+
+String&amp; rjust(String&amp; s, unsigned int n, CharT c = ' ');
+String rjust_copy(const String&amp; s, unsigned int n, CharT c = ' ');
+
+String&amp; center(String&amp; s, unsigned int n, CharT c = ' ');
+String center_copy(const String&amp; s, unsigned int n, CharT c = ' ');
+</pre>
+
+<h1>Overview</h1>
+<p>ljust(), rjust(), center() は，文字列をそれぞれ左詰め，右詰め，センタリングし，
+余白を文字 <em>c</em> で埋めます．ljust_copy(), rjust_copy(), center_copy() は，
+引数として指定された文字列を直接変更せずに，コピーした文字列を変更します．</p>
+
+<p>尚，Declarations においては template &lt; ... &gt; の部分を省略していますが，
+単語の先頭が大文字になっているものはテンプレート引数として渡される型です（ただし，
+String は std::basic_string&lt;CharT, Traits&gt;）．</p>
+
+<h1>Example</h1>
+<p><a href="example/example_adjust.cpp">example_adjust.cpp</a></p>
+
+<pre class="sh_cpp">
+#include &lt;iostream&gt;
+#include &lt;string&gt;
+#include &quot;clx/salgorithm.h&quot;
+
+int main(int argc, char* argv[]) {
+    std::string s = &quot;Hello, world!&quot;;
+    
+    std::cout &lt;&lt; &quot;ljust:  &quot; &lt;&lt; clx::ljust_copy(s, 30, '*') &lt;&lt; std::endl;
+    std::cout &lt;&lt; &quot;rjust:  &quot; &lt;&lt; clx::rjust_copy(s, 30, '*') &lt;&lt; std::endl;
+    std::cout &lt;&lt; &quot;center: &quot; &lt;&lt; clx::center_copy(s, 30, '*') &lt;&lt; std::endl;
+    
+    return 0;
+}
+</pre>
+
+<pre>
+<strong>Result</strong>
+ljust:  Hello, world!*****************
+rjust:  *****************Hello, world!
+center: *********Hello, world!********
+</pre>
+
+</div>
+<!-- end of main text -->
+
+<!-- footer -->
+<div class="foot">
+<address class="copyright">
+Copyright &copy; 2004 - 2008, clown. All rights reserved.
+Mailto: tt.clown(a)gmail.com
+</address>
+</div>
+<!-- end of footer -->
+
+</div>
+</body>
+
+</html>

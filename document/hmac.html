@@ -1,0 +1,187 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ja">
+
+<head>
+<meta name="author" content="clown">
+<meta http-equiv="Content-type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<meta http-equiv="Content-Script-Type" content="text/javascript">
+
+<script type="text/javascript" src="script/sh_main.js"></script>
+<script type="text/javascript" src="script/sh_cpp.js"></script>
+
+<link rel="index" href="index.html">
+<link rel="stylesheet" href="style/default.css" type="text/css">
+<link rel="stylesheet" href="style/hilight.css" type="text/css">
+
+<title>CLX C++ Libraries - hmac</title>
+</head>
+
+<body onload="sh_highlightDocument()">
+<div class="contents">
+
+<!-- header -->
+<div class="title">
+<a href="http://clx.cielquis.net/">CLX C++ Libraries</a>
+<a href="http://b.hatena.ne.jp/entry/http://clx.cielquis.net/hmac.html">
+<img src="http://d.hatena.ne.jp/images/b_entry.gif"
+  width="16" height="12" border="0">
+</a>
+</div>
+<div class="head"><a href="index.html">Home</a> &gt;&gt;
+<a href="hmac.html">hmac</a>
+
+</div>
+<!-- end of header -->
+
+<!-- main text -->
+<div class="main">
+
+<h1>Declaration</h1>
+<pre class="sh_cpp">
+template &lt;class Engine&gt;
+Engine hmac(const char* key, size_t keylen, const char* data, size_t datalen);
+
+template &lt;class Engine&gt;
+Engine hmac(const std::string&amp; key, const std::string&amp; data);
+</pre>
+
+<h1>Overview</h1>
+<p>hmac クラスは，HMAC (Keyed-Hashing for Message Authentication Code)
+アルゴリズムを用いてダイジェストを計算するためのクラスです．Engine には，
+MD5 や SHA1 などのハッシュ値を計算するためのクラスを指定します．指定する
+Engine には以下のメソッドが定義されている必要があります．</p>
+
+<pre class="sh_cpp">
+class engine {
+public:
+    const char* code() const;
+    int size() const;
+};
+</pre>
+
+<p>code() メソッドは計算されたハッシュ値を返します．また，size()
+メソッドはハッシュ値のデータサイズを返します．Engin に関しては，現在のところ
+md5 および sha1 を実装しています．</p>
+
+<h1>Example</h1>
+<p><a href="example/example_hmac_md5.cpp">example_hmac_md5.cpp</a></p>
+
+<pre class="sh_cpp">
+#include &lt;iostream&gt;
+#include &quot;clx/hmac.h&quot;
+#include &quot;clx/md5.h&quot;
+
+int main(int argc, char* argv[]) {
+    // test_case = 1
+    char key1[17];
+    char dat1[9] = &quot;Hi There&quot;;
+    
+    for (size_t i = 0; i &lt; sizeof(key1) - 1; ++i) key1[i] = 0x0b;
+    std::cout &lt;&lt; &quot;case 1: &quot;
+        &lt;&lt; clx::hmac&lt;clx::md5&gt;(key1, sizeof(key1) - 1, dat1, sizeof(dat1) - 1).to_string()
+        &lt;&lt; std::endl;
+    
+    // test_case = 2
+    char key2[5] = &quot;Jefe&quot;;
+    char dat2[29] = &quot;what do ya want for nothing?&quot;;
+    
+    std::cout &lt;&lt; &quot;case 2: &quot;
+        &lt;&lt; clx::hmac&lt;clx::md5&gt;(key2, sizeof(key2) - 1, dat2, sizeof(dat2) - 1).to_string()
+        &lt;&lt; std::endl;
+    
+    // test_cast = 3
+    char key3[17];
+    char dat3[51];
+    
+    for (size_t i = 0; i &lt; sizeof(key3) - 1; ++i) key3[i] = 0xaa;
+    for (size_t i = 0; i &lt; sizeof(dat3) - 1; ++i) dat3[i] = 0xdd;
+    std::cout &lt;&lt; &quot;case 3: &quot;
+        &lt;&lt; clx::hmac&lt;clx::md5&gt;(key3, sizeof(key3) - 1, dat3, sizeof(dat3) - 1).to_string()
+        &lt;&lt; std::endl;
+    
+    // test_cast = 4
+    char key4[26];
+    char dat4[51];
+    
+    for (size_t i = 0; i &lt; sizeof(key4) - 1; ++i) key4[i] = i + 1;
+    for (size_t i = 0; i &lt; sizeof(dat4) - 1; ++i) dat4[i] = 0xcd;
+    std::cout &lt;&lt; &quot;case 4: &quot;
+        &lt;&lt; clx::hmac&lt;clx::md5&gt;(key4, sizeof(key4) - 1, dat4, sizeof(dat4) - 1).to_string()
+        &lt;&lt; std::endl;
+    
+    // test_cast = 5
+    char key5[17];
+    char dat5[21] = &quot;Test With Truncation&quot;;
+    
+    for (size_t i = 0; i &lt; sizeof(key5) - 1; ++i) key5[i] = 0x0c;
+    std::cout &lt;&lt; &quot;case 5: &quot;
+        &lt;&lt; clx::hmac&lt;clx::md5&gt;(key5, sizeof(key5) - 1, dat5, sizeof(dat5) - 1).to_string()
+        &lt;&lt; std::endl;
+    
+    // test_case = 6
+    char key6[81];
+    char dat6[55] = &quot;Test Using Larger Than Block-Size Key - Hash Key First&quot;;
+    
+    for (size_t i = 0; i &lt; sizeof(key6) - 1; ++i) key6[i] = 0xaa;
+    std::cout &lt;&lt; &quot;case 6: &quot;
+        &lt;&lt; clx::hmac&lt;clx::md5&gt;(key6, sizeof(key6) - 1, dat6, sizeof(dat6) - 1).to_string()
+        &lt;&lt; std::endl;
+    
+    // test_case = 7
+    char key7[81];
+    char dat7[74] = &quot;Test Using Larger Than Block-Size Key &quot;
+        &quot;and Larger Than One Block-Size Data&quot;;
+    
+    for (size_t i = 0; i &lt; sizeof(key7) - 1; ++i) key7[i] = 0xaa;
+    std::cout &lt;&lt; &quot;case 7: &quot;
+        &lt;&lt; clx::hmac&lt;clx::md5&gt;(key7, sizeof(key7) - 1, dat7, sizeof(dat7) - 1).to_string()
+        &lt;&lt; std::endl;
+    
+    return 0;
+}
+</pre>
+
+<pre>
+<strong>Result</strong>
+case 1: 9294727a3638bb1c13f48ef8158bfc9d
+case 2: 750c783e6ab0b503eaa86e310a5db738
+case 3: 56be34521d144c88dbb8c733f0e8b3f6
+case 4: 697eaf0aca3a3aea3a75164746ffaa79
+case 5: 56461ef2342edc00f9bab995690efd4c
+case 6: 6b1ab7fe4bd7bf8f0b62e6ce61b9d0cd
+case 7: 6f630fad67cda0ee1fb1f562db3aa53e
+</pre>
+
+<p>HMAC-SHA1 のサンプルコードについては，<a href="example/example_hmac_sha1.cpp">
+example_hmac_sha1.cpp</a> を参照して下さい．</p>
+
+<h1>Related Pages</h1>
+<ol>
+<li><a href="md5.html">CLX C++ Libraries - md5</a></li>
+<li><a href="sha1.html">CLX C++ Libraries - sha1</a></li>
+</ol>
+
+<h1>Reference</h1>
+<ol>
+<li><a href="http://www.ipa.go.jp/security/rfc/RFC2202JA.html" target="_blank">
+Test Cases for HMAC-MD5 and HMAC-SHA-1</a></li>
+</ol>
+
+</div>
+<!-- end of main text -->
+
+<!-- footer -->
+<div class="foot">
+<address class="copyright">
+Copyright &copy; 2004 - 2008, clown. All rights reserved.
+Mailto: tt.clown(a)gmail.com
+</address>
+</div>
+<!-- end of footer -->
+
+</div>
+</body>
+
+</html>

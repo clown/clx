@@ -1,0 +1,153 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ja">
+
+<head>
+<meta name="author" content="clown">
+<meta http-equiv="Content-type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<meta http-equiv="Content-Script-Type" content="text/javascript">
+
+<script type="text/javascript" src="script/sh_main.js"></script>
+<script type="text/javascript" src="script/sh_cpp.js"></script>
+
+<link rel="index" href="index.html">
+<link rel="stylesheet" href="style/default.css" type="text/css">
+<link rel="stylesheet" href="style/hilight.css" type="text/css">
+
+<title>CLX C++ Libraries - hexdump</title>
+</head>
+
+<body onload="sh_highlightDocument()">
+<div class="contents">
+
+<!-- header -->
+<div class="title">
+<a href="http://clx.cielquis.net/">CLX C++ Libraries</a>
+<a href="http://b.hatena.ne.jp/entry/http://clx.cielquis.net/hexdump.html">
+<img src="http://d.hatena.ne.jp/images/b_entry.gif"
+  width="16" height="12" border="0">
+</a>
+</div>
+<div class="head"><a href="index.html">Home</a> &gt;&gt;
+<a href="hexdump.html">hexdump</a></div>
+<!-- end of header -->
+
+<!-- main text -->
+<div class="main">
+
+<h1>Overview</h1>
+<p>hexdump は，文字列を 16 進数で出力するための関数です．入出力イテレータ，
+およびプレフィックスを指定します．プレフィックスとは，それぞれの文字（の 16
+進数表記）の直前に出力される文字列を指します．</p>
+
+<p>入力に関しては，入力イテレータの他に入力ストリーム，文字列を指定することもできます．
+入力ストリーム，および文字列を指定する関数を使用する場合，
+プレフィックスが必要ないときには，それを省略することができます．</p>
+
+<h1>Example</h1>
+<p><a href="example/example_hexdump.cpp">example_hexdump.cpp</a></p>
+
+<pre class="sh_cpp">
+#include &lt;iostream&gt;
+#include &lt;iterator&gt;
+#include &lt;locale&gt;
+#include &quot;clx/hexdump.h&quot;
+
+int main(int argc, char* argv[]) {
+    std::ostream_iterator&lt;std::string&gt; out(std::cout, &quot; &quot;);
+    
+    std::string s = &quot;Hello, world&quot;;
+    clx::hexdump(s, out);
+    std::cout &lt;&lt; std::endl;
+    
+#ifdef CLX_USE_WCHAR
+    std::wcout.imbue(std::locale(&quot;japanese&quot;));
+    std::ostream_iterator&lt;std::wstring, wchar_t&gt; wout(std::wcout, L&quot; &quot;);
+    std::wstring ws = L&quot;ハローワールド。This is a test with wchar_t.&quot;;
+    clx::hexdump(ws, wout);
+    std::wcout &lt;&lt; std::endl;
+#endif
+    
+    /*
+     * InIter/OutIter を引数に指定する場合は，prefix を
+     * 省略できない．このインターフェースを使う場合で prefix がない
+     * ときは，&quot;&quot; (, or L&quot;&quot;)，もしくは空の std::string (, or std::wstring)
+     * を指定する．
+     */
+    std::istream_iterator&lt;char&gt; input(std::cin);
+    std::istream_iterator&lt;char&gt; last;
+    clx::hexdump(input, last, out, &quot;#&quot;);
+    
+    return 0;
+}
+</pre>
+
+<pre>
+<strong>Result</strong>
+$ ./test &lt; example_hexdump.cpp 
+48 65 6c 6c 6f 2c 20 77 6f 72 6c 64 
+30cf 30ed 30fc 30ef 30fc 30eb 30c9 3002 54 68 69 73 20 69 73 20 61 20 74 65 73 
+74 20 77 69 74 68 20 77 63 68 61 72 5f 74 2e 
+#2f #2a #2d #2d #2d #2d #2d #2d #2d #2d #2d #2d #2d #2d #2d #2d #2d #2d #2d #2d 
+#2d #2d #2d #2d #2d #2d #2d #2d #2d #2d #2d #2d #2d #2d #2d #2d #2d #2d #2d #2d 
+#2d #2d #2d #2d #2d #2d #2d #2d #2d #2d #2d #2d #2d #2d #2d #2d #2d #2d #2d #2d 
+
+・・・（以下略）・・・
+</pre>
+
+<h1>Functions</h1>
+<pre class="sh_cpp">
+// 入力が iterator の場合
+template &lt;class Ch, class Tr, class InIter, class OutIter&gt;
+OutIter hexdump(InIter first, InIter last, OutIter dest,
+    const std::basic_string&lt;Ch, Tr&gt;&amp; prefix);
+
+template &lt;class CharT, class InIter, class OutIter&gt;
+OutIter hexdump(InIter first, InIter last, OutIter dest, const CharT* prefix);
+
+// 入力がストリームの場合
+template &lt;class Ch, class Tr, class OutIter&gt;
+OutIter hexdump(std::basic_istream&lt;Ch, Tr&gt;&amp; src, OutIter dest,
+    const std::basic_string&lt;Ch, Tr&gt;&amp; prefix);
+
+template &lt;class Ch, class Tr, class OutIter&gt;
+OutIter hexdump(std::basic_istream&lt;Ch, Tr&gt;&amp; src, OutIter dest, const Ch* prefix);
+
+template &lt;class Ch, class Tr, class OutIter&gt;
+OutIter hexdump(std::basic_istream&lt;Ch, Tr&gt;&amp; src, OutIter dest);
+
+// 入力が文字列の場合
+template &lt;class Ch, class Tr, class OutIter&gt;
+OutIter hexdump(const std::basic_string&lt;Ch, Tr&gt;&amp; src, OutIter dest,
+    const std::basic_string&lt;Ch, Tr&gt;&amp; prefix);
+
+template &lt;class Ch, class Tr, class OutIter&gt;
+OutIter hexdump(const std::basic_string&lt;Ch, Tr&gt;&amp; src, OutIter dest, const Ch* prefix);
+
+template &lt;class Ch, class Tr, class OutIter&gt;
+OutIter hexdump(const std::basic_string&lt;Ch, Tr&gt;&amp; src, OutIter dest);
+
+template &lt;class CharT, class OutIter&gt;
+OutIter hexdump(const CharT* src, OutIter dest, const CharT* prefix);
+
+template &lt;class CharT, class OutIter&gt;
+OutIter hexdump(const CharT* src, OutIter dest);
+</pre>
+
+</div>
+<!-- end of main text -->
+
+<!-- footer -->
+<div class="foot">
+<address class="copyright">
+Copyright &copy; 2004 - 2009, clown. All rights reserved.
+Mailto: tt.clown(a)gmail.com
+</address>
+</div>
+<!-- end of footer -->
+
+</div>
+</body>
+
+</html>

@@ -1,0 +1,125 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ja">
+
+<head>
+<meta name="author" content="clown">
+<meta http-equiv="Content-type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<meta http-equiv="Content-Script-Type" content="text/javascript">
+
+<script type="text/javascript" src="script/sh_main.js"></script>
+<script type="text/javascript" src="script/sh_cpp.js"></script>
+
+<link rel="index" href="index.html">
+<link rel="stylesheet" href="style/default.css" type="text/css">
+<link rel="stylesheet" href="style/hilight.css" type="text/css">
+
+<title>CLX C++ Libraries - case_conv</title>
+</head>
+
+<body onload="sh_highlightDocument()">
+<div class="contents">
+
+<!-- header -->
+<div class="title">
+<a href="http://clx.cielquis.net/">CLX C++ Libraries</a>
+<a href="http://b.hatena.ne.jp/entry/http://clx.cielquis.net/case_conv.html">
+<img src="http://d.hatena.ne.jp/images/b_entry.gif"
+  width="16" height="12" border="0">
+</a>
+</div>
+<div class="head"><a href="index.html">Home</a> &gt;&gt;
+<a href="salgorithm.html">salgorithm</a> &gt;&gt;
+<a href="case_conv.html">case_conv</a></div>
+<!-- end of header -->
+
+<!-- main text -->
+<div class="main">
+
+<h1>Declarations</h1>
+<pre class="sh_cpp">
+String&amp; upcase(String&amp; s, const std::locale&amp; loc = std::locale());
+String upcase_copy(const String&amp; s, const std::locale&amp; loc = std::locale());
+String&amp; upcase_if(String&amp; s, PredicateFunc f,
+    const std::locale&amp; loc = std::locale());
+String upcase_copy_if(const String&amp; s, PredicateFunc f,
+    const std::locale&amp; loc = std::locale());
+
+String&amp; downcase(String&amp; s, const std::locale&amp; loc = std::locale());
+String downcase_copy(const String&amp; s, const std::locale&amp; loc = std::locale());
+String&amp; downcase_if(String&amp; s, PredicateFunc f,
+    const std::locale&amp; loc = std::locale());
+String downcase_copy_if(const String&amp; s, PredicateFunc f,
+    const std::locale&amp; loc = std::locale());
+
+String&amp; swapcase(String&amp; s, const std::locale&amp; loc = std::locale());
+String swapcase_copy(const String&amp; s, const std::locale&amp; loc = std::locale());
+String&amp; swapcase_if(String&amp; s, PredicateFunc f,
+    const std::locale&amp; loc = std::locale());
+String swapcase_copy_if(const String&amp; s, PredicateFunc f,
+    const std::locale&amp; loc = std::locale());
+
+String&amp; capitalize(String&amp; s, const std::locale&amp; loc = std::locale());
+String capitalize_copy(const String&amp; s, const std::locale&amp; loc = std::locale());
+String&amp; capitalize_if(String&amp; s, PredicateFunc f,
+    const std::locale&amp; loc = std::locale());
+String capitalize_copy_if(const String&amp; s, PredicateFunc f,
+    const std::locale&amp; loc = std::locale());
+</pre>
+
+<h1>Overview</h1>
+<p>upcase()，downcase() は，文字列中のアルファベットをそれぞれ，大文字，小文字にします．
+swapcase() は，大文字は小文字に，小文字は大文字に変換します．capitalize() は，
+文字列中の先頭の文字を大文字に変換します．</p>
+
+<p>upcase_copy()，downcase_copy()，swapcase_copy()，capitalize_copy() は，
+引数として指定された文字列を直接変更せず，コピーした文字列を変更します．
+また，upcase_if()，downcase_if()，swapcase_if()，capitalize_if() は，
+PredicateFunc で指定された Functor が真を返した文字にのみ操作を行います．</p>
+
+<p>尚，Declarations においては template &lt; ... &gt; の部分を省略していますが，
+単語の先頭が大文字になっているものはテンプレート引数として渡される型です（ただし，
+String は std::basic_string&lt;CharT, Traits&gt;）．</p>
+
+<h1>Example</h1>
+<p><a href="example/example_case_conv.cpp">example_case_conv.cpp</a></p>
+
+<pre class="sh_cpp">
+#include &lt;iostream&gt;
+#include &lt;string&gt;
+#include &quot;clx/salgorithm.h&quot;
+
+int main(int argc, char* argv[]) {
+    std::string s = &quot;hello, world!&quot;;
+    
+    std::cout &lt;&lt; &quot;original: &quot; &lt;&lt; s &lt;&lt; std::endl;
+    std::cout &lt;&lt; &quot;upcase: &quot; &lt;&lt; clx::upcase_copy(s) &lt;&lt; std::endl;
+    std::cout &lt;&lt; &quot;capitalize: &quot; &lt;&lt; clx::capitalize_copy(s) &lt;&lt; std::endl;
+    
+    return 0;
+}
+</pre>
+
+<pre>
+<strong>Result</strong>
+original: hello, world!
+upcase: HELLO, WORLD!
+capitalize: Hello, world!
+</pre>
+</div>
+<!-- end of main text -->
+
+<!-- footer -->
+<div class="foot">
+<address class="copyright">
+Copyright &copy; 2004 - 2008, clown. All rights reserved.
+Mailto: tt.clown(a)gmail.com
+</address>
+</div>
+<!-- end of footer -->
+
+</div>
+</body>
+
+</html>

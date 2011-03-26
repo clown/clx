@@ -1,0 +1,147 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ja">
+
+<head>
+<meta name="author" content="clown">
+<meta http-equiv="Content-type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<meta http-equiv="Content-Script-Type" content="text/javascript">
+
+<script type="text/javascript" src="script/sh_main.js"></script>
+<script type="text/javascript" src="script/sh_cpp.js"></script>
+
+<link rel="index" href="index.html">
+<link rel="stylesheet" href="style/default.css" type="text/css">
+<link rel="stylesheet" href="style/hilight.css" type="text/css">
+
+<title>CLX C++ Libraries - code_convert</title>
+</head>
+
+<body onload="sh_highlightDocument()">
+<div class="contents">
+
+<!-- header -->
+<div class="title">
+<a href="http://clx.cielquis.net/">CLX C++ Libraries</a>
+<a href="http://b.hatena.ne.jp/entry/http://clx.cielquis.net/code_convert.html">
+<img src="http://d.hatena.ne.jp/images/b_entry.gif"
+  width="16" height="12" border="0">
+</a>
+</div>
+<div class="head"><a href="index.html">Home</a> &gt;&gt;
+<a href="code_convert.html">code_convert</a></div>
+<!-- end of header -->
+
+<!-- main text -->
+<div class="main">
+
+<h1>Declaration</h1>
+<pre class="sh_cpp">
+template &lt;class Type, class CharT&gt;
+std::basic_string&lt;Type&gt; code_convert(const std::basic_string&lt;CharT&gt;&amp; src,
+    cost std::codecvt&lt;wchar_t, char, mbstate_t&gt;&amp; cvt);
+
+template &lt;class Type, class CharT&gt;
+std::basic_string&lt;Type&gt; code_convert(const std::basic_string&lt;CharT&gt;&amp; src,
+    const std::locale&amp; loc = std::locale());
+
+template &lt;class Type, class Source&gt;
+std::basic_string&lt;Type&gt; code_convert(const Source* src,
+    const std::codecvt&lt;wchar_t, char, mbstate_t&gt;&amp; cvt);
+
+template &lt;class Type, class Source&gt;
+std::basic_string&lt;Type&gt; code_convert(const Source* src,
+    const std::locale&amp; loc = std::locale());
+</pre>
+
+<h1>Overview</h1>
+<p>code_convert は，ナロー文字 (char) &lt;-&gt; ワイド文字 (wchar_t)
+の相互変換を行うためのクラスです．std::basic_string&lt;CharT&gt; から
+std::basic_string&lt;Type&gt;，または Source* から std::basic_string&lt;Type&gt;
+への変換を試みます．実際の変換処理は，std::codecvt&lt;wchar_t, char, mbstate_t&gt;
+に依存します．</p>
+
+<h1>Example</h1>
+<p><a href="example/example_code_convert.cpp">example_code_convert.cpp</a></p>
+
+<pre class="sh_cpp">
+#ifndef CLX_USE_WCHAR
+#define CLX_USE_WCHAR
+#endif // CLX_USE_WCHAR
+
+#include &lt;iostream&gt;
+#include &lt;string&gt;
+#include &quot;clx/code_convert.h&quot;
+
+int main(int argc, char* argv[]) {
+    try {
+        std::cout.imbue(std::locale(&quot;japanese&quot;));
+        std::wcout.imbue(std::locale(&quot;japanese&quot;));
+        
+        // char -&gt; wchar_t
+        std::string s = &quot;はろーわーるど&quot;;
+        std::wstring wcvt = clx::code_convert&lt;wchar_t&gt;(s, std::locale(&quot;japanese&quot;));
+        
+        std::wcout &lt;&lt; L&quot;char -&gt; wchar_t&quot; &lt;&lt; std::endl;
+        std::wcout &lt;&lt; L&quot;-----&quot; &lt;&lt; std::endl;
+        std::cout &lt;&lt; &quot;original: &quot; &lt;&lt; s &lt;&lt; &quot; (&quot; &lt;&lt; s.size() &lt;&lt; &quot;)&quot; &lt;&lt; std::endl;
+        std::wcout &lt;&lt; L&quot;convert: &quot; &lt;&lt; wcvt &lt;&lt; L&quot; (&quot; &lt;&lt; wcvt.size() &lt;&lt; L&quot;)&quot;
+            &lt;&lt; std::endl;
+        std::wcout &lt;&lt; std::endl;
+        
+        // wchar_t -&gt; char
+        std::wstring ws = L&quot;ハローワールド&quot;;
+        std::string cvt = clx::code_convert&lt;char&gt;(ws, std::locale(&quot;japanese&quot;));
+        
+        std::cout &lt;&lt; &quot;wchar_t -&gt; char&quot; &lt;&lt; std::endl;
+        std::cout &lt;&lt; &quot;-----&quot; &lt;&lt; std::endl;
+        std::wcout &lt;&lt; L&quot;original: &quot; &lt;&lt; ws &lt;&lt; L&quot; (&quot; &lt;&lt; ws.size() &lt;&lt; L&quot;)&quot; &lt;&lt; std::endl;
+        std::cout &lt;&lt; &quot;convert: &quot; &lt;&lt; cvt &lt;&lt; &quot; (&quot; &lt;&lt; cvt.size() &lt;&lt; &quot;)&quot; &lt;&lt; std::endl;
+    }
+    catch (std::runtime_error&amp; e) {
+        std::cerr &lt;&lt; e.what() &lt;&lt; std::endl;
+        std::exit(-1);
+    }
+    
+    return 0;
+}
+</pre>
+
+<pre>
+<strong>Result</strong>
+char -> wchar_t
+-----
+original: はろーわーるど (14)
+convert: はろーわーるど (7)
+
+wchar_t -> char
+-----
+original: ハローワールド (7)
+convert: ハローワールド (14)
+</pre>
+
+<h1>Referrences</h1>
+<ol>
+<li><a href="http://d.hatena.ne.jp/tt_clown/20080829/p1" target="_blank">
+Life like a clown - ワイド文字と codecvt</a></li>
+<li><a href="http://hw001.gate01.com/eggplant/tcf/cpp/wchar_t_trap.html" target="_blank">
+ワイド文字列の罠</a></li>
+</ol>
+
+</div>
+<!-- end of main text -->
+
+<!-- footer -->
+<div class="foot">
+<address class="copyright">
+Copyright &copy; 2004 - 2008, clown. All rights reserved.
+Mailto: tt.clown(a)gmail.com
+</address>
+</div>
+<!-- end of footer -->
+
+</div>
+</body>
+
+</html>

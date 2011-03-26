@@ -1,0 +1,176 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ja">
+
+<head>
+<meta name="author" content="clown">
+<meta http-equiv="Content-type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<meta http-equiv="Content-Script-Type" content="text/javascript">
+
+<script type="text/javascript" src="script/sh_main.js"></script>
+<script type="text/javascript" src="script/sh_cpp.js"></script>
+
+<link rel="index" href="index.html">
+<link rel="stylesheet" href="style/default.css" type="text/css">
+<link rel="stylesheet" href="style/hilight.css" type="text/css">
+
+<title>CLX C++ Libraries - sockstream</title>
+</head>
+
+<body onload="sh_highlightDocument()">
+<div class="contents">
+
+<!-- header -->
+<div class="title">
+<a href="http://clx.cielquis.net/">CLX C++ Libraries</a>
+<a href="http://b.hatena.ne.jp/entry/http://clx.cielquis.net/sockstream.html">
+<img src="http://d.hatena.ne.jp/images/b_entry.gif"
+  width="16" height="12" border="0">
+</a>
+</div>
+<div class="head"><a href="index.html">Home</a> &gt;&gt;
+<a href="sockstream.html">sockstream</a></div>
+<!-- end of header -->
+
+<!-- main text -->
+<div class="main">
+
+<h1>Declaration</h1>
+<pre class="sh_cpp">
+template &lt;
+    class Socket,
+    class CharT = char,
+    class Traits = std::char_traits&lt;CharT&gt;
+&gt;
+class basic_sockstream : public Socket, public basic_iostream&lt;CharT, Traits&gt;;
+
+namespace tcp {
+    typedef basic_socket&lt;AF_INET&gt; socket;
+    typedef basic_sockstream&lt;socket&gt; sockstream;
+};
+
+namespace udp {
+    typedef basic_socket&lt;AF_INET&gt; socket;
+    typedef basic_sockstream&lt;socket&gt; sockstream;
+};
+
+namespace ssl {
+    typedef basic_socket&lt;sslv23, AF_INET&gt; socket;
+    typedef basic_sockstream&lt;socket&gt; sockstream;
+};
+</pre>
+
+<h1>Overview</h1>
+
+<p>TCP などのストリームタイプのデータ通信を C++ の iostream のように行うためのクラスです．
+現在のところ，TCP および UDP によるデータ通信をサポートしています．</p>
+
+<p>sockstream は，<a href="http://www.boost.org/doc/libs/1_35_0/doc/html/boost_asio.html"
+target="_blank">boost::asio</a>，<a href="http://gimite.ddo.jp/gimite/cppmess.htm"
+target="_blank">namespace gimite</a> を参考に作成しました．</p>
+
+<h1>Example</h1>
+<p><a href="example/example_sockstream.cpp">example_sockstream.cpp</a></p>
+
+<pre class="sh_cpp">
+#include &lt;iostream&gt;
+#include &lt;sstream&gt;
+#include &lt;string&gt;
+#include &lt;cstdlib&gt;
+#include &quot;clx/tcp.h&quot;
+
+int main(int argc, char* argv[]) {
+    if (argc &lt; 3) return -1;
+    
+    try {
+        /*
+         * 第1引数にホスト名（またはIPアドレス），
+         * 第2引数にポート番号を指定する．
+         */
+        clx::tcp::sockstream ss(argv[1], 80);
+        std::stringstream query;
+        query &lt;&lt; &quot;GET /&quot; &lt;&lt; argv[2] &lt;&lt; &quot; HTTP/1.1\r\n&quot;;
+        query &lt;&lt; &quot;Host: &quot; &lt;&lt; argv[1] &lt;&lt; &quot;\r\n&quot;;
+        query &lt;&lt; &quot;\r\n&quot;;
+        ss &lt;&lt; query.str() &lt;&lt; std::flush;
+        
+        std::string buf;
+        while (std::getline(ss, buf)) std::cout &lt;&lt; buf &lt;&lt; std::endl;
+    }
+    catch (clx::socket_error&amp; e) {
+        std::cerr &lt;&lt; e.what() &lt;&lt; std::endl;
+        std::exit(-1);
+    }
+    catch (clx::sockaddress_error&amp; e) {
+        std::cerr &lt;&lt; e.what() &lt;&lt; std::endl;
+        std::exit(-1);
+    }
+    
+    return 0;
+}
+</pre>
+
+<h1>Template Parameters</h1>
+
+<dl>
+<dt>Socket</dt><dd>TCP または UDP のソケットクラスを指定します．</dd>
+<dt>CharT</dt><dd>文字の型を指定します．デフォルト値は，char．</dd>
+<dt>Traits</dt><dd>文字列を扱うためのtraitsを指定します．デフォルト値は，
+std::char_traits&lt;CharT&gt;．</dd>
+</dl>
+
+<h1>Related Types</h1>
+<pre class="sh_cpp">
+typedef Socket socket_type;
+typedef std::basic_iostream&lt;CharT, Traits&gt; iostream_type;
+typedef CharT char_type;
+typedef std::basic_string&lt;CharT, Traits&gt; string_type;
+typedef basic_sockbuf&lt;TransmitFunc, CharT, Traits&gt; sockbuf_type;
+typedef typename sockbuf::size_type size_type;
+</pre>
+
+<h1>Construction and Member Functions</h1>
+<pre class="sh_cpp">
+explicit basic_sockstream(const socket_type&amp; s, size_type n = 65536);
+explicit basic_sockstream(const char_type* host, int port, size_type n = 65536);
+explicit basic_sockstream(const string_type&amp; host, int port, size_type n = 65536);
+virtual ~basic_sockstream();
+</pre>
+
+<h1>Related Pages</h1>
+<ol>
+<li><a href="sockbuf.html">CLX C++ Libraries - sockbuf</a></li>
+<li><a href="udp.html">CLX C++ Libraries - udp::socket</a></li>
+<li><a href="tcp.html">CLX C++ Libraries - tcp::socket</a></li>
+<li><a href="ssl.html">CLX C++ Libraries - ssl::socket</a></li>
+</ol>
+
+<h1>References</h1>
+<ol>
+<li><a href="http://www.boost.org/doc/libs/1_35_0/doc/html/boost_asio.html"
+target="_blank">Boost C++ Libraries - Boost.Asio</a></li>
+<li><a href="http://gimite.ddo.jp/gimite/cppmess.htm" target="_blank">
+namespace gimite - C++ 小物集</a></li>
+<li><a href="http://www.jah.ne.jp/~naoyuki/Writings/ExtIos.html"
+target="_blank">iostream の拡張</a></li>
+<li><a href="http://www-online.kek.jp/~keibun/pukiwiki/index.php?C%2B%2B%A4%CEiostream"
+target="_blank">C++ の iostream</a></li>
+</ol>
+
+</div>
+<!-- end of main text -->
+
+<!-- footer -->
+<div class="foot">
+<address class="copyright">
+Copyright &copy; 2004 - 2008, clown. All rights reserved.
+Mailto: tt.clown(a)gmail.com
+</address>
+</div>
+<!-- end of footer -->
+
+</div>
+</body>
+
+</html>

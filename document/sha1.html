@@ -1,0 +1,180 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ja">
+
+<head>
+<meta name="author" content="clown">
+<meta http-equiv="Content-type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Script-Type" content="text/javascript">
+
+<script type="text/javascript" src="script/sh_main.js"></script>
+<script type="text/javascript" src="script/sh_cpp.js"></script>
+
+<link rel="index" href="index.html">
+<link rel="stylesheet" href="style/default.css" type="text/css">
+<link rel="stylesheet" href="style/hilight.css" type="text/css">
+
+<title>CLX C++ Libraries - sha1</title>
+</head>
+
+<body onload="sh_highlightDocument()">
+<div class="contents">
+
+<!-- header -->
+<div class="title">
+<a href="http://clx.cielquis.net/">CLX C++ Libraries</a>
+<a href="http://b.hatena.ne.jp/entry/http://clx.cielquis.net/sha1.html">
+<img src="http://d.hatena.ne.jp/images/b_entry.gif"
+  width="16" height="12" border="0">
+</a>
+</div>
+<div class="head"><a href="index.html">Home</a> &gt;&gt;
+<a href="sha1.html">sha1</a></div>
+<!-- end of header -->
+
+<!-- main text -->
+<div class="main">
+
+<h1>Declaration</h1>
+<pre class="sh_cpp">
+class sha1;
+</pre>
+
+<h1>Overview</h1>
+<p>sha1 は，引数に指定された文字列，または1Byte（char 型）の配列に対して SHA-1
+方式でハッシュ値を計算するためのクラスです．使用方法は以下のようになります．</p>
+<ol>
+<li>reset() メソッドで初期化を行う．</li>
+<li>update() メソッドに計算を行うためのデータを指定して呼び出す．update()
+メソッドは，複数回呼び出すことも可能．</li>
+<li>finish() メソッドで計算処理を終了する．</li>
+</ol>
+
+<p>一度に全てのデータを渡せる場合，これらのメソッドを順番に呼び出す代わりに
+encode() メソッドを用いることもできます．encode() メソッドは，reset()，update()，
+finish() メソッドを一度に呼び出します．</p>
+
+<h1>Example</h1>
+<p><a href="example/example_sha1.cpp">example_sha1.cpp</a></p>
+
+<pre class="sh_cpp">
+#include &lt;iostream&gt;
+#include &lt;cstdlib&gt;
+#include &quot;clx/sha1.h&quot;
+
+int main(int argc, char* argv[]) {
+    std::string s1 = &quot;abc&quot;;
+    std::string s2 = &quot;abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq&quot;;
+    std::string s3 = &quot;a&quot;;
+    std::string s4 = &quot;0123456701234567012345670123456701234567012345670123456701234567&quot;;
+    
+    clx::sha1 hash;
+    
+    std::cout &lt;&lt; &quot;str: &quot; &lt;&lt; s1 &lt;&lt; std::endl;
+    std::cout &lt;&lt; &quot;sha1: &quot; &lt;&lt; hash.encode(s1).to_string() &lt;&lt; std::endl;
+    std::cout &lt;&lt; std::endl;
+    
+    std::cout &lt;&lt; &quot;str: &quot; &lt;&lt; s2 &lt;&lt; std::endl;
+    std::cout &lt;&lt; &quot;sha1: &quot; &lt;&lt; hash.encode(s2).to_string() &lt;&lt; std::endl;
+    std::cout &lt;&lt; std::endl;
+    
+    std::cout &lt;&lt; &quot;str: &quot; &lt;&lt; s3 &lt;&lt; std::endl;
+    hash.reset();
+    for (int i = 0; i &lt; 1000000; i++) {
+        hash.update(s3.c_str(), s3.size());
+    }
+    hash.finish();
+    std::cout &lt;&lt; &quot;sha1: &quot; &lt;&lt; hash.to_string() &lt;&lt; std::endl;
+    std::cout &lt;&lt; std::endl;
+    
+    std::cout &lt;&lt; &quot;str: &quot; &lt;&lt; s4 &lt;&lt; std::endl;
+    hash.reset();
+    for (int i = 0; i &lt; 10; i++) {
+        hash.update(s4.c_str(), s4.size());
+    }
+    hash.finish();
+    std::cout &lt;&lt; &quot;sha1: &quot; &lt;&lt; hash.to_string() &lt;&lt; std::endl;
+    std::cout &lt;&lt; std::endl;
+    
+    return 0;
+}
+</pre>
+
+<pre>
+<strong>Result</strong>
+str: abc
+sha1: a9993e364706816aba3e25717850c26c9cd0d89d
+
+str: abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq
+sha1: 84983e441c3bd26ebaae4aa1f95129e5e54670f1
+
+str: a
+sha1: 34aa973cd4c4daa4f61eeb2bdbad27316534016f
+
+str: 0123456701234567012345670123456701234567012345670123456701234567
+sha1: dea356a2cddd90c7a7ecedc5ebb563934f460452
+</pre>
+
+<h1>Related Types</h1>
+<pre class="sh_cpp">
+typedef unsigned char uchar_t;
+typedef char char_type;
+typedef std::string string_type;
+</pre>
+
+<h1>Construction and Member Functions</h1>
+<pre class="sh_cpp">
+sha1();
+explicit sha1(const char_type* src, size_t n);
+explicit sha1(const string_type&amp; src);
+</pre>
+
+<pre class="sh_cpp">
+sha1&amp; encode(const char_type* src, size_t n);
+sha1&amp; encode(const string_type&amp; src);
+
+void reset();
+void update(const char_type* src, size_t n);
+void finish();
+</pre>
+
+<p>SHA-1 方式のハッシュ値を計算する場合は，encode() メソッドか，reset()，update()，
+finish() メソッド群のどちらかを使用します．後者のメソッド群は，
+データサイズが大きいなどの理由で一度に全てのデータを渡すことができない場合に使用します．</p>
+
+<pre class="sh_cpp">
+int size() const;
+const uchar_t* code() const;
+string_type to_string() const;
+</pre>
+
+<p>size() メソッドは，計算結果のハッシュ値のデータサイズを返します．code() メソッドは，
+計算結果のハッシュ値を返します．to_string() メソッドは，計算結果を数値文字列に変換したものを返します．</p>
+
+<h1>Related Page</h1>
+<ol>
+<li><a href="md5.html">CLX C++ Libraries - md5</a></li>
+</ol>
+
+<h1>Referrence</h1>
+<ol>
+<li><a href="http://www.faqs.org/rfcs/rfc3174.html" target="_blank">
+RFC3174 - US Secure Hash Algorithm 1 (SHA1)</a></li>
+</ol>
+
+</div>
+<!-- end of main text -->
+
+<!-- footer -->
+<div class="foot">
+<address class="copyright">
+Copyright &copy; 2004 - 2008, clown. All rights reserved.
+Mailto: tt.clown(a)gmail.com
+</address>
+</div>
+<!-- end of footer -->
+
+</div>
+</body>
+
+</html>

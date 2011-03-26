@@ -1,0 +1,235 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ja">
+
+<head>
+<meta name="author" content="clown">
+<meta http-equiv="Content-type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<meta http-equiv="Content-Script-Type" content="text/javascript">
+
+<script type="text/javascript" src="script/sh_main.js"></script>
+<script type="text/javascript" src="script/sh_cpp.js"></script>
+
+<link rel="index" href="index.html">
+<link rel="stylesheet" href="style/default.css" type="text/css">
+<link rel="stylesheet" href="style/hilight.css" type="text/css">
+
+<title>CLX C++ Libraries - tokenizer</title>
+</head>
+
+<body onload="sh_highlightDocument()">
+<div class="contents">
+
+<!-- header -->
+<div class="title">
+<a href="http://clx.cielquis.net/">CLX C++ Libraries</a>
+<a href="http://b.hatena.ne.jp/entry/http://clx.cielquis.net/tokenizer.html">
+<img src="http://d.hatena.ne.jp/images/b_entry.gif"
+  width="16" height="12" border="0">
+</a>
+</div>
+<div class="head"><a href="index.html">Home</a> &gt;&gt;
+<a href="tokenizer.html">tokenizer</a></div>
+<!-- end of header -->
+
+<!-- main text -->
+<div class="main">
+
+<h1>Declrations</h1>
+<pre class="sh_cpp">
+template &lt;
+    class TokenizerFunc,
+    class Type = std::string,
+    class Container = std::vector&lt;Type&gt;
+&gt;
+class basic_tokenizer : private container_generator&lt;Container&gt;,
+    public random_accessor&lt;Container&gt;;
+
+typedef basic_tokenizer&lt;char_separator&lt;char&gt;, std::string&gt; tokenizer;
+typedef basic_tokenizer&lt;escape_separator&lt;char&gt;, std::string&gt; csvtokenizer;
+typedef basic_tokenizer&lt;format_separator&lt;char&gt;, std::string&gt; strftokenizer;
+#ifdef CLX_USE_WCHAR
+typedef basic_tokenizer&lt;char_separator&lt;wchar_t&gt;, std::wstring&gt; wtokenizer;
+typedef basic_tokenizer&lt;escape_separator&lt;wchar_t&gt;, std::wstring&gt; wcsvtokenizer;
+typedef basic_tokenizer&lt;format_separator&lt;wchar_t&gt;, std::wstring&gt; wstrftokenizer;
+#endif
+</pre>
+
+<h1>Overview</h1>
+<p>tokenizer は，ポリシークラス (TokenizerFunc) に基づいて，
+指定された文字列をトークン文字列群に分割するためのクラスです．
+<a href="http://www.boost.org/libs/tokenizer/" target="_blank">boost::tokenizer</a>
+をベースに実装しています．boost::tokenizer との違いは，分割したトークンをコンテナ
+(Container&lt;Type&gt;) に格納することによって，分割後の各トークンに対して，
+ランダムアクセスを行うことができる点です．</p>
+
+<p>TokenizerFunc は，<a href="http://www.boost.org/libs/tokenizer/tokenizerfunction.htm"
+target="_blank">Boost TokenizerFunction</a> と同様のインターフェースを採用しています．
+そのため，ポリシークラスとして Boost TokenizerFunction を利用することも可能です（逆に，
+CLXのTokenizerFuncもBoostで利用可能）．独自にポリシークラス (TokenizerFunc)
+を作成する場合には，以下の型およびメソッドを定義する必要があります．標準で実装している
+TokenizerFunc については，<a href="tokenizer_func.html">tokenizer_func</a>
+を参照して下さい．</p>
+
+<pre class="sh_cpp">
+template &lt;class CharT&gt;
+class separator {
+public:
+    typedef CharT char_type;
+    
+    void reset();
+    template &lt;class InIter, class Token&gt;
+    bool operator()(InIter&amp; next, InIter last, Token&amp; dest);
+};
+</pre>
+
+<p>Typeに文字列以外の型 (int，long，...) が指定された場合，コンテナに格納する直前に
+<a href="lexical_cast.html">lexical_cast</a> によるキャストを試みます．
+キャストに失敗した場合には，<a href="lexical_cast.html">lexical_cast</a>
+から例外が送出されます．</p>
+
+<h1>Examples</h1>
+
+<h2>Tokenizer</h2>
+<p><a href="example/example_tokenizer.cpp">example_tokenizer.cpp</a></p>
+
+<pre class="sh_cpp">
+#include &lt;iostream&gt;
+#include &lt;string&gt;
+#include &quot;clx/tokenizer.h&quot;
+
+int main(int argc, char* argv[]) {
+    std::string s = &quot;This is, a test&quot;;
+    clx::tokenizer tok(s);
+    
+    for (unsigned int i = 0; i &lt; tok.size(); i++) {
+        std::cout &lt;&lt; '&lt;' &lt;&lt; tok.at(i) &lt;&tl; &quot;&gt; &quot;;
+    }
+    std::cout &lt;&lt; std::endl;
+    
+    return 0;
+}
+</pre>
+
+<pre>
+<strong>Result</strong> &lt;This&gt; &lt;is,&gt; &lt;a&gt; &lt;test&gt;
+</pre>
+
+<h2>Formatted Tokenizer</h2>
+<p><a href="example/example_strftokenizer.cpp">example_strftokenizer.cpp</a></p>
+
+<pre class="sh_cpp">
+#include &lt;iostream&gt;
+#include &quot;clx/tokenizer.h&quot;
+
+int main(int argc, char* argv[]) {
+    std::string s = &quot;23:30:25.030254  IP  192.168.1.2.100 &gt; 192.168.1.3.200:
+      . ack 12 win 256 &lt;XXX&gt;&quot;;
+    std::string fmt = &quot;%s:%s:%s.%s IP %s &gt; %s: %s ack %s win %s &lt;%s&gt;&quot;;
+    
+    clx::format_separator&lt;char&gt; f(fmt);
+    clx::strftokenizer tok(f);
+    
+    tok.assign(s);
+    std::cout &lt;&lt; &quot;Member: &quot; &lt;&lt; tok.size() &lt;&lt; std::endl;
+    for (unsigned int i = 0; i &lt; tok.size(); i++) {
+        std::cout &lt;&lt; '&lt;' &lt;&lt; tok[i] &lt;&lt; &quot;&gt; &quot;;
+    }
+    std::cout &lt;&lt; std::endl;
+    
+    return 0;
+}
+</pre>
+
+<pre>
+<strong>Result</strong>
+Member: 10
+&lt;23&gt; &lt;30&gt; &lt;25&gt; &lt;030254&gt; &lt;192.168.1.2.100&gt; &lt;192.168.1.3.200&gt; &lt;.&gt; &lt;12&gt; &lt;256&gt; &lt;XXX&gt;
+</pre>
+
+<p>strftokenizer は，C 標準ライブラリの scanf() のように与えられた書式に基づいて文字列を分割します．
+ただし，書式で与えられた型修飾子は無視し，分割後の各トークンの型はテンプレート引数の Type
+として認識するので，書式の型修飾子は "s" のみを用いて下さい．</p>
+
+<h1>Template Parameters</h1>
+<dl>
+<dt>TokenizerFunc</dt><dd>文字列を分割するためのポリシーを指定します．</dd>
+<dt>Type</dt><dd>分割したトークンの型を指定します．デフォルト値は，std::string</dd>
+<dt>Container</dt><dd>Type型のトークンを格納するためのコンテナを指定します．デフォルト値は，std::vector</dd>
+</dl>
+
+<h1>Related Types</h1>
+<pre class="sh_cpp">
+typedef TokenizerFunc functor;
+typedef typename functor::char_type char_type;
+typedef std::basic_string&lt;char_type&gt; string_type;
+typedef Type value_type;
+typedef Container container;
+</pre>
+
+<h1>Construction and Member Functions</h1>
+
+<pre class="sh_cpp">
+explicit basic_tokenizer(functor f = functor());
+explicit basic_tokenizer(const string_type&amp; s, functor f = functor());
+explicit basic_tokenizer(const char_type* s, functor f  = functor());
+
+template &lt;class InIter&gt;
+basic_tokenizer(InIter first, InIter last, functor f = functor());
+
+virtual ~basic_tokenzier() throw();
+</pre>
+
+<p>コンストラクタには，分割を行う文字列，または文字列のイテレータを指定します．
+コンストラクタは，assign() メソッドを実行して指定された文字列を分割します．
+assign() メソッドに関しては後述します．</p>
+
+<pre class="sh_cpp">
+basic_tokenizer&amp; assign(const string_type&amp; s);
+basic_tokenizer&amp; assign(const char_type* s);
+
+template &lt;class InIter&gt;
+basic_tokenizer&amp; assign(InIter first, InIter last);
+
+void reset();
+</pre>
+
+<p>assign() メソッドは，TokenizerFunc にしたがって指定された文字列を分割します．
+分割した文字列は Container で指定されたクラスへ格納されます．tokenizer は，
+Container クラスを継承しているので，分割された各トークンへのアクセスは
+Container で提供されている各メソッドを利用して行います．</p>
+
+<p>Container （の継承）に関する詳細は，<a href="container_wrapper.html">container_wrapper</a>
+を参照して下さい．</p>
+
+<h1>Related Pages</h1>
+<ol>
+<li><a href="tokenizer_func.html">CLX C++ Libraries - tokenizer_func</a></li>
+<li><a href="container_wrapper.html">CLX C++ Libraries - container_wrapper</a></li>
+</ol>
+
+<h1>References</h1>
+<ol>
+<li><a href="http://www.boost.org/doc/libs/1_35_0/libs/tokenizer/index.html"
+target="_blank">Boost C++ Libraries - Boost Tokenizer Overview</a></li>
+<li><a href="http://www.boost.org/doc/libs/1_35_0/libs/tokenizer/tokenizerfunction.htm"
+target="_blank">Boost C++ Libraries - TokenizerFunction Concept</a></li>
+</ol>
+
+</div>
+<!-- end of main text -->
+
+<!-- footer -->
+<div class="foot">
+<address class="copyright">
+Copyright &copy; 2004 - 2009, clown. All rights reserved.
+Mailto: tt.clown(a)gmail.com
+</address>
+</div>
+<!-- end of footer -->
+
+</div>
+</body>
+
+</html>

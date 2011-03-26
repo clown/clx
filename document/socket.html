@@ -1,0 +1,154 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ja">
+
+<head>
+<meta name="author" content="clown">
+<meta http-equiv="Content-type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<meta http-equiv="Content-Script-Type" content="text/javascript">
+
+<script type="text/javascript" src="script/sh_main.js"></script>
+<script type="text/javascript" src="script/sh_cpp.js"></script>
+
+<link rel="index" href="index.html">
+<link rel="stylesheet" href="style/default.css" type="text/css">
+<link rel="stylesheet" href="style/hilight.css" type="text/css">
+
+<title>CLX C++ Libraries - socket</title>
+</head>
+
+<body onload="sh_highlightDocument()">
+<div class="contents">
+
+<!-- header -->
+<div class="title">
+<a href="http://clx.cielquis.net/">CLX C++ Libraries</a>
+<a href="http://b.hatena.ne.jp/entry/http://clx.cielquis.net/socket.html">
+<img src="http://d.hatena.ne.jp/images/b_entry.gif"
+  width="16" height="12" border="0">
+</a>
+</div>
+<div class="head"><a href="index.html">Home</a> &gt;&gt;
+<a href="socket.html">socket</a></div>
+<!-- end of header -->
+
+<!-- main text -->
+<div class="main">
+
+<h1>Declaration</h1>
+<pre class="sh_cpp">
+// socket_intとsocklen_typeのみグローバル名前空間で宣言
+#ifdef CLX_WIN32
+typedef SOCKET socket_int;
+typedef int socklen_type;
+#else
+typedef int socket_int;
+typedef socklen_t socklen_type;
+#endif
+
+template &lt;
+    int Type,
+    int Family,
+    int Protocol = 0
+&gt;
+class basic_rawsocket;
+
+class socket_error;
+</pre>
+
+<h1>Overview</h1>
+<p>rawsocket は，ソケットのラッパクラスです．このクラスから各種ソケットクラス
+(<a href="udp.html">udp::socket</a>，<a href="tcp.html">tcp::socket</a>，
+<a href="acceptor.html">tcp::acceptor</a>，<a href="icmp.html">icmp::socket</a>)
+へ派生します．現在は，POSIX および Winsock に対応しています．socket_error は，
+ソケットを用いた通信中に何らかのエラーが発生した場合に送出される例外です．
+ユーザには，<a href="http://www.linux.or.jp/JM/html/LDP_man-pages/man3/errno.3.html"
+target="_blank">errno</a> に対応するエラーメッセージを知らせます．</p>
+
+<h1>Template Parameters</h1>
+<dl>
+<dt>Type</dt><dd>ソケットタイプを指定します．</dd>
+<dt>Family</dt><dd>プロトコルファミリーを指定します．</dd>
+<dt>Protocl</td><dd>プロトコルを指定します．デフォルト値は，0
+（詳細は，<a href="http://www.linux.or.jp/JM/html/LDP_man-pages/man2/socket.2.html"
+target="_blank">Manpage of SOCKET</a> を参照して下さい）．</dd>
+</dl>
+
+<h1>Construction and Member Functions</h1>
+<pre class="sh_cpp">
+basic_rawsocket();
+explicit basic_rawsocket(const basic_rawsocket&amp; cp);
+explicit basic_rawsocket(socket_int s);
+virtual ~basic_rawsocket();
+</pre>
+
+<p>コンストラクタに引数が指定された場合，指定された引数で assign() メソッドを実行します．
+assign() メソッドに関しては後述します．</p>
+
+<pre class="sh_cpp">
+basic_rawsocket&amp; assign(const basic_rawsocket&amp; cp);
+basic_rawsocket&amp; assign(socket_int s);
+</pre>
+
+<p>引数に basic_rawsocket クラスが指定された場合は，同じソケットを共有する
+basic_rawsocket のコピーを生成します．ここで生成された 2 つの basic_rawsocket
+は同じソケットを共有する為，どちらか一方が close() メソッドを実行すると，
+もう片方の basic_rawsocket も通信が終了します．</p>
+
+<p>引数に socket_int が指定された場合は，指定された引数を基に新たな basic_rawsocket
+を生成します．</p>
+
+<pre class="sh_cpp">
+virtual socket_int open();
+virtual void close();
+</pre>
+
+<p>open() メソッドは，ソケット通信を行うための新たなソケットを取得し，
+そのソケットを基にして basic_rawsocket を初期化します．</p>
+
+<p>close() メソッドは，ソケット通信を<strong>明示的に</strong>終了します．
+前述したように，コピーコンストラクタなどを通じて複数の basic_rawsocket
+が 1 つのソケットを共有している場合，それらの basic_rawsocket の 1 つが
+close() メソッドを実行した時点で他の basic_rawsocket もそれ以上通信を行う事ができなくなります．
+尚，close() メソッドを実行せずに終了した場合，同じソケットを共有している
+basic_rawsocket の中で最後に実行されたデストラクタによって通信が終了します．</p>
+
+<pre class="sh_cpp">
+socket_int socket() const;
+</pre>
+
+<p>ソケットを返します．この値は，ユーザがシステムコールを直接操作する場合に必要になります．</p>
+
+<h1>Related Pages</h1>
+<ol>
+<li><a href="udp.html">CLX C++ Libraries - udp::socket</a></li>
+<li><a href="tcp.html">CLX C++ Libraries - tcp::socket</a></li>
+<li><a href="acceptor.html">CLX C++ Libraries - tcp::acceptor</a></li>
+<li><a href="icmp.html">CLX C++ Libraries - icmp::socket</a></li>
+</ol>
+
+<h1>References</h1>
+<ol>
+<li><a href="http://www.linux.or.jp/JM/html/LDP_man-pages/man2/socket.2.html"
+target="_blank">Manpage of SOCKET</a></li>
+<li><a href="http://www.linux.or.jp/JM/html/LDP_man-pages/man3/errno.3.html"
+target="_blank">Manpage of ERRNO</a></li>
+</ol>
+
+</div>
+<!-- end of main text -->
+
+<!-- footer -->
+<div class="foot">
+<address class="copyright">
+Copyright &copy; 2004 - 2008, clown. All rights reserved.
+Mailto: tt.clown(a)gmail.com
+</address>
+</div>
+<!-- end of footer -->
+
+</div>
+</body>
+
+</html>

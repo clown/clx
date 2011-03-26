@@ -1,0 +1,153 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ja">
+
+<head>
+<meta name="author" content="clown">
+<meta http-equiv="Content-type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<meta http-equiv="Content-Script-Type" content="text/javascript">
+
+<script type="text/javascript" src="script/sh_main.js"></script>
+<script type="text/javascript" src="script/sh_cpp.js"></script>
+
+<link rel="index" href="index.html">
+<link rel="stylesheet" href="style/default.css" type="text/css">
+<link rel="stylesheet" href="style/hilight.css" type="text/css">
+
+<title>CLX C++ Libraries - istream_utility</title>
+</head>
+
+<body onload="sh_highlightDocument()">
+<div class="contents">
+
+<!-- header -->
+<div class="title">
+<a href="http://clx.cielquis.net/">CLX C++ Libraries</a>
+<a href="http://b.hatena.ne.jp/entry/http://clx.cielquis.net/istream_utility.html">
+<img src="http://d.hatena.ne.jp/images/b_entry.gif"
+  width="16" height="12" border="0">
+</a>
+</div>
+<div class="head"><a href="index.html">Home</a> &gt;&gt;
+<a href="istream_utility.html">istream_utility</a></div>
+<!-- end of header -->
+
+<!-- main text -->
+<div class="main">
+
+<h1>Overview</h1>
+
+<p>入力ストリームからデータを読み込む際の補助関数群です．現在では，read(), および get()
+関数を提供しています．各関数の最後の引数には，ストリームのエンディアンを指定する事ができます．
+引数に指定できる値は，以下の通りです．</p>
+
+<ul style="list-style-type:none">
+<li><strong>endian::none</strong> ..... 実行環境のエンディアンと同じ</li>
+<li><strong>endian::little</strong> ..... リトル・エンディアン</li>
+<li><strong>endian::big</strong> ..... ビッグ・エンディアン</li>
+</ul>
+
+<p>get() の格納先の変数，および read() の格納先のコンテナの各要素の型が 1 バイトよりも大きな型
+(short, int, ...) であり，かつ引数に指定されたエンディアンと実行環境のエンディアンが異なる場合は，
+変数に読み込んだ値に対して std::reverse() を適用してバイト列を反転させます．</p>
+
+<h1>Example</h1>
+<p><a href="example/example_istream_utility.cpp">example_istream_utility.cpp</a></p>
+
+<pre class="sh_cpp">
+#include &lt;algorithm&gt;
+#include &lt;iostream&gt;
+#include &lt;fstream&gt;
+#include &lt;string&gt;
+#include &quot;clx/utility.h&quot;
+
+int main(int argc, char* argv[]) {
+    if (argc &lt; 2) std::exit(-1);
+    
+    std::fstream fs(argv[1]);
+    
+    std::string s;
+    if (!clx::read(fs, s)) std::cout &lt;&lt; &quot;error: something is wrong.&quot; &lt;&lt; std::endl;
+    else std::cout &lt;&lt; &quot;file size: &quot; &lt;&lt; s.size() &lt;&lt; std::endl;
+    
+    fs.clear(); // EOF フラグ等をクリア
+    fs.seekg(0);
+    
+    char buf[256];
+    std::size_t n = clx::read(fs, buf);
+    if (n == 0) std::cout &lt;&lt; &quot;empty&quot; &lt;&lt; std::endl;
+    else std::cout &lt;&lt; std::string(buf, std::min(n, sizeof(buf))) &lt;&lt; std::endl;
+    
+    return 0;
+}
+</pre>
+
+<pre>
+$ ./a example_istream_utility.cpp 
+file size: 2470
+/* ------------------------------------------------------------------------- */
+/*
+ *  example_istream_utility.cpp
+ *
+ *  Copyright (c) 2004 - 2010, clown. All rights reserved.
+ *
+ *  Redistribution and use in source and binary forms, with or without
+</pre>
+
+<h1>Functions</h1>
+<pre class="sh_cpp">
+template &lt;class Ch, class Tr, class Type, std::size_t N&gt;
+std::size_t read(std::basic_istream&lt;Ch, Tr&gt;&amp; in, Type (&amp;dest)[N],
+    int which = endian::none);
+</pre>
+
+<p>read() 関数テンプレートは，入力ストリームから最大 N * sizeof(Type) バイトのデータを
+dest に格納します．EOF に達した場合は，std::ios_base::eofbit をセットします．
+ストリームからデータが全く読み込まれなかった場合は，std::ios_base::failbit をセットします．
+戻り値は in から読み込んだ要素数（バイト数ではない）です．</p>
+
+<pre class="sh_cpp">
+template &lt;class Ch, class Tr, class Type, class Container&gt;
+std::basic_istream&lt;Ch, Tr&gt;&amp; read(std::basic_istream&lt;Ch, Tr&gt;&amp; in, Container&amp; dest,
+    int which = endian::none);
+</pre>
+
+<p>read() 関数テンプレートは，入力ストリームから最大 max_size() * sizeof(Container::value_type)
+バイトのデータを dest に格納します．EOF に達した場合，std::ios_base::eofbit をセットします．
+EOF に達する前に max_size() に達した場合は，std::ios_base::failbit をセットします．
+また，ストリームからデータが全く読み込まれなかった場合も，std::ios_base::failbit をセットします．
+戻り値は in です．</p>
+
+<pre class="sh_cpp">
+template &lt;class Ch, class Tr, class Type, class Type&gt;
+std::basic_istream&lt;Ch, Tr&gt;&amp; get(std::basic_istream&lt;Ch, Tr&gt;&amp; in, Type&amp; dest,
+    int which = endian::none);
+</pre>
+
+<p>get() 関数テンプレートは，入力ストリームから sizeof(Type) バイトのデータを dest に格納します．
+データが読み込まれなかった場合は，std::ios_base::failbit をセットします．
+EOF に達したためにデータが読み込まれなかった場合は，それに加えて std::ios_base::eofbit をセットします．
+戻り値は in です．</p>
+
+<h1>References</h1>
+<ol>
+<li><a href="http://d.hatena.ne.jp/tt_clown/20100112/1263286891"
+target="_blank">Life like a clown - ストリームから読み込んで STL コンテナに格納する</a></li>
+</ol>
+</div>
+<!-- end of main text -->
+
+<!-- footer -->
+<div class="foot">
+<address class="copyright">
+Copyright &copy; 2004 - 2010, clown. All rights reserved.
+Mailto: tt.clown(a)gmail.com
+</address>
+</div>
+<!-- end of footer -->
+
+</div>
+</body>
+
+</html>

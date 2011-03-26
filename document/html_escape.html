@@ -1,0 +1,107 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ja">
+
+<head>
+<meta name="author" content="clown">
+<meta http-equiv="Content-type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<meta http-equiv="Content-Script-Type" content="text/javascript">
+
+<script type="text/javascript" src="script/sh_main.js"></script>
+<script type="text/javascript" src="script/sh_cpp.js"></script>
+
+<link rel="index" href="index.html">
+<link rel="stylesheet" href="style/default.css" type="text/css">
+<link rel="stylesheet" href="style/hilight.css" type="text/css">
+
+<title>CLX C++ Libraries - html::escape</title>
+</head>
+
+<body onload="sh_highlightDocument()">
+<div class="contents">
+
+<!-- header -->
+<div class="title">
+<a href="http://clx.cielquis.net/">CLX C++ Libraries</a>
+<a href="http://b.hatena.ne.jp/entry/http://clx.cielquis.net/html_escape.html">
+<img src="http://d.hatena.ne.jp/images/b_entry.gif"
+  width="16" height="12" border="0">
+</a>
+</div>
+<div class="head"><a href="index.html">Home</a> &gt;&gt;
+<a href="html_escape.html">html::escape</a></div>
+<!-- end of header -->
+
+<!-- main text -->
+<div class="main">
+
+<h1>Declrations</h1>
+<pre class="sh_cpp">
+namespace html {
+    template &lt;class CharT, class InIter, class OutIter&gt;
+    OutIter escape(InIter first, InIter last, OutIter result);
+    
+    template &lt;class Ch, class Tr&gt;
+    std::basic_string&lt;Ch, Tr&gt; escape(const std::basic_string&lt;Ch, Tr&gt; s);
+    
+    template &lt;class CharT&gt;
+    std::basic_string&lt;CharT&gt; escape(const CharT* s);
+}
+</pre>
+
+<h1>Overview</h1>
+<p>html::escape は，html 文書で制御文字として使われている文字をエスケープするための関数です．
+エスケープする文字は，&quot;&amp;&quot;，&quot;&quot;&quot;，&quot;&lt;&quot;，&quot;&gt;&quot;，
+&quot;&#39;&quot;の 5 つです．尚，InIter と OutIter
+を引数に指定する関数を使用する場合は，以下のように文字型を明示する必要があります．</p>
+
+<pre class="sh_cpp">
+std::string src;
+std::string dest;
+std::insert_iterator pos(dest, dest.begin());
+
+clx::html::escape&lt;char&gt;(src.begin(), src.end(), pos)
+</pre>
+
+<h1>Example</h1>
+<p><a href="example/example_html.cpp">example_html.cpp</a></p>
+
+<pre class="sh_cpp">
+#include &lt;iostream&gt;
+#include &lt;iterator&gt;
+#include &quot;clx/html.h&quot;
+
+int main(int argc, char* argv[]) {
+    std::ostreambuf_iterator&lt;char&gt; result(std::cout);
+    
+    std::istreambuf_iterator&lt;char&gt; input(std::cin);
+    std::istreambuf_iterator&lt;char&gt; last;
+    clx::html::escape&lt;char&gt;(input, last, result);
+    
+    return 0;
+}
+</pre>
+
+<h1>Reference</h1>
+<ol>
+<li><a href="http://www.s34.co.jp/cpptechdoc/misc/src2html/index.html"
+target="_blank">S34 - Making of C++ Technical Documents</a></li>
+</ol>
+
+</div>
+<!-- end of main text -->
+
+<!-- footer -->
+<div class="foot">
+<address class="copyright">
+Copyright &copy; 2004 - 2008, clown. All rights reserved.
+Mailto: tt.clown(a)gmail.com
+</address>
+</div>
+<!-- end of footer -->
+
+</div>
+</body>
+
+</html>

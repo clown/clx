@@ -1,0 +1,279 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ja">
+
+<head>
+<meta name="author" content="clown">
+<meta http-equiv="Content-type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<meta http-equiv="Content-Script-Type" content="text/javascript">
+
+<script type="text/javascript" src="script/sh_main.js"></script>
+<script type="text/javascript" src="script/sh_cpp.js"></script>
+
+<link rel="index" href="index.html">
+<link rel="stylesheet" href="style/default.css" type="text/css">
+<link rel="stylesheet" href="style/hilight.css" type="text/css">
+
+<title>CLX C++ Libraries - ftp</title>
+</head>
+
+<body onload="sh_highlightDocument()">
+<div class="contents">
+
+<!-- header -->
+<div class="title">
+<a href="http://clx.cielquis.net/">CLX C++ Libraries</a>
+<a href="http://b.hatena.ne.jp/entry/http://clx.cielquis.net/ftp.html">
+<img src="http://d.hatena.ne.jp/images/b_entry.gif"
+  width="16" height="12" border="0">
+</a>
+</div>
+<div class="head"><a href="index.html">Home</a> &gt;&gt;
+<a href="ftp.html">ftp</a></div>
+<!-- end of header -->
+
+<!-- main text -->
+<div class="main">
+
+<h1>Declaration</h1>
+<pre class="sh_cpp">
+template &lt;
+    class Socket,
+    class Acceptor
+&gt;
+class basic_ftp : public Socket;
+
+typedef basic_ftp&lt;tcp::socket, tcp::acceptor&gt; ftp;
+</pre>
+
+<h1>Overview</h1>
+<p>ftp クラスは FTP (File Transfer Protocol) でファイルの転送を行うためのクラスです．
+start() メソッドで FTP サーバと接続し，login() メソッドでログイン処理を行った後，
+各種メソッドを用いて FTP サーバと通信を行います．</p>
+
+<p>FTP では，ファイルの送受信はデータコネクションを用いて行われます．そのため，
+ファイル転送を行う場合は，データコネクションの接続方法を指定する必要があります．
+接続方法には，FTP サーバからクライアントへ向けてコネクションが確立されるアクティブ接続
+（PORT コマンド）とクライアントから FTP サーバへ向けてコネクションが確立される
+パッシブ接続（PASV コマンド）が存在します．どちらの接続方法を用いるかは，
+引数に clx::ftp::active, clx::ftp::passive を指定して選択します．
+尚，デフォルトの接続方法はパッシブ接続を用いています．</p>
+
+<p>ftp クラスは，サーバからエラーメッセージが返された場合には ftp_error を例外として送出します．
+また，ftp クラスはサーバからの応答メッセージを内部に蓄積するように実装しています．
+responses() メソッドを呼ぶと，サーバからの応答メッセージの一覧を取得することができます．</p>
+
+<h1>Example</h1>
+<p><a href="example/example_ftp.cpp">example_ftp.cpp</a></p>
+
+<pre class="sh_cpp">
+#include &lt;iostream&gt;
+#include &lt;string&gt;
+#include &lt;sstream&gt;
+#include &quot;clx/ftp.h&quot;
+
+int main(int argc, char* argv[]) {
+    if (argc &lt; 4) {
+        std::cerr &lt;&lt; &quot;usage &quot; &lt;&lt; argv[0] &lt;&lt; &quot; host id pass&quot; &lt;&lt; std::endl;
+        std::exit(-1);
+    }
+    
+    try {
+        clx::ftp session(argv[1], 21);
+        
+        // 各種コマンドのテスト
+        session.login(argv[2], argv[3]);
+        session.status();
+        session.system();
+        session.command("HELP");
+        session.cd(&quot;/public_html&quot;);
+        session.pwd();
+        session.mkdir(&quot;tmp&quot;);
+        session.rmdir(&quot;tmp&quot;);
+        
+        /*
+         * list(), retrieve(), store() はデータコネクションを使用する．
+         * データコネクションを用いるメソッドは，最後の引数に
+         * アクティブ接続 (clx::ftp::active) かパッシブ接続 (clx::ftp::passive)
+         * を指定する．尚，省略時はパッシブ接続．
+         */
+        session.list(&quot;/public_html&quot;);
+        session.retrieve(&quot;/public_html/index.html&quot;, &quot;./result.txt&quot;, clx::ftp::binary);
+        session.store(&quot;./example_ftp.cpp&quot;, &quot;/public_html/example_ftp.cpp&quot;);
+        
+        session.remove(&quot;/public_html/example_ftp.cpp&quot;);
+        session.finish();
+        
+        // print message log
+        clx::ftp::response_array::reverse_iterator pos;
+        for (pos = session.responses().rbegin();
+            pos != session.responses().rend(); ++pos) {
+            std::cout &lt;&lt; pos-&gt;second &lt;&lt; std::endl;
+            std::cout &lt;&lt; std::endl;
+        }
+    }
+    catch (clx::ftp_error&amp; e) {
+        std::cerr &lt;&lt; e.code() &lt;&lt; &quot;: &quot; &lt;&lt; e.what() &lt;&lt; std::endl;
+        std::exit(-1);
+    }
+    catch (clx::socket_error&amp; e) {
+        std::cerr &lt;&lt; e.what() &lt;&lt; std::endl;
+        std::exit(-1);
+    }
+    catch (std::runtime_error&amp; e) {
+        std::cerr &lt;&lt; e.what() &lt;&lt; std::endl;
+        std::exit(-1);
+    }
+    
+    return 0;
+}
+</pre>
+
+<pre>
+<strong>Result</strong>
+ProFTPD  
+
+Password required for cielquis.
+
+User cielquis logged in.
+
+Status of 'FTP SERVER'
+ Connected from 61.127.142.47 (61.127.142.47)
+ Logged in as cielquis
+ TYPE: ASCII, STRUcture: File, Mode: Stream
+ No data connection
+End of status
+
+・・・（中略）・・・
+
+Goodbye.
+</pre>
+
+<h1>Template Parameters</h1>
+<dl>
+<dt>Socket</dt><dd>ソケットクラスを指定します．</dd>
+<dt>Acceptor</dt><dd>サーバ用のソケットクラスを指定します．</dd>
+</dl>
+
+<h1>Related Types</h1>
+<pre class="sh_cpp">
+typedef Socket socket_type;
+typedef Acceptor acceptor_type;
+typedef char char_type;
+typedef std::basic_string&lt;char_type&gt; string_type;
+
+typedef std::pair&lt;int, string_type&gt; response_type;
+typedef std::deque&lt;response_type&gt; response_array;
+</pre>
+
+<h1>Construction and Member Functions</h1>
+<pre class="sh_cpp">
+basic_ftp();
+basic_ftp(const basic_ftp&amp; cp);
+explicit basic_ftp(const string_type&amp; host, int port = 21);
+explicit basic_ftp(const char_type* host, int port = 21);
+virtual ~basic_ftp();
+
+basic_smtp&amp; start(const string_type&amp; host, int port = 21);
+basic_smtp&amp; start(const char_type* host, int port = 21);
+
+void finish();
+
+basic_smtp&amp; login(const string_type&amp; id, const string_type&amp; pass);
+basic_smtp&amp; login(const char_type* id, const char_type* pass);
+</pre>
+
+<p>start() メソッドで FTP サーバと接続し，login() メソッドでログイン処理を行います．</p>
+
+<pre class="sh_cpp">
+string_type pwd();
+string_type system();
+string_type status(const string_type&amp; name = &quot;&quot;);
+</pre>
+
+<p>pwd() メソッドはリモートホストのカレントディレクトリを返します．ただし，
+pwd() はサーバからの応答をそのまま返します．そのため，カレントディレクトリを表す
+path 以外の文字列が含まれる場合もあります（テスト環境では，&quot;/public_html&quot;
+is current directory. という文字列が返された）．</p>
+
+<p>system()，status() メソッドはそれぞれ SYST，STAT コマンドの結果を返します．
+status() メソッドにファイル名/ディレクトリ名を引数として指定した場合は，
+指定されたファイル/ディレクトリに関する情報が返されます．これは，後述する
+list() メソッドと同等の機能となります．</p>
+
+<pre class="sh_cpp">
+basic_ftp&amp; noop();
+basic_ftp&amp; reset();
+basic_ftp&amp; cd(const string_type&amp; dir);
+basic_ftp&amp; cdup();
+basic_ftp&amp; rename(const string_type&amp; from, const string_type&amp; to);
+basic_ftp&amp; remove(const string_type&amp; file);
+basic_ftp&amp; rmdir(const string_type&amp; dir);
+basic_ftp&amp; mkdir(const string_type&amp; dir);
+basic_ftp&amp; command(const string_type&amp; cmd);
+</pre>
+
+<p>FTP サーバに対して各種コマンドを送信します．サーバからの応答は responses()
+メソッドで取得できるキューに格納されます．</p>
+
+<p>reset() メソッドは REIN コマンドを FTP サーバに送信した後，
+サーバからの応答の履歴を全て消去します．そのため，reset()
+メソッドを呼び出した場合は再度 login() メソッドを用いてログインする必要があります．</p>
+
+<p>command() メソッドは SITE コマンドを用いて任意のコマンドを FTP サーバへ送信します．
+受け付けるコマンドに関しては，接続した FTP サーバに依存します．
+受け付けるコマンドは command("HELP") を用いて調べることができます．ただし，
+結果（サーバからの応答）は responses() で取得できるサーバからの応答の履歴に格納されます．</p>
+
+<pre class="sh_cpp">
+string_type list(const string_type&amp; name = &quot;&quot;, int mode = passive);
+
+basic_ftp&amp; retrieve(const string_type&amp; from, const string_type&amp; to,
+    int type = ascii, int mode = passive);
+basic_ftp&amp; store(const string_type&amp; from, const string_type&amp; to,
+    int type = ascii, int mode = passive);
+
+int&amp; port();
+int port() const;
+</pre>
+
+<p>list()，retrieve()，store() メソッドはデータコネクションを用いて通信を行います．
+そのため，アクティブ接続 (clx::ftp::active) かパッシブ接続 (clx::ftp::passive)
+を選択する必要があります．引数が省略された場合はパッシブ接続で通信を行います．
+アクティブ接続で通信を行う場合，通信に使用するポート番号は port()
+メソッドで指定することができます．port() メソッドが呼ばれなかった場合は，
+デフォルトのポート番号で通信を行います．</p>
+
+<p>retrieve() メソッド，および store() メソッドは通信モード (clx::ftp::active or
+clx::ftp::passive) の他にファイルタイプを指定する必要があります．ファイルタイプは，
+アスキーモード (clx::ftp::ascii) とバイナリモード (clx::ftp::binary) が存在します．
+引数を省略した場合はアスキーモードで通信を行います．これらのメソッドは，宛先 path
+に指定したファイル名が既に存在する場合は内容を上書きします．</p>
+
+<pre class="sh_cpp">
+response_array&amp; responses();
+const response_array&amp; responses() const;
+const response_type&amp; response(size_t index) const;
+</pre>
+
+<p>response() メソッドは，SMTP サーバからの応答メッセージの一覧を取得するためのメソッドです．
+それぞれの応答メッセージ (response_type) は，応答コードとメッセージのペアで構成されています．
+サーバからの応答メッセージはキュー (正確には std::deque) で管理しているため，
+最新のメッセージが先頭に格納されています．</p>
+</div>
+<!-- end of main text -->
+
+<!-- footer -->
+<div class="foot">
+<address class="copyright">
+Copyright &copy; 2004 - 2008, clown. All rights reserved.
+Mailto: tt.clown(a)gmail.com
+</address>
+</div>
+<!-- end of footer -->
+
+</div>
+</body>
+
+</html>

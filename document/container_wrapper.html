@@ -1,0 +1,200 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ja">
+
+<head>
+<meta name="author" content="clown">
+<meta http-equiv="Content-type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<meta http-equiv="Content-Script-Type" content="text/javascript">
+
+<script type="text/javascript" src="script/sh_main.js"></script>
+<script type="text/javascript" src="script/sh_cpp.js"></script>
+
+<link rel="index" href="index.html">
+<link rel="stylesheet" href="style/default.css" type="text/css">
+<link rel="stylesheet" href="style/hilight.css" type="text/css">
+
+<title>CLX C++ Libraries - container_wrapper</title>
+</head>
+
+<body onload="sh_highlightDocument()">
+<div class="contents">
+
+<!-- header -->
+<div class="title">
+<a href="http://clx.cielquis.net/">CLX C++ Libraries</a>
+<a href="http://b.hatena.ne.jp/entry/http://clx.cielquis.net/container_wrapper.html">
+<img src="http://d.hatena.ne.jp/images/b_entry.gif" width="16" height="12" border="0"></a>
+</div>
+<div class="head"><a href="index.html">Home</a> &gt;&gt;
+<a href="container_wrapper.html">container_wrapper</a></div>
+<!-- end of header -->
+
+<!-- main text -->
+<div class="main">
+
+<h1>Declarations</h1>
+<pre class="sh_cpp">
+template &lt;class Type, class Alloc = std::allocator&lt;Type&gt; &gt;
+class vector_wrapper;
+
+template &lt;class Type, class Alloc = std::allocator&lt;Type&gt; &gt;
+class deque_wrapper;
+
+template &lt;class Type, class Alloc = std::allocator&lt;Type&gt; &gt;
+class list_wrapper;
+
+template &lt;
+    class Key,
+    class Compare = std::less&lt;Key&gt;,
+    class Alloc = std::allocator&lt;Type&gt; &gt;
+&gt;
+class set_wrapper;
+
+template &lt;
+    class Key,
+    class Compare = std::less&lt;Key&gt;,
+    class Alloc = std::allocator&lt;Type&gt; &gt;
+&gt;
+class multiset_wrapper;
+
+template &lt;
+    class Key,
+    class Type,
+    class Compare = std::less&lt;Key&gt;,
+    class Alloc = std::allocator&lt;Type&gt; &gt;
+&gt;
+class map_wrapper;
+
+template &lt;
+    class Key,
+    class Type,
+    class Compare = std::less&lt;Key&gt;,
+    class Alloc = std::allocator&lt;Type&gt; &gt;
+&gt;
+class multimap_wrapper;
+</pre>
+
+<h1>Overview</h1>
+<p>ファイルの解析など何らかの操作を行った結果をコンテナに格納し，
+そのコンテナから各情報を取得するようなコードを書く機会にしばしば遭遇します．
+このとき，まず始めに思いつくのが，対象となる STL のコンテナ・クラスを継承して
+独自のメソッドのみを定義して拡張すると言う方法ですが，STL コンテナは継承される事を
+想定して設計されていないため，ユーザの利用方法によっては問題が生じる事があります．</p>
+
+<p>Container Wrapper は，STL の各コンテナクラスを安全に継承できる形にラップしたクラス群です．
+ユーザは，対象とする STL コンテナの代わりに対応する Container Wrapper
+クラスを継承する事により，各 STL コンテナで定義されているメソッド群を
+サブクラスでも利用することができるようになります．
+
+<p>Container Wrapper クラスは，ラップ元の STL コンテナへのキャスト演算子を定義しているので，
+（対応する）STL コンテナクラスを引数に指定する関数などにも渡す事が可能です．</p>
+
+<h1>Example</h1>
+<p><a href="example/example_deque_wrapper.cpp">example_deque_wrapper.cpp</a></p>
+
+<pre class="sh_cpp">
+#include &lt;iostream&gt;
+#include &lt;string&gt;
+#include &lt;deque&gt;
+#include &quot;clx/container_wrapper.h&quot;
+
+/* ------------------------------------------------------------------------- */
+//  exdeque
+/* ------------------------------------------------------------------------- */
+class exdeque : public clx::deque_wrapper&lt;std::string&gt; {
+public:
+    exdeque() : clx::deque_wrapper&lt;std::string&gt;() {}
+    
+    virtual ~exdeque() throw() {}
+    
+    void do_something() {
+        member.push_back(&quot;Hello, world!&quot;);
+        member.push_back(&quot;foo&quot;);
+        member.push_back(&quot;hoge&quot;);
+        member.push_back(&quot;Bye bye.&quot;);
+    }
+};
+
+/* ------------------------------------------------------------------------- */
+//  put_element
+/* ------------------------------------------------------------------------- */
+void put_element(const std::deque&lt;std::string&gt;&amp; v) {
+    std::cout &lt;&lt; &quot;size: &quot; &lt;&lt; v.size() &lt;&lt; std::endl;
+    std::cout &lt;&lt; &quot;--&quot; &lt;&lt; std::endl;
+    for (size_t i = 0; i &lt; v.size(); ++i) {
+        std::cout &lt;&lt; v[i] &lt;&lt; std::endl;
+    }
+    std::cout &lt;&lt; std::endl;
+}
+
+/* ------------------------------------------------------------------------- */
+//  main
+/* ------------------------------------------------------------------------- */
+int main(int argc, char* argv[]) {
+    exdeque v;
+    
+    v.do_something();
+    put_element(v);
+    
+    v.push_back(&quot;new element&quot;);
+    put_element(v);
+    
+    std::cout &lt;&lt; std::endl;
+    
+    return 0;
+}
+</pre>
+
+<pre>
+<strong>Result</strong>
+size: 4
+--
+Hello, world!
+foo
+hoge
+Bye bye.
+
+size: 5
+--
+Hello, world!
+foo
+hoge
+Bye bye.
+new element
+</pre>
+
+<p>ラップ元の STL コンテナのインスタンスは，<strong>member</strong> と言う変数名で保持しています．
+継承したサブクラス内で，直接 STL コンテナを操作する必要がある場合は，
+member と記述することでアクセスする事ができます．</p>
+
+<h1>Template Parameters, Construction, and Member Functions</h1>
+<p>対応する STL コンテナ・クラスのメソッドを参照して下さい．</p>
+
+<h1>References</h1>
+<ol>
+<li><a href="http://www.cplusplus.com/reference/"
+target="_blank">C++ Reference</a></li>
+<li><a href="http://d.hatena.ne.jp/tt_clown/20091008/1255007613"
+target="_blank">Container Accessors - Life like a clown</a></li>
+<li><a href="http://d.hatena.ne.jp/tt_clown/20091009/1255047431"
+target="_blank">Container Wrappers - Life like a clown</a></li>
+</ol>
+
+</div>
+<!-- end of main text -->
+
+<!-- footer -->
+<div class="foot">
+<address class="copyright">
+Copyright &copy; 2004 - 2009, clown. All rights reserved.
+Mailto: tt.clown(a)gmail.com
+</address>
+</div>
+<!-- end of footer -->
+
+</div>
+</body>
+
+</html>

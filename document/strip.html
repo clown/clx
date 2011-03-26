@@ -1,0 +1,130 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ja">
+
+<head>
+<meta name="author" content="clown">
+<meta http-equiv="Content-type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<meta http-equiv="Content-Script-Type" content="text/javascript">
+
+<script type="text/javascript" src="script/sh_main.js"></script>
+<script type="text/javascript" src="script/sh_cpp.js"></script>
+
+<link rel="index" href="index.html">
+<link rel="stylesheet" href="style/default.css" type="text/css">
+<link rel="stylesheet" href="style/hilight.css" type="text/css">
+
+<title>CLX C++ Libraries - strip</title>
+</head>
+
+<body onload="sh_highlightDocument()">
+<div class="contents">
+
+<!-- header -->
+<div class="title">
+<a href="http://clx.cielquis.net/">CLX C++ Libraries</a>
+<a href="http://b.hatena.ne.jp/entry/http://clx.cielquis.net/strip.html">
+<img src="http://d.hatena.ne.jp/images/b_entry.gif"
+  width="16" height="12" border="0">
+</a>
+</div>
+<div class="head"><a href="index.html">Home</a> &gt;&gt;
+<a href="salgorithm.html">salgorithm</a>&gt;&gt;
+<a href="strip.html">strip</a></div>
+<!-- end of header -->
+
+<!-- main text -->
+<div class="main">
+
+<h1>Declarations</h1>
+<pre class="sh_cpp">
+String&amp; strip(String&amp; s, const std::locale&amp; loc = std::locale());
+String strip_copy(const String&amp; s, const std::locale&amp; loc = std::locale());
+String&amp; strip_if(String&amp; s, PredicateFunc f);
+String strip_copy_if(const String&amp; s, PredicateFunc f);
+
+String&amp; lstrip(String&amp; s, const std::locale&amp; loc = std::locale());
+String lstrip_copy(const String&amp; s, const std::locale&amp; loc = std::locale());
+String&amp; lstrip_if(String&amp; s, PredicateFunc f);
+String lstrip_copy_if(const String&amp; s, PredicateFunc f);
+
+String&amp; rstrip(String&amp; s, const std::locale&amp; loc = std::locale());
+String rstrip_copy(const String&amp; s, const std::locale&amp; loc = std::locale());
+String&amp; rstrip_if(String&amp; s, PredicateFunc f);
+String rstrip_copy_if(const String&amp; s, PredicateFunc f);
+
+String&amp; chop(String&amp; s);
+String chop_copy(const String&amp; s);
+String&amp; chop_if(String&amp; s, PredicateFunc f);
+String chop_copy_if(const String&amp; s, PredicateFunc f);
+
+String&amp; chomp(String&amp; s);
+String chomp_copy(const String&amp; s);
+</pre>
+
+<h1>Overview</h1>
+<p>strip() は，文字列の前後に存在する空白文字を除去します．lstrip()，rstrip()
+はそれぞれ，文字列の先頭，末尾に存在する空白文字を除去します．chop()
+は末尾の文字を1文字除去し，chomp() は末尾の改行文字を除去します．</p>
+
+<p>strip_copy()，lstrip_copy()，rstrip_copy()，chop_copy()，chomp_copy()
+は，引数として指定された文字列を直接変更せず，コピーした文字列を変更します．
+また，strip_if()，lstrip_if()，rstrip_if() は，それぞれ文字列の前後，先頭，
+末尾に存在する文字に対して PredicateFunc で指定された Functor が真を返す時のみ，
+その文字を除去します．</p>
+
+<p>尚，Declarations においては template &lt; ... &gt; の部分を省略していますが，
+単語の先頭が大文字になっているものはテンプレート引数として渡される型です（ただし，
+String は std::basic_string&lt;CharT, Traits&gt;）．</p>
+
+<h1>Example</h1>
+<p><a href="example/example_strip.cpp">example_strip.cpp</a></p>
+
+<pre class="sh_cpp">
+#include &lt;string&gt;
+#include &lt;iostream&gt;
+#include &quot;clx/salgorithm.h&quot;
+
+int main(int argc, char* argv[]) {
+    std::string s = &quot;*****Hello, world!*****&quot;;
+    
+    std::cout &lt;&lt; &quot;original: &quot; &lt;&lt; s &lt;&lt; std::endl;
+    std::cout &lt;&lt; &quot;strip:    &quot; &lt;&lt; clx::strip_copy_if(s, clx::is_any_of(&quot;*&quot;))
+        &lt;&lt; std::endl;
+    std::cout &lt;&lt; &quot;lstrip:   &quot; &lt;&lt; clx::lstrip_copy_if(s, clx::is_any_of(&quot;*&quot;))
+        &lt;&lt; std::endl;
+    std::cout &lt;&lt; &quot;rstrip:   &quot; &lt;&lt; clx::rstrip_copy_if(s, clx::is_any_of(&quot;*&quot;))
+        &lt;&lt; std::endl;
+    std::cout &lt;&lt; &quot;chop:     &quot; &lt;&lt; clx::chop_copy_if(s, clx::is_any_of(&quot;*&quot;))
+        &lt;&lt; std::endl;
+    
+    return 0;
+}
+</pre>
+
+<pre>
+<strong>Result</strong>
+original: *****Hello, world!*****
+strip:    Hello, world!
+lstrip:   Hello, world!*****
+rstrip:   *****Hello, world!
+chop:     *****Hello, world!****
+</pre>
+
+</div>
+<!-- end of main text -->
+
+<!-- footer -->
+<div class="foot">
+<address class="copyright">
+Copyright &copy; 2004 - 2008, clown. All rights reserved.
+Mailto: tt.clown(a)gmail.com
+</address>
+</div>
+<!-- end of footer -->
+
+</div>
+</body>
+
+</html>

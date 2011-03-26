@@ -1,0 +1,307 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ja">
+
+<head>
+<meta name="author" content="clown">
+<meta http-equiv="Content-type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<meta http-equiv="Content-Script-Type" content="text/javascript">
+
+<script type="text/javascript" src="script/sh_main.js"></script>
+<script type="text/javascript" src="script/sh_cpp.js"></script>
+
+<link rel="index" href="index.html">
+<link rel="stylesheet" href="style/default.css" type="text/css">
+<link rel="stylesheet" href="style/hilight.css" type="text/css">
+
+<title>CLX C++ Libraries - icmp::socket</title>
+</head>
+
+<body onload="sh_highlightDocument()">
+<div class="contents">
+
+<!-- header -->
+<div class="title">
+<a href="http://clx.cielquis.net/">CLX C++ Libraries</a>
+<a href="http://b.hatena.ne.jp/entry/http://clx.cielquis.net/icmp.html">
+<img src="http://d.hatena.ne.jp/images/b_entry.gif"
+  width="16" height="12" border="0">
+</a>
+</div>
+<div class="head"><a href="index.html">Home</a> &gt;&gt;
+<a href="icmp.html">icmp::socket</a></div>
+<!-- end of header -->
+
+<!-- main text -->
+<div class="main">
+
+<h1>Declaration</h1>
+
+<pre class="sh_cpp">
+#define ICMP_ECHO_REQUEST 8
+#define ICMP_ECHO_REPLY 0
+
+namespace icmp {
+    template &lt;int Family&gt;
+    class basic_socket : public basic_rawsocket&lt;SOCK_RAW, Family, IPPROTO_ICMP&gt;
+    
+    typedef basic_rawsocket&lt;SOCK_RAW, AF_INET, IPPROTO_ICMP&gt; rawsocket;
+    typedef basic_socket&lt;AF_INET&gt; socket;
+    typedef basic_sockaddress&lt;AF_INET, IPPROTO_ICMP&gt; sockaddress;
+    typedef basic_sockmanager&lt;SOCK_RAW, AF_INET, IPPROTO_ICMP&gt; sockmanager;
+};
+</pre>
+
+<h1>Overview</h1>
+<p>icmp::socket は，ICMP 用ソケットのラッパクラスです．現在は，ICMP ECHO REQUEST
+の送信，および ICMP ECHO REPLY の受信しか想定していません（値を define していない）．
+IPヘッダおよびICMPヘッダは，それぞれ ip.h，icmp.h のグローバル名前空間において，
+独自に定義しています．</p>
+
+<pre class="sh_cpp">
+struct iphdr {
+    u_int8_t  ihl:4;
+    u_int8_t  version:4;
+    u_int8_t  tos;
+    
+    u_int16_t tot_len;
+    u_int16_t id;
+    u_int16_t frag_off;
+    
+    u_int8_t  ttl;
+    u_int8_t  protocol;
+    u_int16_t check;
+    
+    unsigned long saddr;
+    unsigned long daddr;
+};
+
+struct icmphdr {
+    u_int8_t  type;
+    u_int8_t  code;
+    u_int16_t checksum;
+    u_int16_t id;
+    u_int16_t sequence;
+};
+</pre>
+
+<p>また，データに付与されているIPヘッダ，ICMPヘッダを扱うための packet_header
+も定義しています．packet_header は，（IP ヘッダ + ICMP ヘッダが付与されている）
+受信データを引数として指定されると，受信データからヘッダ情報をコピーします．</p>
+
+<pre class="sh_cpp">
+namespace icmp {
+    class packet_header {
+    public:
+        typedef struct iphdr ip_type;
+        typedef struct icmphdr icmp_type;
+        typedef size_t size_type;
+        
+        packet_header();
+        explicit packet_header(const char* packet);
+        virtual ~packet_header();
+        
+        packet_header&amp; operator=(const char* packet);
+        packet_header&amp; assign(const char* packet);
+        void reset();
+        
+        size_type size() const;
+        size_type ip_size() const;
+        size_type icmp_size() const;
+        
+        ip_type* ip();
+        icmp_type* icmp();
+        
+        const ip_type* ip() const;
+        const icmp_type* icmp() const;
+    };
+};
+</pre>
+
+<p>ICMP ソケットを用いて通信を行う場合，送信時にはデータの先頭に ICMP
+ヘッダを付与して送信する必要があります．また，受信されるデータには，
+IP ヘッダ，および ICMP ヘッダが付与されています．</p>
+
+<h1>Example</h1>
+<p><a href="example/example_icmp.cpp">example_icmp.cpp</a></p>
+
+<pre class="sh_cpp">
+#include &lt;iostream&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;memory&gt;
+#include &quot;clx/icmp.h&quot;
+#include &quot;clx/timer.h&quot;
+#include &quot;clx/argument.h&quot;
+#include &quot;clx/format.h&quot;
+
+int main(int argc, char* argv[]) {
+    clx::argument arg(argc, argv);
+    if (arg.head().empty()) {
+        std::cerr &lt;&lt; &quot;usage &quot; &lt;&lt; argv[0]
+            &lt;&lt; &quot; hostname [-l data_bytes]&quot; &lt;&lt; std::endl;
+        return -1;
+    }
+    
+    /*
+     * bufは送受信兼用バッファ．
+     *   -send()メソッド: payload + ICMPヘッダ長
+     *   -recv()メソッド: payload + IPヘッダ長 + ICMPヘッダ長
+     * 以上を考慮して大きめに領域を確保する．
+     */
+    clx::icmp::packet_header hdr;
+    int payload = 56;
+    arg(&quot;l,length&quot;, payload);
+    int packetsize = payload + hdr.icmp_size();
+    int buffsize = packetsize + 1024;
+    std::auto_ptr&lt;char&gt; buf(new char[buffsize]);
+    
+    try {
+        clx::icmp::socket s(arg.head().at(0));
+        std::cout &lt;&lt; clx::format(&quot;ICMP ECHO %s (%s): %d data bytes&quot;)
+            % arg.head().at(0) % s.to().ipaddr() % payload
+        &lt;&lt; std::endl;
+        
+        int seq = 0;
+        while (1) {
+            std::memset(buf.get(), 'a', packetsize);
+            
+            // sending ICMP echo request
+            hdr.reset();
+            hdr.icmp()-&gt;type = ICMP_ECHO_REQUEST;
+            hdr.icmp()-&gt;sequence = seq;
+            std::memcpy(buf.get(), (char*)hdr.icmp(), hdr.icmp_size());
+            s.send(buf.get(), packetsize);
+            clx::timer t;
+            
+            // receiving ICMP echo packet
+            std::memset(buf.get(), 0, buffsize);
+            int len = s.recv(buf.get(), buffsize);
+            if (len &lt; 0) return -1;
+            double recv = t.total_elapsed();
+            
+            // print information
+            hdr = buf.get();
+            if (hdr.icmp()-&gt;type == ICMP_ECHO_REPLY) {
+                std::cout &lt;&lt;
+                    clx::format(&quot;%d bytes from %s: icmp_seq=%d ttl=%d time=%d ms&quot;)
+                    % len % s.from().ipaddr()
+                    % static_cast&lt;int&gt;(hdr.icmp()-&gt;sequence)
+                    % static_cast&lt;int&gt;(hdr.ip()-&gt;ttl)
+                    % static_cast&lt;int&gt;(recv * 1000)
+                &lt;&lt; std::endl;
+                seq = hdr.icmp()-&gt;sequence + 1;
+            } else {
+                std::cerr &lt;&lt; clx::format(&quot;received ICMP packet (type: %d) from %s&quot;)
+                    % static_cast&lt;int&gt;(hdr.icmp()-&gt;type) % s.from().ipaddr()
+                &lt;&lt; std::endl;
+            }
+            
+            clx::sleep(1.0);
+        }
+    }
+    catch (clx::socket_error&amp; e) {
+        std::cerr &lt;&lt; e.what() &lt;&lt; std::endl;
+        return -1;
+    }
+    catch (clx::sockaddress_error&amp; e) {
+        std::cerr &lt;&lt; e.what() &lt;&lt; std::endl;
+        return -1;
+    }
+    
+    return 0;
+}
+</pre>
+
+<pre>
+<strong>Result</strong>
+$ ./test yahoo.com -l 1000
+ICMP ECHO yahoo.com (68.180.206.184): 1000 data bytes
+1028 bytes from 68.180.206.184: icmp_seq=0 ttl=46 time=156 ms
+1028 bytes from 68.180.206.184: icmp_seq=1 ttl=46 time=159 ms
+1028 bytes from 68.180.206.184: icmp_seq=2 ttl=46 time=168 ms
+1028 bytes from 68.180.206.184: icmp_seq=3 ttl=46 time=171 ms
+1028 bytes from 68.180.206.184: icmp_seq=4 ttl=46 time=162 ms
+1028 bytes from 68.180.206.184: icmp_seq=5 ttl=46 time=158 ms
+</pre>
+
+<p>ping のような動きをします．指定されたホスト名に対して，</p>
+
+<ol>
+<li>ICMP ECHO REQUEST を送信する．</li>
+<li>ICMP ECHO REPLY を受信する．</li>
+<li>1 秒スリープする．</li>
+</ol>
+
+<p>と言う動きを繰り返します．RTT の計測にはタイムスタンプは使わずに，send()
+メソッドが成功した直後から recv() メソッドが成功した直後までの時間を表示しています．</p>
+
+<h1>Template Parameters</h1>
+<dl>
+<dt>Family</dt><dd>プロトコルファミリーを指定します．</dd>
+</dl>
+
+<h1>Related Types</h1>
+<pre class="sh_cpp">
+typedef basic_sockaddress&lt;Family, IPPROTO_ICMP&gt; address_type;
+typedef char char_type;
+typedef std::basic_string&lt;char_type&gt; string_type;
+</pre>
+
+<h1>Construction and Member Functions</h1>
+<pre class="sh_cpp">
+basic_socket();
+basic_socket(const basic_socket&amp; cp);
+basic_soket&amp; operator=(const basic_socket&amp; cp);
+
+explicit basic_socket(socket_int s, const address_type&amp; addr);
+explicit basic_socket(const char_type* host);
+explicit basic_socket(const string_type&amp; host);
+virtual ~basic_socket();
+
+basic_socket&amp; connect(const char_type* host);
+basic_socket&amp; connect(const string_type&amp; host);
+
+int send_to(const char_type* src, int n, const address_type&amp; addr);
+int send_to(const string_type&amp; src, const address_type&amp; addr);
+int send_to(const char_type* src, int n, const char_type* host);
+int send_to(const string_type&amp; src, const string_type&amp; host);
+int send(const char_type* src, int n);
+int send(const string_type&amp; src);
+
+int recv(char_type* dest, int n);
+
+const address_type&amp; from() const;
+const address_type&amp; to() const;
+</pre>
+
+<p>send() メソッドは，コンストラクタ，または connect() メソッドで指定したホストに対して，
+通信を試みます．from() メソッドは，直近の recv() メソッドを用いて受信したデータの送り先を返します．</p>
+
+<h1>References</h1>
+<ol>
+<li><a href="http://d.hatena.ne.jp/tt_clown/20080730/p1" target="_blank">
+Life like a clown - ICMPパケットを利用したパケット間隔ベースの帯域計測方法</a></li>
+<li><a href="http://www.geekpage.jp/programming/linux-network/simple-ping.php"
+target="_blank">Geekなページ - 簡単なpingの作成（ICMPの送受信）</a></li>
+<li><a href="http://www.kt.rim.or.jp/~ksk/wskfaq-ja/examples/rawping.html"
+target="_blank">Winsock Programmer's FAQ - Ping: Raw Sockets Method</a></li>
+</ol>
+
+</div>
+<!-- end of main text -->
+
+<!-- footer -->
+<div class="foot">
+<address class="copyright">
+Copyright &copy; 2004 - 2008, clown. All rights reserved.
+Mailto: tt.clown(a)gmail.com
+</address>
+</div>
+<!-- end of footer -->
+
+</div>
+</body>
+
+</html>

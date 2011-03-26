@@ -1,0 +1,265 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ja">
+
+<head>
+<meta name="author" content="clown">
+<meta http-equiv="Content-type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<meta http-equiv="Content-Script-Type" content="text/javascript">
+
+<script type="text/javascript" src="script/sh_main.js"></script>
+<script type="text/javascript" src="script/sh_cpp.js"></script>
+
+<link rel="index" href="index.html">
+<link rel="stylesheet" href="style/default.css" type="text/css">
+<link rel="stylesheet" href="style/hilight.css" type="text/css">
+
+<title>CLX C++ Libraries - constrained_value</title>
+</head>
+
+<body onload="sh_highlightDocument()">
+<div class="contents">
+
+<!-- header -->
+<div class="title">
+<a href="http://clx.cielquis.net/">CLX C++ Libraries</a>
+<a href="http://b.hatena.ne.jp/entry/http://clx.cielquis.net/constrained_value.html">
+<img src="http://d.hatena.ne.jp/images/b_entry.gif"
+  width="16" height="12" border="0">
+</a>
+</div>
+<div class="head"><a href="index.html">Home</a> &gt;&gt;
+<a href="constrained_value.html">constrained_value</a></div>
+<!-- end of header -->
+
+<!-- main text -->
+<div class="main">
+
+<h1>Declarations</h1>
+<pre class="sh_cpp">
+template &lt;class ConstrainedFunc&gt;
+class constrained_value;
+</pre>
+
+<h1>Overview</h1>
+<p>constrained_value は，制約付きの値型を実現するためのクラスです．
+代入演算子をオーバーロードすることによって，値の代入や四則演算が行われるたびに，
+値が制約を満たしているか自動的にチェックします．制約は ConstrainedFunc
+に制約条件用のポリシークラスを指定することによってよって与えます．
+独自に制約条件用のポリシークラスを定義する場合には，以下の型，
+およびメソッドを定義する必要があります．</p>
+
+<pre class="sh_cpp">
+class constrained_func {
+public:
+  typedef ... value_type;
+  
+  static void assign(value_type&amp; dest, const value_type&amp; src);
+};
+</pre>
+
+<p>尚，現在のところ代入された値が [Min, Max] の範囲外である場合には，std::ranged_error
+を例外として送出する ranged_integer と言う制約条件用ポリシークラスを提供しています．</p>
+
+<pre class="sh_cpp">
+template &lt;int Min, int Max&gt;
+class ranged_integer {
+public:
+    typedef int value_type;
+    const static value_type default_value = Min;
+    
+    static void assign(value_type&amp; dest, const value_type&amp; src);
+};
+</pre>
+
+<p>代入，四則演算，および比較については，同じ ConstrainedFunc を適用しているオブジェクト，
+または，基となる型 (integer, double, ...) と行うことができます．</p>
+
+<p>constrained_value は，C++ クックブック (p.194 - 197) をベースに実装しています．</p>
+
+<h1>Example</h1>
+<p><a href="example/example_constrained_value.cpp">example_constrained_value.cpp</a></p>
+
+<pre class="sh_cpp">
+#include &lt;iostream&gt;
+#include &quot;clx/constrained_value.h&quot;
+
+int main(int argc, char* argv[])
+{
+    clx::constrained_value&lt;clx::ranged_integer&lt;0, 100&gt; &gt; x;
+    clx::constrained_value&lt;clx::ranged_integer&lt;0, 100&gt; &gt; y;
+    clx::constrained_value&lt;clx::ranged_integer&lt;0, 50&gt; &gt; z;
+    
+    try {
+        std::cout &lt;&lt; &quot;1st example.&quot; &lt;&lt; std::endl;
+        x = 32;
+        std::cout &lt;&lt; &quot;x = &quot; &lt;&lt; x &lt;&lt; std::endl;
+        y = 8;
+        std::cout &lt;&lt; &quot;y = &quot; &lt;&lt; y &lt;&lt; std::endl;
+        y += x + 51 - (2 * 4);
+        std::cout &lt;&lt; &quot;y = &quot; &lt;&lt; y &lt;&lt; std::endl;
+    }
+    catch (std::range_error&amp; e) {
+        std::cerr &lt;&lt; &quot;exception: &quot; &lt;&lt; e.what() &lt;&lt; std::endl;
+    }
+    
+    std::cout &lt;&lt; std::endl;
+    
+    try {
+        std::cout &lt;&lt; &quot;2nd example.&quot; &lt;&lt; std::endl;
+        x = 32;
+        std::cout &lt;&lt; &quot;x = &quot; &lt;&lt; x &lt;&lt; std::endl;
+        z = 8;
+        std::cout &lt;&lt; &quot;z = &quot; &lt;&lt; z &lt;&lt; std::endl;
+        z += z.value() + 51 - (2 * 4);
+        std::cout &lt;&lt; &quot;z = &quot; &lt;&lt; z &lt;&lt; std::endl;
+    }
+    catch (std::range_error&amp; e) {
+        std::cerr &lt;&lt; &quot;exception: &quot; &lt;&lt; e.what() &lt;&lt; std::endl;
+    }
+    
+    return 0;
+}
+</pre>
+
+<pre>
+<strong>Result</strong>
+1st example.
+x = 32
+y = 8
+y = 83
+
+2nd example.
+x = 32
+z = 8
+exception: out of valied range
+</pre>
+
+<h1>Template Parameters</h1>
+<dl>
+<dt>ConstrainedFunc</dt><dd>制約条件を記述したポリシークラスを指定します．</dd>
+</dl>
+
+<h1>Related Types</h1>
+<pre class="sh_cpp">
+typedef ConstrainedFunc func;
+typedef typename ConstrainedFunc::value_type value_type;
+</pre>
+
+<h1>Construction and Member Functions</h1>
+<pre class="sh_cpp">
+constrained_value();
+constrained_value(const constrained_value&amp; x);
+explicit constrained_value(const value_type&amp; x);
+virtual ~constrained_value();
+
+const value_type&amp; value() const;
+</pre>
+
+<h1>Operators</h1>
+<pre class="sh_cpp">
+constrained_value&amp; operator=(const constrained_value&amp; x);
+constrained_value&amp; operator+=(const constrained_value&amp; x);
+constrained_value&amp; operator-=(const constrained_value&amp; x);
+constrained_value&amp; operator*=(const constrained_value&amp; x);
+constrained_value&amp; operator/=(const constrained_value&amp; x);
+constrained_value&amp; operator%=(const constrained_value&amp; x);
+constrained_value&amp; operator=(const value_type&amp; x);
+constrained_value&amp; operator+=(const value_type&amp; x);
+constrained_value&amp; operator-=(const value_type&amp; x);
+constrained_value&amp; operator*=(const value_type&amp; x);
+constrained_value&amp; operator/=(const value_type&amp; x);
+constrained_value&amp; operator%=(const value_type&amp; x);
+constrained_value&amp; operator&gt;&gt;=(int x);
+constrained_value&amp; operator&lt;&lt;=(int x);
+</pre>
+
+<h2>Unary Operators</h2>
+<pre class="sh_cpp">
+constrained_value operator-();
+constrained_value operator+();
+constrained_value operator!();
+constrained_value operator~();
+</pre>
+
+<h2>Binary Operators</h2>
+<pre class="sh_cpp">
+friend constrained_value operator+(constrained_value x, const constrained_value&amp; y);
+friend constrained_value operator-(constrained_value x, const constrained_value&amp; y);
+friend constrained_value operator*(constrained_value x, const constrained_value&amp; y);
+friend constrained_value operator/(constrained_value x, const constrained_value&amp; y);
+friend constrained_value operator%(constrained_value x, const constrained_value&amp; y);
+
+friend constrained_value operator+(constrained_value x, const value_type&amp; y);
+friend constrained_value operator-(constrained_value x, const value_type&amp; y);
+friend constrained_value operator*(constrained_value x, const value_type&amp; y);
+friend constrained_value operator/(constrained_value x, const value_type&amp; y);
+friend constrained_value operator%(constrained_value x, const value_type&amp; y);
+friend constrained_value operator+(const value_type&amp; y, constrained_value x);
+friend constrained_value operator-(const value_type&amp; y, constrained_value x);
+friend constrained_value operator*(const value_type&amp; y, constrained_value x);
+friend constrained_value operator/(const value_type&amp; y, constrained_value x);
+friend constrained_value operator%(const value_type&amp; y, constrained_value x);
+
+friend constrained_value operator&gt;&gt;(constrained_value x, int y);
+friend constrained_value operator&lt;&lt;(constrained_value x, int y);
+</pre>
+
+<h2>Stream Operators</h2>
+<pre class="sh_cpp">
+template &lt;class Ch, class Tr&gt;
+friend std::basic_ostream&lt;Ch, Tr&gt;&amp; operator&lt;&lt;(
+  std::basic_ostream&lt;Ch, Tr&gt;&amp; sout, constrained_value x);
+
+template &lt;class Ch, class Tr&gt;
+friend std::basic_istream&lt;Ch, Tr&gt;&amp; operator&gt;&gt;(
+  std::basic_istream&lt;Ch, Tr&gt;&amp; sin, constrained_value x);
+</pre>
+
+<h2>Comparison Operators</h2>
+<pre class="sh_cpp">
+friend bool operator&lt;(const constrained_value&amp; x, const constrained_value&amp; y);
+friend bool operator&gt;(const constrained_value&amp; x, const constrained_value&amp; y);
+friend bool operator&lt;=(const constrained_value&amp; x, const constrained_value&amp; y);
+friend bool operator&gt;=(const constrained_value&amp; x, const constrained_value&amp; y);
+friend bool operator==(const constrained_value&amp; x, const constrained_value&amp; y);
+friend bool operator!=(const constrained_value&amp; x, const constrained_value&amp; y);
+
+friend bool operator&lt;(const constrained_value&amp; x, const value_type&amp; y);
+friend bool operator&gt;(const constrained_value&amp; x, const value_type&amp; y);
+friend bool operator&lt;=(const constrained_value&amp; x, const value_type&amp; y);
+friend bool operator&gt;=(const constrained_value&amp; x, const value_type&amp; y);
+friend bool operator==(const constrained_value&amp; x, const value_type&amp; y);
+friend bool operator!=(const constrained_value&amp; x, const value_type&amp; y);
+friend bool operator&lt;(const value_type&amp; y, const constrained_value&amp; x);
+friend bool operator&gt;(const value_type&amp; y, const constrained_value&amp; x);
+friend bool operator&lt;=(const value_type&amp; y, const constrained_value&amp; x);
+friend bool operator&gt;=(const value_type&amp; y, const constrained_value&amp; x);
+friend bool operator==(const value_type&amp; y, const constrained_value&amp; x);
+friend bool operator!=(const value_type&amp; y, const constrained_value&amp; x);
+</pre>
+
+<h1>References</h1>
+<ol>
+<li>D. Ryan Stephens, Christopher Diggins, Janathan Turkanis, and Jeff Cogswell
+(株式会社クイープ訳), &quot;C++ クックブック,&quot; 株式会社オライリー・ジャパン,
+2006.</li>
+</ol>
+
+</div>
+<!-- end of main text -->
+
+<!-- footer -->
+<div class="foot">
+<address class="copyright">
+Copyright &copy; 2004 - 2008, clown. All rights reserved.
+Mailto: tt.clown(a)gmail.com
+</address>
+</div>
+<!-- end of footer -->
+
+</div>
+</body>
+
+</html>

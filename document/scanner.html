@@ -1,0 +1,177 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ja">
+
+<head>
+<meta name="author" content="clown">
+<meta http-equiv="Content-type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<meta http-equiv="Content-Script-Type" content="text/javascript">
+
+<script type="text/javascript" src="script/sh_main.js"></script>
+<script type="text/javascript" src="script/sh_cpp.js"></script>
+
+<link rel="index" href="index.html">
+<link rel="stylesheet" href="style/default.css" type="text/css">
+<link rel="stylesheet" href="style/hilight.css" type="text/css">
+
+<title>CLX C++ Libraries - scanner</title>
+</head>
+
+<body onload="sh_highlightDocument()">
+<div class="contents">
+
+<!-- header -->
+<div class="title">
+<a href="http://clx.cielquis.net/">CLX C++ Libraries</a>
+<a href="http://b.hatena.ne.jp/entry/http://clx.cielquis.net/scanner.html">
+<img src="http://d.hatena.ne.jp/images/b_entry.gif"
+  width="16" height="12" border="0">
+</a>
+</div>
+<div class="head"><a href="index.html">Home</a> &gt;&gt;
+<a href="scanner.html">scanner</a></div>
+<!-- end of header -->
+
+<!-- main text -->
+<div class="main">
+<h1>Declarations</h1>
+<pre class="sh_cpp">
+template &lt;
+    class CharT,
+    class Traits = std::char_traits&lt;CharT&gt;
+&gt;
+class basic_scanner;
+
+typedef basic_scanner&lt;char&gt; scanner;
+#ifdef CLX_USE_WCHAR
+typedef basic_scanner&lt;wchar_t&gt; wscanner;
+#endif
+</pre>
+
+<h1>Overview</h1>
+<p>scanner は，標準Cライブラリにおける scanf() や fscanf()，sscanf()
+と同様の機能を提供します．引数として指定された文字列や入力ストリーム（標準入力，
+ファイル，...）から渡される文字列を指定された書式に従って読み込みます．
+scanner も scanf() と同様に変換指定（% で始まる識別子）を含めることができますが，
+scanf() のように型修飾子（%d, %f，...）は存在せず，変換指定は必ず &quot;s&quot;
+で終了します．</p>
+
+<p>読み込んだ文字列は，% 演算子，または () 演算子を用いて，
+ユーザが指定した変数に代入することができます．% 演算子は，scanner
+が読み込んだ順に代入します．一方，() 演算子は，
+第一引数に指定された添え字に対応する文字列を代入します．
+どちらの演算子においても，文字列 &lt;-&gt; 数値変換には<a href="lexical_cast.html">
+lexical_cast</a> を用いています．また，() 演算子は，第 3 引数に Functor
+を指定することによって，独自の変換ルールを適用することもできます．</p>
+
+<p>scanner は，TokenizerFunc として format_separator を用いた tokenizer
+を利用して実装しています．tokenizer や format_separator については，
+<a href="tokenizer.html">tokenizer</a> を参照して下さい．</p>
+
+<h1>Example</h1>
+<p><a href="example/example_scanner.cpp">example_scanner.cpp</a></p>
+
+<pre class="sh_cpp">
+#include &lt;iostream&gt;
+#include &lt;string&gt;
+#include &quot;clx/scanner.h&quot;
+#include &quot;clx/lexical_cast.h&quot;
+
+class my_assign {
+public:
+    template &lt;class ValueT&gt;
+    void operator()(const std::string&amp; s, ValueT&amp; dest) {
+        dest = clx::lexical_cast&lt;ValueT&gt;(s) + 1000;
+    }
+};
+
+
+int main(int argc, char* argv[]) {
+    std::string fmt = &quot;%s/%s/%s %s:%s:%s&quot;;
+    std::string s = &quot;2006/03/31 13:00:30&quot;;
+    int year, mon, day, hour, min, sec;
+    
+    // scan from string
+    clx::scanner(s, fmt) % year % mon % day % hour % min % sec;
+    std::cout &lt;&lt; &quot;Today is &quot; &lt;&lt; day &lt;&lt; ' ' &lt;&lt; mon &lt;&lt; &quot;, &quot; &lt;&lt; year &lt;&lt; std::endl;
+    
+    hour = 0;
+    min = 0;
+    sec = 0;
+    
+    // scan from cin
+    std::cout &lt;&lt; &quot;Date: &quot;;
+    clx::scanner(std::cin, fmt)(5, sec)(4, min)(3, hour, my_assign());
+    std::cout &lt;&lt; &quot;Now, it is &quot; &lt;&lt; hour &lt;&lt; ':' &lt;&lt; min &lt;&lt; ':' &lt;&lt; sec &lt;&lt; std::endl;
+    
+    return 0;
+}
+</pre>
+
+<pre>
+<strong>Result</strong>
+Today is 31 3, 2006
+Date: 2006/03/31 15:44:00
+Now, it is 1015:44:0
+</pre>
+
+<h1>Template Parameters</h1>
+<dl>
+<dt>CharT</dt><dd>文字の型を指定します．</dd>
+<dt>Traits</dt><dd>文字列を扱うためのtraitsを指定します．デフォルト値は，
+std::char_traits&lt;CharT&gt;．</dd>
+</dl>
+
+<h1>Related Types</h1>
+<pre class="sh_cpp">
+typedef CharT char_type;
+typedef unsigned int size_type;
+typedef typename std::basic_string&lt;CharT, Traits&gt; string_type;
+typedef typename std::basic_istream&lt;CharT, Traits&gt; istream_type;
+</pre>
+
+<h1>Construction and Member Functions</h1>
+<pre class="sh_cpp">
+explicit basic_scanner(istream_type&amp; sin, const char_type* fmt);
+explicit basic_scanner(istream_type&amp; sin, const string_type&amp; fmt);
+explicit basic_scanner(const char_type* src, const char_type* fmt);
+explicit basic_scanner(const string_type&amp; src, const string_type&amp; fmt);
+virtual ~basic_scanner();
+
+template &lt;class ValueT&gt;
+basic_scanner&amp; operator%(ValueT&amp; dest);
+
+template &lt;class ValueT&gt;
+basic_scanner&amp; operator()(size_type pos, ValueT&amp; dest);
+
+template &lt;class ValueT, class Assign&gt;
+basic_scanner&amp; operator()(size_type pos, ValueT&amp; dest, Assign f);
+</pre>
+
+<p>% 演算子は，scanner が読み込んだ順に代入します．() 演算子は，
+第一引数に指定された添え字に対応する文字列を代入します．また，() 演算子は，第 3 引数に
+Functor を指定することによって，独自の変換ルールを適用することもできます．</p>
+
+<h1>Related Pages</h1>
+<ol>
+<li><a href="tokenizer.html">CLX C++ Libraries - tokenizer</a></li>
+<li><a href="tokenizer_func.html">CLX C++ Libraries - tokenizer_func</a></li>
+</ol>
+
+</div>
+<!-- end of main text -->
+
+<!-- footer -->
+<div class="foot">
+<address class="copyright">
+Copyright &copy; 2004 - 2008, clown. All rights reserved.
+Mailto: tt.clown(a)gmail.com
+</address>
+</div>
+<!-- end of footer -->
+
+</div>
+</body>
+
+</html>

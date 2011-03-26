@@ -1,0 +1,238 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ja">
+
+<head>
+<meta name="author" content="clown">
+<meta http-equiv="Content-type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<meta http-equiv="Content-Script-Type" content="text/javascript">
+
+<script type="text/javascript" src="script/sh_main.js"></script>
+<script type="text/javascript" src="script/sh_cpp.js"></script>
+
+<link rel="index" href="index.html">
+<link rel="stylesheet" href="style/default.css" type="text/css">
+<link rel="stylesheet" href="style/hilight.css" type="text/css">
+
+<title>CLX C++ Libraries - unzip</title>
+</head>
+
+<body onload="sh_highlightDocument()">
+<div class="contents">
+
+<!-- header -->
+<div class="title">
+<a href="http://clx.cielquis.net/">CLX C++ Libraries</a>
+<a href="http://b.hatena.ne.jp/entry/http://clx.cielquis.net/unzip.html">
+<img src="http://d.hatena.ne.jp/images/b_entry.gif" width="16" height="12" border="0"></a>
+</div>
+<div class="head"><a href="index.html">Home</a> &gt;&gt;
+<a href="unzip.html">unzip</a></div>
+<!-- end of header -->
+
+<!-- main text -->
+<div class="main">
+
+<h1>Declarations</h1>
+
+<pre class="sh_cpp">
+template &lt;
+    class CharT,
+    class Traits = std::char_traits&lt;CharT&gt;
+&gt;
+class basic_unzip;
+
+typedef basic_unzip&lt;char&gt; unzip;
+</pre>
+
+<h1>Overview</h1>
+
+<p>unzip は，zip 圧縮されたファイルを操作するためのクラスです．zip では，
+複数のファイル/ディレクトリをひとまとめにしてアーカイブ化される事があります．
+unzip では，この zip アーカイブ内の各要素（ファイル/ディレクトリ）を順に走査する
+iterator を定義し，通常はこの iterator を通じて各ファイルへアクセスするような実装になっています．</p>
+
+<p>尚，unzip を利用するためには <a href="http://www.zlib.net/" target="_blank">zlib</a>
+を用意する必要があります．</p>
+
+<h1>Example</h1>
+<p><a href="example/example_unzip.cpp">example_unzip.cpp</a></p>
+
+<pre class="sh_cpp">
+#include &lt;iostream&gt;
+#include &lt;string&gt;
+#include &quot;clx/unzip.h&quot;
+
+int main(int argc, char* argv[]) {
+    if (argc &lt; 2) {
+        std::cerr &lt;&lt; argv[0] &lt;&lt; &quot; filename&quot; &lt;&lt; std::endl;
+        std::exit(-1);
+    }
+    
+    std::string path(argv[1]);
+    std::string password;
+    if (argc &gt; 2) password = argv[2];
+    clx::unzip uz(path, password);
+    
+    // zip アーカイブ内の各ファイル/ディレクトリへ順にアクセスする場合．
+    for (clx::unzip::iterator pos = uz.begin(); pos != uz.end(); ++pos) {
+        std::cout &lt;&lt; pos-&gt;path() &lt;&lt; std::endl;
+        
+        std::string buf;
+        // 最初の 10 行を表示
+        for (size_t i = 0; i &lt; 10; ++i) {
+            if (!std::getline(*pos, buf)) break;
+            std::cout &lt;&lt; &quot;\t&quot; &lt;&lt; buf &lt;&lt; std::endl;
+        }
+        std::cout &lt;&lt; std::endl;
+    }
+    
+    // zip アーカイブ内のある 1 つのファイルにアクセスする場合．
+    clx::unzip::iterator target = uz.find(&quot;document/index.html&quot;);
+    if (target != uz.end()) {
+        std::cout &lt;&lt; target-&gt;path() &lt;&lt; &quot; is found.&quot; &lt;&lt; std::endl;
+    }
+    
+    return 0;
+}
+</pre>
+
+<pre>
+<strong>Result</strong>
+document/
+
+document/acceptor.html
+    &lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.01 Transitional//EN&quot;
+      &quot;http://www.w3.org/TR/html4/loose.dtd&quot;&gt;
+    &lt;html lang=&quot;ja&quot;&gt;
+
+・・・（中略）・・・
+
+    &lt;meta http-equiv=&quot;Content-Script-Type&quot; content=&quot;text/javascript&quot;&gt;
+    
+    &lt;script type=&quot;text/javascript&quot; src=&quot;script/sh_main.js&quot;&gt;&lt;/script&gt;
+
+document/index.html is found.
+</pre>
+
+<p>unzip オブジェクトを生成した後は，begin() や find() メソッドを用いて zip
+アーカイブ内の処理を行いたいファイルへアクセスします．これらのメソッドが返す
+iterator は istream へのポインタ（正確には shared_ptr）なので，*演算子や ->演算子を用いることで，
+通常の istream と同様の方法で対象となるファイルの内容を読み取ることができます．</p>
+
+<p>ただし，zip アーカイブ内の複数のファイルへ同時にアクセスすることはできないので，
+この点に注意する必要があります（find() や iterator の ++演算子で別のファイルへアクセスした時点で，
+元のファイルは閉じられる）．</p>
+
+<h1>Template Parameters</h1>
+
+<dl>
+<dt>CharT</dt><dd>文字の型を指定します．</dd>
+<dt>Traits</dt><dd>文字列を扱うためのtraitsを指定します．デフォルト値は，
+std::char_traits&lt;CharT&gt;．</dd>
+</dl>
+
+<h1>Construction and Member Functions</h1>
+
+<pre class="sh_cpp">
+basic_unzip();
+basic_unzip(const basic_unzip&amp; cp);
+explicit basic_unzip(const string_type&amp; path);
+explicit basic_unzip(const char_type* path);
+basic_unzip(const string_type&amp; path, const string_type&amp; password);
+basic_unzip(const char_type* path, const char_type* password);
+virtual ~basic_unzip() throw();
+</pre>
+
+<p>引数に，対象ファイルへのパス，およびパスワードが指定された場合は，
+指定された引数で open() メソッドを実行します．open() メソッドに関しては後述します．</p>
+
+<pre class="sh_cpp">
+bool open(const string_type&amp; path);
+bool open(const char_type* path);
+bool open(const string_type&amp; path, const string_type&amp; password);
+bool open(const char_type* path, const char_type* password);
+bool is_open() const;
+</pre>
+
+<p>引数に指定されたファイルを zip アーカイブと見なして解凍します．
+zip アーカイブにパスワードが設定されている場合は，第 2 引数でそのパスワードを指定します．
+解凍された zip アーカイブ内の各ファイルへは，後述する begin(), find()
+メソッドなどによって得られる iterator を通じてアクセスします．</p>
+
+<pre class="sh_cpp">
+void close();
+</pre>
+
+<p><strong>明示的に</strong>終了します．close() メソッドを実行せずに終了した場合は，
+デストラクタが実行されるタイミングで終了します．</p>
+
+<pre class="sh_cpp">
+bool exist(const string_type&amp; path);
+bool exist(const char_type* path);
+</pre>
+
+<p>zip アーカイブ内に path で示されるファイルが存在するかどうかを判別するためのメソッドです．</p>
+
+<pre class="sh_cpp">
+iterator begin();
+iterator end();
+iterator find(const string_type&amp; path);
+iterator find(const char_type* path);
+</pre>
+
+<p>begin(), end() は zip アーカイブ内の各ファイルを順に走査するための iterator を返します．
+iterator は，istream へのイテレータとなっています．ただし，std::istream
+の各メソッドに加えて，zip アーカイブ内でのそのファイルのパスを取得するための path()
+メソッドを定義しています．</p>
+
+<p>find() メソッドは，zip アーカイブ内の path で示されるファイルに対応する iterator
+を返します．zip アーカイブ内に path で示されるファイルが存在しない場合は，
+end() を返します．</p>
+
+<pre class="sh_cpp">
+handler_type handler() const;
+const string_type&amp; password() const;
+</pre>
+
+<h1>Related Types</h1>
+
+<pre class="sh_cpp">
+typedef size_t size_type;
+typedef CharT char_type;
+typedef unzFile handler_type;
+typedef std::basic_string&lt;CharT, Traits&gt; string_type;
+typedef basic_unzipstream&lt;CharT, Traits&gt; stream_type;
+typedef basic_unzipiterator&lt;CharT, Traits&gt; iterator;
+</pre>
+
+<h1>Related Page</h1>
+<ol>
+<li><a href="zstream.html">CLX C++ Libraries - zstream</a></li>
+</ol>
+
+<h1>References</h1>
+<ol>
+<li><a href="http://d.hatena.ne.jp/tt_clown/20090601/p1"
+target="_blank">zip の解凍 - Life like a clown</a></li>
+<li><a href="http://www.winimage.com/zLibDll/minizip.html"
+target="_blank">Minizip: Zip and UnZip addtionnal library</a></li>
+</ol>
+
+</div>
+<!-- end of main text -->
+
+<!-- footer -->
+<div class="foot">
+<address class="copyright">
+Copyright &copy; 2004 - 2009, clown. All rights reserved.
+Mailto: tt.clown(a)gmail.com
+</address>
+</div>
+<!-- end of footer -->
+
+</div>
+</body>
+
+</html>

@@ -1,0 +1,111 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ja">
+
+<head>
+<meta name="author" content="clown">
+<meta http-equiv="Content-type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<meta http-equiv="Content-Script-Type" content="text/javascript">
+
+<script type="text/javascript" src="script/sh_main.js"></script>
+<script type="text/javascript" src="script/sh_cpp.js"></script>
+
+<link rel="index" href="index.html">
+<link rel="stylesheet" href="style/default.css" type="text/css">
+<link rel="stylesheet" href="style/hilight.css" type="text/css">
+
+<title>CLX C++ Libraries - localhost</title>
+</head>
+
+<body onload="sh_highlightDocument()">
+<div class="contents">
+
+<!-- header -->
+<div class="title">
+<a href="http://clx.cielquis.net/">CLX C++ Libraries</a>
+<a href="http://b.hatena.ne.jp/entry/http://clx.cielquis.net/localhost.html">
+<img src="http://d.hatena.ne.jp/images/b_entry.gif"
+  width="16" height="12" border="0">
+</a>
+</div>
+<div class="head"><a href="index.html">Home</a> &gt;&gt;
+<a href="resolver.html">resolver</a> &gt;&gt;
+<a href="localhost.html">localhost</a></div>
+<!-- end of header -->
+
+<!-- main text -->
+<div class="main">
+
+<h1>Declaration</h1>
+<pre class="sh_cpp">
+std::string localhost(socket_int s);
+
+template &lt;class Socket&gt;
+std::string localhost(Socket&amp; s);
+
+std::string localhost();
+</pre>
+
+<h1>Overview</h1>
+<p>localhost() 関数は自ホストの IP アドレスを取得するための関数です．
+引数にコネクション確立済みのソケットが指定された場合，そのソケットを用いて
+IP アドレスを取得します．引数なしで localhost() が呼ばれた場合は，
+IP アドレスを取得するためのダミーのコネクションを確立し，
+そのダミーソケットを用いて IP アドレスを取得します．</p>
+
+<h1>Example</h1>
+<p><a href="example/example_localhost.cpp">example_localhost.cpp</a></p>
+
+<pre class="sh_cpp">
+#include &lt;iostream&gt;
+#include &quot;clx/resolver.h&quot;
+
+int main(int argc, char* argv[]) {
+    /*
+     * clx::localhost(socket_int s);
+     * clx::localhost(Socket&amp; s);
+     * clx::localhost();
+     *
+     * 現在，通信を行っている（connect の完了している）ソケットが存在
+     * する場合は，そのソケットを用いてローカルホストの IP アドレスを
+     * 取得する．通信を行っているソケットが存在しない場合は，引数なし
+     * で localhost を呼び出す．
+     */
+    std::cout &lt;&lt; clx::localhost() &lt;&lt; std::endl;
+    return 0;
+}
+</pre>
+
+<pre>
+<strong>Result</strong>
+192.168.0.2
+</pre>
+
+<h1>Related Page</h1>
+<ol>
+<li><a href="resolver.html">CLX C++ Libraries - resolver</a></li>
+</ol>
+
+<h1>Reference</h1>
+<ol>
+<li><a href="http://d.hatena.ne.jp/tt_clown/20081225/p1" target="_blank">
+Life like a clown - ローカルホストの IP アドレス取得方法</a></li>
+</ol>
+
+</div>
+<!-- end of main text -->
+
+<!-- footer -->
+<div class="foot">
+<address class="copyright">
+Copyright &copy; 2004 - 2008, clown. All rights reserved.
+Mailto: tt.clown(a)gmail.com
+</address>
+</div>
+<!-- end of footer -->
+
+</div>
+</body>
+
+</html>

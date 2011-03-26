@@ -1,0 +1,210 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ja">
+
+<head>
+<meta name="author" content="clown">
+<meta http-equiv="Content-type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<meta http-equiv="Content-Script-Type" content="text/javascript">
+
+<script type="text/javascript" src="script/sh_main.js"></script>
+<script type="text/javascript" src="script/sh_cpp.js"></script>
+
+<link rel="index" href="index.html">
+<link rel="stylesheet" href="style/default.css" type="text/css">
+<link rel="stylesheet" href="style/hilight.css" type="text/css">
+
+<title>CLX C++ Libraries - resolver</title>
+</head>
+
+<body onload="sh_highlightDocument()">
+<div class="contents">
+
+<!-- header -->
+<div class="title">
+<a href="http://clx.cielquis.net/">CLX C++ Libraries</a>
+<a href="http://b.hatena.ne.jp/entry/http://clx.cielquis.net/resolver.html">
+<img src="http://d.hatena.ne.jp/images/b_entry.gif"
+  width="16" height="12" border="0">
+</a>
+</div>
+<div class="head"><a href="index.html">Home</a> &gt;&gt;
+<a href="resolver.html">resolver</a></div>
+<!-- end of header -->
+
+<!-- main text -->
+<div class="main">
+
+<h1>Declaration</h1>
+<pre class="sh_cpp">
+template &lt;int Family&gt;
+class basic_resolver;
+
+typedef basic_resolver&lt;AF_INET&gt; resolver;
+
+int port(const std::string&amp; service, const std::string&amp; protocol);
+int port(const char* service, const char* protocol);
+
+namespace tcp {
+    int port(const std::string&amp; service);
+    int port(const char* service);
+}
+
+namespace udp {
+    int port(const std::string&amp; service);
+    int port(const char* service);
+}
+
+namespace ssl {
+    int port(const std::string&amp; service);
+    int port(const char* service);
+}
+</pre>
+
+<h1>Overview</h1>
+<p>resolver は，名前解決を行うためのクラスです．IPアドレス &lt;-&gt;
+ホスト名の名前解決を行うことができます．実際には，gethostbyname()
+のラッパクラスとして実装されています．</p>
+
+<p>名前解決を行うためには，lookup() メソッドへ名前解決を行いたいホスト名 or
+IPアドレスを指定します．lookup() メソッドは，名前解決に失敗すると false を返します．</p>
+
+<p>名前解決を行った結果に対してのアクセスは，addresses()，hostname()，aliases()
+メソッドを用いて行います．IP アドレスおよびエイリアス名は複数存在する場合もあります．
+addresses()，aliases() メソッドで返されるオブジェクトはそれぞれ at() メソッドや
+size() メソッドを所持していますので，IP アドレスおよびエイリアス名がいくつ存在するのかについては，
+それらのメソッドを用いて調べることができます．</p>
+
+<p>port() 関数は，サービス名 (e.g., http, smtp, smtp) からポート番号を導出します．
+port() 関数は，サービス名からポート番号の取得に失敗すると，
+次に与えられた文字列を数字文字列と見なして変換を試みます．どちらにも失敗した場合には，
+-1 が返されます．tcp::port(), udp::port() 関数はそれぞれ port() 関数の第 2 引数に
+&quot;tcp&quot;, &quot;udp&quot; を指定する事と等価です．</p>
+
+<h1>Example</h1>
+<p><a href="example/example_resolver.cpp">example_resolver.cpp</a></p>
+
+<pre class="sh_cpp">
+#include &lt;iostream&gt;
+#include &quot;clx/resolver.h&quot;
+
+int main(int argc , char *argv[]) {
+    if (argc &lt; 2) return -1;
+    
+    clx::resolver addr;
+    if (!addr.lookup(argv[1])) {
+        std::cerr &lt;&lt; &quot;Cannot find &quot; &lt;&lt; argv[1] &lt;&lt; &quot;: Non-existent domain&quot;
+            &lt;&lt; std::endl;
+        return -1;
+    }
+    
+    std::cout &lt;&lt; &quot;Name: &quot; &lt;&lt; addr.hostname() &lt;&lt; std::endl;
+    
+    // print addresses
+    if (!addr.addresses().empty()) {
+        std::cout &lt;&lt; &quot;Address: &quot; &lt;&lt; inet_ntoa(addr.addresses().at(0));
+    }
+    for (size_t i = 1; i &lt; addr.addresses().size(); i++) {
+        std::cout &lt;&lt; &quot;, &quot; &lt;&lt; inet_ntoa(addr.addresses().at(i));
+    }
+    std::cout &lt;&lt; std::endl;
+    
+    // print aliaseses
+    if (!addr.aliases().empty()) std::cout &lt;&lt; &quot;Alias: &quot; &lt;&lt; addr.aliases().at(0);
+    for (size_t i = 1; i &lt; addr.aliases().size(); i++) {
+        std::cout &lt;&lt; &quot;, &quot; &lt;&lt; addr.aliases().at(i);
+    }
+    std::cout &lt;&lt; std::endl;
+    
+    return 0;
+}
+</pre>
+
+<pre>
+<strong>Result</strong> (www.yahoo.com)
+Name: www.yahoo.com
+Address: 68.142.197.78, 68.142.197.83, 68.142.197.86, 68.142.197.88, 68.142.197.
+90, 68.142.197.64, 68.142.197.69, 68.142.197.75
+Aliases: www.yahoo.com
+</pre>
+
+<h1>Template Parameters</h1>
+<dl>
+<dt>Family</dt><dd>プロトコルファミリーを指定します．</dd>
+</dl>
+
+<h1>Related Types</h1>
+
+<pre class="sh_cpp">
+typedef struct in_addr ipaddr_type;
+typedef size_t size_type;
+typedef char char_type;
+typedef std::basic_string&lt;char&gt; string_type;
+typedef std::vector&lt;address_type&gt; ipaddr_list;
+typedef std::vector&lt;string_type&gt; alias_list;
+</pre>
+
+<h1>Construction and Member Functions</h1>
+<pre class="sh_cpp">
+basic_resolver();
+explicit basic_resolver(const char* s);
+explicit basic_resolver(const string_type& s);
+virtual ~basic_resolver() throw();
+</pre>
+
+<p>コンストラクタの引数に文字列が指定された場合，指定された引数で lookup()
+メソッドを実行します．lookup() メソッドについては後述します．</p>
+
+<pre class="sh_cpp">
+bool lookup(const char_type* s);
+bool lookup(const string_type&amp; s);
+</pre>
+
+<p>指定された文字列の名前解決を行います．lookup() メソッドは，まず始めに，
+指定された文字列をドット区切りの IP アドレス (e.g., 192.168.0.1) と見なして名前解決を試みます．
+失敗した場合は，次に指定された文字列をホスト名 (e.g., www.example.com) と見なして再試行します．
+戻り値は，いずれも失敗した場合には false, それ以外の場合は true です．</p>
+
+<pre class="sh_cpp">
+const address_list& addresses() const;
+</pre>
+
+<p>addresses() は，名前解決した IP アドレスの配列 (std::vector&lt;ipaddr_type&gt;) を返します．
+現在の DNS では，1 つのホスト名に対して複数の IP アドレスを割り当てる事ができます．
+そのため，名前解決を行った後に得られる IP アドレスは複数存在することもあります．
+それぞれの ipaddr_type をドット区切りの IP アドレス（文字列）として取得したい場合は，
+adresses() メソッドで得られた各要素に対して，inet_ntoa() などを適用します．</p>
+
+<pre class="sh_cpp">
+const string_type&amp; hostname() const;
+const alias_list&amp; aliases() const;
+</pre>
+
+<p>ホスト名，およびホスト名の別名を返します．現在の DNS では，ある IP アドレスに対して，
+正式なホスト名とは別に複数の別名を設定する事ができます．別名が設定されている場合には，
+aliases() メソッドを通じて，それらの名前を取得する事ができます．</p>
+
+<pre class="sh_cpp">
+int length() const;
+</pre>
+
+<p>アドレス長を返します．アドレス長は，ユーザがソケットを操作するシステムコールを
+直に操作する場合に必要になる事があります．</p>
+
+</div>
+<!-- end of main text -->
+
+<!-- footer -->
+<div class="foot">
+<address class="copyright">
+Copyright &copy; 2004 - 2009, clown. All rights reserved.
+Mailto: tt.clown(a)gmail.com
+</address>
+</div>
+<!-- end of footer -->
+
+</div>
+</body>
+
+</html>

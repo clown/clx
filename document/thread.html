@@ -1,0 +1,212 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ja">
+
+<head>
+<meta name="author" content="clown">
+<meta http-equiv="Content-type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<meta http-equiv="Content-Script-Type" content="text/javascript">
+
+<script type="text/javascript" src="script/sh_main.js"></script>
+<script type="text/javascript" src="script/sh_cpp.js"></script>
+
+<link rel="index" href="index.html">
+<link rel="stylesheet" href="style/default.css" type="text/css">
+<link rel="stylesheet" href="style/hilight.css" type="text/css">
+
+<title>CLX C++ Libraries - thread</title>
+</head>
+
+<body onload="sh_highlightDocument()">
+<div class="contents">
+
+<!-- header -->
+<div class="title">
+<a href="http://clx.cielquis.net/">CLX C++ Libraries</a>
+<a href="http://b.hatena.ne.jp/entry/http://clx.cielquis.net/thread.html">
+<img src="http://d.hatena.ne.jp/images/b_entry.gif"
+  width="16" height="12" border="0">
+</a>
+</div>
+<div class="head"><a href="index.html">Home</a> &gt;&gt;
+<a href="thread.html">thread</a></div>
+<!-- end of header -->
+
+<!-- main text -->
+<div class="main">
+
+<h1>Declrations</h1>
+<pre class="sh_cpp">
+class thread;
+class thread_error;
+</pre>
+
+<h1>Overview</h1>
+<p>thread は，スレッドの作成，操作を行うためのクラスです．<a href="
+http://www.boost.org/doc/libs/1_35_0/doc/html/thread.html" target="_blank">
+boost::thread</a> のインターフェースをベースに，pthread および win32 thread
+を用いて実装を行っています．UNIX 環境（cygwin 版 gcc を含む）で thread
+モジュールを利用する際は，リンクオプション -lpthread を指定して下さい．</p>
+
+<p>スレッドは，コンストラクタ，または start() メソッドに，
+作成されたスレッドが呼び出す関数（または関数オブジェクト）を指定して作成します．
+指定できる関数（または，関数オブジェクト）は以下のような形になります．</p>
+
+<pre class="sh_cpp">
+void function();
+
+class functor {
+public:
+    void operator()();
+};
+</pre>
+
+<p>thread は，実行中に何らかのエラーが発生した場合は，thread_error を例外として送出します．</p>
+
+<h1>Sample</h1>
+<p><a href="example/example_thread.cpp">example_thread.cpp</a></p>
+
+<pre class="sh_cpp">
+#include &lt;iostream&gt;
+#include &quot;clx/thread.h&quot;
+
+clx::mutex m_;
+
+class exfunctor {
+public:
+    exfunctor() : c_(&#39;a&#39;) {}
+    explicit exfunctor(char c) : c_(c) {}
+    
+    virtual ~exfunctor() {}
+    
+    void operator()() {
+        for (int i = 0; i &lt; 10; i++) {
+            clx::mutex::scoped_lock lk(m_);
+            for (int j = 0; j &lt; i+5; j++) std::cout &lt;&lt; c_ &lt;&lt; std::flush;
+            std::cout &lt;&lt; &#39;\n&#39; &lt;&lt; std::flush;
+        }
+    }
+
+private:
+    char c_;
+};
+
+int main(int argc, char* argv[]) {
+    try {
+        clx::thread t1(exfunctor(&#39;A&#39;));
+        clx::thread t2(exfunctor(&#39;B&#39;));
+        
+        t1.join();
+        t2.join();
+    }
+    catch (clx::system_error &amp;e) {
+        std::cerr &lt;&lt; e.what() &lt;&lt; std::endl;
+        std::exit(-1);
+    }
+    
+    std::cout &lt;&lt; std::endl;
+    std::cout &lt;&lt; &quot;end of main thread&quot; &lt;&lt; std::endl;
+    
+    return 0;
+}
+</pre>
+
+<pre>
+<strong>Result</strong>
+AAAAA
+BBBBB
+AAAAAA
+BBBBBB
+AAAAAAA
+BBBBBBB
+AAAAAAAA
+BBBBBBBB
+AAAAAAAAA
+BBBBBBBBB
+AAAAAAAAAA
+BBBBBBBBBB
+AAAAAAAAAAA
+BBBBBBBBBBB
+AAAAAAAAAAAA
+BBBBBBBBBBBB
+AAAAAAAAAAAAA
+BBBBBBBBBBBBB
+AAAAAAAAAAAAAA
+BBBBBBBBBBBBBB
+
+end of main thread
+</pre>
+
+<h1>Related Types</h1>
+<pre class="sh_cpp">
+typedef ... handle_pointer;
+</pre>
+
+<h1>Construction and Member Functions</h1>
+<pre class="sh_cpp">
+thread();
+
+template &lt;class Functor&gt;
+explicit thread(Functor f, bool detached = false);
+
+virtual ~thread();
+
+template &lt;class Functor&gt;
+void start(Functor f, bool detached = false);
+
+bool joinable() const;
+void join();
+void detach();
+void sleep(double sec);
+
+handle_id_type get_id();
+</pre>
+
+<p>通常，作成したスレッドは join() メソッドで終了を待つ必要があります．これに対して，
+コンストラクタか start() メソッドの第 2 引数に true を指定した場合，または，detach()
+メソッドを呼んだ場合は，スレッドが終了すると自動的にリソースの開放などの終了処理が行われます．</p>
+
+<h1>Related Pages</h1>
+<ol>
+<li><a href="mutex.html">CLX C++ Libraries - mutex</a></li>
+<li><a href="condition.html">CLX C++ Libraries - condition</a></li>
+<li><a href="call_once.html">CLX C++ Libraries - call_once</a></li>
+</ol>
+
+<h1>References</h1>
+<ol>
+<li><a href="http://d.hatena.ne.jp/tt_clown/20080813/p1" target="_blank">
+Life like a clown - マルチプラットフォームなスレッドクラス</a></li>
+<li><a href="http://www.boost.org/doc/libs/1_35_0/doc/html/thread.html" target="_blank">
+Boost C++ Libraries - Chapter 17. Thread</a></li>
+<li><a href="http://www.orange.co.jp/~hiroshi/soft/pthread.html" target="_blank">
+pthread document</a></li>
+<li><a href="http://d.hatena.ne.jp/amachang/20080623/1214197643" target="_blank">
+IT戦記 - pthread でキューを作ってみる（再々挑戦、最終版）</a></li>
+<li><a href="http://www.geocities.jp/woodwood77777/linux_c_pthread02_detached.htm" target="_blank">
+Pthreadプログラミング(2) DETACHED属性の利点と問題点の解決</a></li>
+<li><a href="http://d.hatena.ne.jp/gikogeek/20070703" target="_blank">
+ものぐさ備忘録 - スレッドの関数一覧（pthread, win32スレッド）</a></li>
+<li><a href="http://www.ops.dti.ne.jp/~allergy/thread/thread.html" target="_blank">
+マルチスレッドプログラミング（POSIX、Win32）</a></li>
+<li><a href="http://www002.upp.so-net.ne.jp/ys_oota/Amigo/ThreadWrapper.htm" target="_blank">
+AMIGO FOR Win32 - 気軽にスレッド！ThreadWrapper</a></li>
+</ol>
+
+</div>
+<!-- end of main text -->
+
+<!-- footer -->
+<div class="foot">
+<address class="copyright">
+Copyright &copy; 2004 - 2008, clown. All rights reserved.
+Mailto: tt.clown(a)gmail.com
+</address>
+</div>
+<!-- end of footer -->
+
+</div>
+</body>
+
+</html>

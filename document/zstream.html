@@ -1,0 +1,193 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ja">
+
+<head>
+<meta name="author" content="clown">
+<meta http-equiv="Content-type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<meta http-equiv="Content-Script-Type" content="text/javascript">
+
+<script type="text/javascript" src="script/sh_main.js"></script>
+<script type="text/javascript" src="script/sh_cpp.js"></script>
+
+<link rel="index" href="index.html">
+<link rel="stylesheet" href="style/default.css" type="text/css">
+<link rel="stylesheet" href="style/hilight.css" type="text/css">
+
+<title>CLX C++ Libraries - zstream</title>
+</head>
+
+<body onload="sh_highlightDocument()">
+<div class="contents">
+
+<!-- header -->
+<div class="title">
+<a href="http://clx.cielquis.net/">CLX C++ Libraries</a>
+<a href="http://b.hatena.ne.jp/entry/http://clx.cielquis.net/zstream.html">
+<img src="http://d.hatena.ne.jp/images/b_entry.gif"
+  width="16" height="12" border="0">
+</a>
+</div>
+<div class="head"><a href="index.html">Home</a> &gt;&gt;
+<a href="zstream.html">zstream</a></div>
+<!-- end of header -->
+
+<!-- main text -->
+<div class="main">
+
+<h1>Declaration</h1>
+<pre class="sh_cpp">
+template &lt;
+    int CompressionRate,
+    class CharT = char,
+    class Traits = std::char_traits&lt;CharT&gt;
+&gt;
+class basic_zstream;
+
+template &lt;
+    class CharT = char,
+    class Traits = std::char_traits&lt;CharT&gt;
+&gt;
+class basic_unzstream;
+
+typedef basic_zstream&lt;Z_DEFAULT_COMPRESSION, char&gt; zstream;
+typedef basic_unzstream&lt;char&gt; unzstream;
+</pre>
+
+<h1>Overview</h1>
+<p>zstream/unzstream は，zlib ライブラリを用いた圧縮・解凍を行うためのクラスです．
+これらのクラスは，ともに C++ の istream/ostream のフィルタ・ストリームとして実装されています．
+zstream には圧縮後のデータを格納する ostream，unzstream には圧縮されたデータを保持している
+istream を引数にインスタンスを生成します．生成されたインスタンスは，istream/ostream
+を継承しているので，通常の istream/ostream と同様のメソッドを用いてデータの読み込み，
+書き出しを行います．</p>
+
+<p>zstream/unzstream は zlib を利用しています．そのため，これらのクラスを使用する場合は，
+実行環境に zlib がインストールされている必要があります．zlib は，<a href="http://www.zlib.net/"
+target="_blank">zlib Home Site</a> より取得してください．</p>
+
+<h1>Examples</h1>
+<p><a href="example/example_zstream.cpp">example_zstream.cpp</a></p>
+<pre class="sh_cpp">
+#include &lt;iostream&gt;
+#include &lt;fstream&gt;
+#include &quot;clx/zstream.h&quot;
+
+int main(int argc, char* argv[]) {
+    if (argc &lt; 3) std::exit(-1);
+    
+    std::ifstream ifs(argv[1], std::ios::binary);
+    std::ofstream ofs(argv[2], std::ios::binary);
+    clx::zstream z(ofs);
+    
+    std::string buf;
+    while (std::getline(ifs, buf)) {
+        z &lt;&lt; buf &lt;&lt; std::endl;
+    }
+    
+    return 0;
+}
+</pre>
+
+<p><a href="example/example_unzstream.cpp">example_unzstream.cpp</a></p>
+<pre class="sh_cpp">
+#include &lt;iostream&gt;
+#include &lt;fstream&gt;
+#include &quot;clx/zstream.h&quot;
+
+int main(int argc, char* argv[]) {
+    if (argc &lt; 3) std::exit(-1);
+    
+    /*
+     * unzstream は解凍用．
+     * zlib 圧縮されている各種 istream のフィルタとして使用する．
+     */
+    std::ifstream ifs(argv[1], std::ios::binary);
+    clx::unzstream z(ifs);
+    
+    std::ofstream ofs(argv[2], std::ios::binary);
+    
+    char buf[32768];
+    do {
+        z.read(buf, sizeof(buf));
+        ofs.write(buf, z.gcount());
+    } while (z.gcount() &gt; 0);
+    
+    return 0;
+}
+</pre>
+
+<h1>Template Parameters</h1>
+<dl>
+<dt>CompressionRate</dt><dd>圧縮率を 0--9 の範囲で指定します．
+デフォルトの圧縮率 (Z_DEFAULT_COMPRESSION) は 6 に設定されているようです．
+このパラメータは，zstream にのみ存在します．</dd>
+<dt>CharT</dt><dd>文字の型を指定します．デフォルト値は，char．</dd>
+<dt>Traits</dt><dd>文字列を扱うためのtraitsを指定します．デフォルト値は，
+std::char_traits&lt;CharT&gt;．</dd>
+</dl>
+
+<h1>Related Types</h1>
+<h2>zstream</h2>
+<pre class="sh_cpp">
+typedef std::basic_ostream&lt;CharT, Traits&gt; stream_type;
+typedef basic_zstreambuf&lt;CompressionRate, CharT, Traits&gt; streambuf_type;
+typedef typename streambuf_type::size_type size_type;
+</pre>
+
+<h2>unzstream</h2>
+<pre class="sh_cpp">
+typedef std::basic_istream&lt;CharT, Traits&gt; stream_type;
+typedef basic_unzstreambuf&lt;CharT, Traits&gt; streambuf_type;
+typedef typename streambuf_type::size_type size_type;
+</pre>
+
+<h1>Construction and Member Functions</h1>
+<h2>zstream</h2>
+<pre class="sh_cpp">
+basic_zstream(stream_type& out, size_type n = 4096);
+virtual ~basic_zstream() throw();
+
+void finish();
+</pre>
+
+<p>zstream は，コンストラクタの引数に指定された出力ストリームに対して，
+圧縮されたデータを出力して行きます．尚，コンストラクタの第 2 引数は，
+zstream の内部バッファのバッファサイズを表します．</p>
+
+<p>zlib による圧縮は終了処理が必要となります．通常この終了処理は，
+デストラクタが呼ばれた時点で行いますが，finish() メソッドによって，
+終了処理を行うタイミングを明示的に指示することもできます．</p>
+
+<h2>unzstream</h2>
+<pre class="sh_cpp">
+basic_unzstream(stream_type& in, size_type n = 4096);
+virtual ~basic_unzstream() throw();
+</pre>
+
+<p>unzstream は，コンストラクタの引数に指定された入力ストリームからデータを読み込み，
+そのデータを解凍します．ユーザは，&gt;&gt; 演算子，read(), getline()
+などのメソッドを通じて解凍されたデータを取得することができます．</p>
+
+<h1>Reference</h1>
+<ul>
+<li><a href="http://www.zlib.net/" target="_blank">zlib Home Site</a></li>
+</ul>
+
+</div>
+<!-- end of main text -->
+
+<!-- footer -->
+<div class="foot">
+<address class="copyright">
+Copyright &copy; 2004 - 2009, clown. All rights reserved.
+Mailto: tt.clown(a)gmail.com
+</address>
+</div>
+<!-- end of footer -->
+
+</div>
+</body>
+
+</html>

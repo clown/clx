@@ -1,0 +1,129 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ja">
+
+<head>
+<meta name="author" content="clown">
+<meta http-equiv="Content-type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<meta http-equiv="Content-Script-Type" content="text/javascript">
+
+<script type="text/javascript" src="script/sh_main.js"></script>
+<script type="text/javascript" src="script/sh_cpp.js"></script>
+
+<link rel="index" href="index.html">
+<link rel="stylesheet" href="style/default.css" type="text/css">
+<link rel="stylesheet" href="style/hilight.css" type="text/css">
+
+<title>CLX C++ Libraries - lexical_cast</title>
+</head>
+
+<body onload="sh_highlightDocument()">
+<div class="contents">
+
+<!-- header -->
+<div class="title">
+<a href="http://clx.cielquis.net/">CLX C++ Libraries</a>
+<a href="http://b.hatena.ne.jp/entry/http://clx.cielquis.net/lexical_cast.html">
+<img src="http://d.hatena.ne.jp/images/b_entry.gif"
+  width="16" height="12" border="0">
+</a>
+</div>
+<div class="head"><a href="index.html">Home</a> &gt;&gt;
+<a href="lexical_cast.html">lexical_cast</a></div>
+<!-- end of header -->
+
+<!-- main text -->
+<div class="main">
+
+<h1>Declarations</h1>
+
+<pre class="sh_cpp">
+template &lt;class Type, class Source&gt;
+Type lexical_cast(const Source&amp; src, std::ios::fmtflags base = std::ios::dec);
+
+class bad_lexical_cast : public std::bad_cast;
+</pre>
+
+<h1>Overview</h1>
+
+<p>lexocak_cast() は，文字列&lt;-&gt;数値の相互変換を行うための関数です．
+<a href="http://www.boost.org/libs/conversion/lexical_cast.htm" target="_blank">
+boost::lexical_cast</a> をベースに実装しています．引数 base には基数として，
+std::ios::dec，std::ios::hex，std::ios::oct を指定することができ，
+それぞれ与えられた文字列を 10 進数，16 進数，8 進数と見なして変換がなされます．
+また，std::ios::showbase を指定すると与えられた文字列に応じた変換がなされます
+（e.g., 0xfa なら 16 進数として変換される）．</p>
+
+<p>lexical_cast() はキャストに失敗するとbad_lexical_cast を例外として送出します．</p>
+
+<h1>Example</h1>
+<p><a href="example/example_lexical_cast.cpp">example_lexical_cast.cpp</a></p>
+
+<pre class="sh_cpp">
+#include &lt;iostream&gt;
+#include &lt;string&gt;
+#include &quot;clx/lexical_cast.h&quot;
+
+int main(int argc, char* argv[]) {
+    std::string s1 = &quot;326&quot;;
+    std::string s2 = &quot;0xf2a&quot;;
+    std::string serr = &quot;nonum&quot;;
+    
+    try {
+        int a = clx::lexical_cast&lt;int&gt;(s1, std::ios::oct);
+        int b = clx::lexical_cast&lt;int&gt;(s2, std::ios::showbase);
+        
+        std::cout &lt;&lt; &quot;str &quot; &lt;&lt; s1 &lt;&lt; &quot;, val &quot; &lt;&lt; a &lt;&lt; std::endl;
+        std::cout &lt;&lt; &quot;str &quot; &lt;&lt; s2 &lt;&lt; &quot;, val &quot; &lt;&lt; b &lt;&lt; std::endl;
+        
+        std::string s3 = clx::lexical_cast&lt;std::string&gt;(a, std::ios::hex);
+        std::cout &lt;&lt; "val " &lt;&lt; a &lt;&lt; ", str " &lt;&lt; s3 &lt;&lt; std::endl;
+        
+        int c = clx::lexical_cast&lt;int&gt;(serr);
+        std::cout &lt;&lt; &quot;str &quot; &lt;&lt; serr &lt;&lt; &quot;, val &quot; &lt;&lt; c &lt;&lt; std::endl;
+    }
+    catch (clx::bad_lexical_cast e) {
+        std::cerr &lt;&lt; &quot;exeption: &quot; &lt;&lt; e.what() &lt;&lt; std::endl;
+        std::exit(-1);
+    }
+    
+    return 0;
+}
+</pre>
+
+<pre>
+<strong>Result</strong>
+str 326, val 214
+str 0xf2a, val 3882
+val 214, str d6
+exeption: bad lexical cast
+</pre>
+
+<h1>Template Parameters</h1>
+<dl>
+<dt>Type</dt><dd>変換後の型を指定します．</dd>
+<dt>Source</dt><dd>変換前の型．引数として指定した変数の型が適用されます．</dd>
+</dl>
+
+<h1>References</h1>
+<ol>
+<li><a href="http://www.boost.org/doc/libs/1_35_0/libs/conversion/lexical_cast.htm"
+target="_blank">Boost C++ Libraries - lexical_cast</a></li>
+</ol>
+</div>
+<!-- end of main text -->
+
+<!-- footer -->
+<div class="foot">
+<address class="copyright">
+Copyright &copy; 2004 - 2008, clown. All rights reserved.
+Mailto: tt.clown(a)gmail.com
+</address>
+</div>
+<!-- end of footer -->
+
+</div>
+</body>
+
+</html>

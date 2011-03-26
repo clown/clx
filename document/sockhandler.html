@@ -1,0 +1,115 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ja">
+
+<head>
+<meta name="author" content="clown">
+<meta http-equiv="Content-type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<meta http-equiv="Content-Script-Type" content="text/javascript">
+
+<script type="text/javascript" src="script/sh_main.js"></script>
+<script type="text/javascript" src="script/sh_cpp.js"></script>
+
+<link rel="index" href="index.html">
+<link rel="stylesheet" href="style/default.css" type="text/css">
+<link rel="stylesheet" href="style/hilight.css" type="text/css">
+
+<title>CLX C++ Libraries - sockhandler</title>
+</head>
+
+<body onload="sh_highlightDocument()">
+<div class="contents">
+
+<!-- header -->
+<div class="title">
+<a href="http://clx.cielquis.net/">CLX C++ Libraries</a>
+<a href="http://b.hatena.ne.jp/entry/http://clx.cielquis.net/sockhandler.html">
+<img src="http://d.hatena.ne.jp/images/b_entry.gif"
+  width="16" height="12" border="0">
+</a>
+</div>
+<div class="head"><a href="index.html">Home</a> &gt;&gt;
+<a href="sockmanager.html">sockmanager</a> &gt;&gt;
+<a href="sockhandler.html">sockhandler</a></div>
+<!-- end of header -->
+
+<!-- main text -->
+<div class="main">
+
+<h1>Overview</h1>
+<p><a href="sockmanager.html">sockmanager</a> を使用するときに利用する handler
+の実装例です．現在のところ，実装しているものは TCP 通信に関するものだけです．</p>
+
+<h2>accept_handler</h2>
+<pre class="sh_cpp">
+namespace tcp {
+    template &lt;class Socket, class Service&gt;
+    class accept_handler {
+    public:
+        typedef Socket socket_type;
+        typedef clx::tcp::acceptor acceptor_type;
+        typedef Service service_handler;
+        
+        accept_handler();
+        virtual ~accept_handler();
+        
+        template &lt;class T, class SockManager&gt;
+        bool operator()(T* s, SockManager&amp; sm);
+    };
+};
+</pre>
+
+<p>accept_handler は，<a href="acceptor.html">tcp::accepor</a> が利用する handler です．
+クライアントから接続要求があると accept() メソッドで接続要求を受け付けて通信用ソケット
+(Socket) を生成し，通信用ハンドラ (Service) とともに sockmanager へ登録します．
+Socket には tcp::socket，tcp::sockstream，または，それらを継承したクラスを指定することができます．
+Service には，生成された通信用ソケットにデータが到着した時に呼び出される handler
+を指定します．尚，accept_handler は Service を生成する際に，引数として acceptor
+のソケット番号を指定するので，引数として socket_int を持つコンストラクタを定義しておく必要があります．</p>
+
+<h2>echo_handler</h2>
+<pre class="sh_cpp">
+namespace tcp {
+    class echo_handler {
+    public:
+        typedef clx::tcp::sockstream socket_type;
+        
+        echo_handler();
+        explicit echo_handler(socket_int s);
+        virtual ~echo_handler();
+        
+        template &lt;class T, class SockT&gt;
+        bool operator()(T* s, SockManager&amp; sm);
+    };
+};
+</pre>
+
+<p>echo_handler は，受信したデータをそのまま送信元へ送り返す handler です．
+handler の簡単な実装例として記載しておきました．自分で handler を実装する際には，
+この handler を参考にして実装して下さい．</p>
+
+<h1>Example</h1>
+<p><a href="sockmanager.html">sockmanager</a> の Examples を参考にして下さい．</p>
+
+<h1>Related Pages</h1>
+<ol>
+<li><a href="sockmanager.html">CLX C++ Libraries - sockmanager</a></li>
+</ol>
+
+</div>
+<!-- end of main text -->
+
+<!-- footer -->
+<div class="foot">
+<address class="copyright">
+Copyright &copy; 2004 - 2008, clown. All rights reserved.
+Mailto: tt.clown(a)gmail.com
+</address>
+</div>
+<!-- end of footer -->
+
+</div>
+</body>
+
+</html>

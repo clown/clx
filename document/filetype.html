@@ -1,0 +1,208 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ja">
+
+<head>
+<meta name="author" content="clown">
+<meta http-equiv="Content-type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<meta http-equiv="Content-Script-Type" content="text/javascript">
+
+<script type="text/javascript" src="script/sh_main.js"></script>
+<script type="text/javascript" src="script/sh_cpp.js"></script>
+
+<link rel="index" href="index.html">
+<link rel="stylesheet" href="style/default.css" type="text/css">
+<link rel="stylesheet" href="style/hilight.css" type="text/css">
+
+<title>CLX C++ Libraries - filetype</title>
+</head>
+
+<body onload="sh_highlightDocument()">
+<div class="contents">
+
+<!-- header -->
+<div class="title">
+<a href="http://clx.cielquis.net/">CLX C++ Libraries</a>
+<a href="http://b.hatena.ne.jp/entry/http://clx.cielquis.net/filetype.html">
+<img src="http://d.hatena.ne.jp/images/b_entry.gif" width="16" height="12" border="0"></a>
+</div>
+<div class="head"><a href="index.html">Home</a> &gt;&gt;
+<a href="filetype.html">filetype</a></div>
+<!-- end of header -->
+
+<!-- main text -->
+<div class="main">
+<h1>Overview</h1>
+
+<p>様々なファイルタイプを判別するための関数群です．現在のところ，BMP, PNG, GIF, JPEG,
+WMF, EMF, PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, TTF, TTC の 15 種類を実装しています．</p>
+
+<p>尚，DOCX, XLSX, PPTX の判別関数を利用するためには <a href="http://www.zlib.net/"
+target="_blank">zlib</a> を用意する必要があります．</p>
+
+<h1>Example</h1>
+<p><a href="example/example_filetype.cpp">example_filetype.cpp</a></p>
+
+<pre class="sh_cpp">
+#include &lt;cstdlib&gt;
+#include &lt;iostream&gt;
+#include &quot;clx/filetype.h&quot;
+
+int main(int argc, char* argv[]) {
+    if (argc &lt; 2) std::exit(-1);
+    
+    std::string path(argv[1]);
+    std::string type;
+    if (clx::is_bmp(path, clx::bmptype::os2)) type = &quot;BMP (OS/2 1.x)&quot;;
+    else if (clx::is_bmp(path, clx::bmptype::win)) type = &quot;BMP (Windows)&quot;;
+    else if (clx::is_png(path)) type = &quot;PNG&quot;;
+    else if (clx::is_gif(path)) type = &quot;GIF&quot;;
+    else if (clx::is_jpg(path)) type = &quot;JPEG&quot;;
+    else if (clx::is_wmf(path)) type = &quot;WMF (APM)&quot;;
+    else if (clx::is_wmf(path, false)) type = &quot;WMF (Windows)&quot;;
+    else if (clx::is_emf(path)) type = &quot;EMF&quot;;
+    else if (clx::is_pdf(path)) type = &quot;PDF&quot;;
+    else if (clx::is_doc(path)) type = &quot;DOC (Binary)&quot;;
+    else if (clx::is_xls(path)) type = &quot;XLS (Binary)&quot;;
+    else if (clx::is_ppt(path)) type = &quot;PPT (Binary)&quot;;
+    else if (clx::is_docx(path)) type = &quot;DOCX (OpenXML)&quot;;
+    else if (clx::is_xlsx(path)) type = &quot;XLSX (OpenXML)&quot;;
+    else if (clx::is_pptx(path)) type = &quot;PPTX (OpenXML)&quot;;
+    else if (clx::is_ttf(path)) type = &quot;TrueType font&quot;;
+    else if (clx::is_ttc(path)) type = &quot;TrueType font collection&quot;;
+    else type = &quot;unknown file type&quot;;
+    
+    std::cout &lt;&lt; argv[1] &lt;&lt; &quot;: &quot; &lt;&lt; type &lt;&lt; std::endl;
+    return 0;
+}
+</pre>
+
+<h1>Functions</h1>
+
+<pre class="sh_cpp">
+namespace bmptype {
+    enum { both = 0, os2, win };
+}
+
+bool is_bmp(std::basic_istream&lt;char&gt;&amp; in, int which = bmptype::both);
+bool is_bmp(const char* path, int which = bmptype::both);
+bool is_bmp(const std::basic_string&lt;char&gt;&amp; path, int which = bmptype::both);
+
+bool is_png(std::basic_istream&lt;char&gt;&amp; in);
+bool is_png(const char* path);
+bool is_png(const std::basic_string&lt;char&gt;&amp; path);
+
+bool is_gif(std::basic_istream&lt;char&gt;&amp; in);
+bool is_gif(const char* path);
+bool is_gif(const std::basic_string&lt;char&gt;&amp; path);
+
+bool is_jpg(std::basic_istream&lt;char&gt;&amp; in);
+bool is_jpg(const char* path);
+bool is_jpg(const std::basic_string&lt;char&gt;&amp; path);
+</pre>
+
+<p>ビットマップ型の各種画像ファイルのための判別関数です．尚，ビットマップファイル (*.bmp)
+は，OS/2 1.x と Windows 版でヘッダ形式が異なるため，どちらのファイルとして判別するかを第
+2 引数で指定します．</p>
+
+<pre class="sh_cpp">
+bool is_wmf(std::basic_istream&lt;char&gt;&amp; in, bool apm = true);
+bool is_wmf(const char* path, bool apm = true);
+bool is_wmf(const std::basic_string&lt;char&gt;&amp; path, bool apm = true);
+
+bool is_emf(std::basic_istream&lt;char&gt;&amp; in);
+bool is_emf(const char* path);
+bool is_emf(const std::basic_string&lt;char&gt;&amp; path);
+</pre>
+
+<p>Windows で使用されるベクター型の画像ファイルのための判別関数です．尚，WMF は
+通常 22Byte Placeable ヘッダ + 18Byte WMF ヘッダと言う形を取りますが，
+稀に 18Byte WMF ヘッダのみのファイルも存在します．第 2 引数を true に指定すると，
+Placeable ヘッダを持つ WMF ファイルの場合のみ true を返します．</p>
+
+<pre class="sh_cpp">
+bool is_pdf(std::basic_istream&lt;char&gt;&amp; in);
+bool is_pdf(const char* path);
+bool is_pdf(const std::basic_string&lt;char&gt;&amp; path);
+</pre>
+
+<p>PDF ファイルかどうかを判別するための関数です．</p>
+
+<pre class="sh_cpp">
+bool is_ole2(std::basic_istream&lt;char&gt;&amp; in);
+bool is_ole2(const char* path);
+bool is_ole2(const std::basic_string&lt;char&gt;&amp; path);
+
+bool is_doc(std::basic_istream&lt;char&gt;&amp; in);
+bool is_doc(const char* path);
+bool is_doc(const std::basic_string&lt;char&gt;&amp; path);
+
+bool is_xls(std::basic_istream&lt;char&gt;&amp; in);
+bool is_xls(const char* path);
+bool is_xls(const std::basic_string&lt;char&gt;&amp; path);
+
+bool is_ppt(std::basic_istream&lt;char&gt;&amp; in);
+bool is_ppt(const char* path);
+bool is_ppt(const std::basic_string&lt;char&gt;&amp; path);
+</pre>
+
+<p>Microsoft Office（2003 以前）の各種ファイルのための判別関数です．
+Office 2003 以前のファイルは全て OLE2 形式のバイナリファイルなので，
+DOC (Microsoft Word), XLS (Microsoft Excel), PPT (Microsoft PowerPoint)
+の判別関数に加えて，OLE2 形式のバイナリファイルかどうかを判別する関数も定義してあります．</p>
+
+<pre class="sh_cpp">
+bool is_docx(const std::basic_string&lt;char&gt;&amp; path);
+bool is_docx(const char* path);
+
+bool is_xlsx(const std::basic_string&lt;char&gt;&amp; path);
+bool is_xlsx(const char* path);
+
+bool is_pptx(const std::basic_string&lt;char&gt;&amp; path);
+bool is_pptx(const char* path);
+</pre>
+
+<p>Microsoft Office 2007 の各種ファイルのための判別関数です．
+これらの関数は，現在のところファイル名を受け取る形しか提供していません．
+尚，is_docx(), is_xlsx(), is_pptx() を使用するためには<a href="http://www.zlib.net/"
+target="_blank">zlib</a> を用意する必要があります．</p>
+
+<pre class="sh_cpp">
+bool is_ttf(std::basic_istream&lt;char&gt;&amp; in);
+bool is_ttf(const char* path);
+bool is_ttf(const std::basic_string&lt;char&gt;&amp; path);
+
+bool is_ttc(std::basic_istream&lt;char&gt;&amp; in);
+bool is_ttc(const char* path);
+bool is_ttc(const std::basic_string&lt;char&gt;&amp; path);
+</pre>
+
+<p>TrueType フォントファイルのための判別関数です．
+TrueType フォントファイルには，単一の TrueType フォントに関する情報を保持する
+*.ttf と，複数の TrueType フォントに関する情報を保持する *.ttc の二種類が存在します．</p>
+
+<h1>References</h1>
+<ol>
+<li><a href="http://d.hatena.ne.jp/tt_clown/20090818/p1"
+target="_blank">ファイルタイプ判別関数 - Life like a clown</a></li>
+<li><a href="http://d.hatena.ne.jp/tt_clown/20090819/p1"
+target="_blank">Microsoft Office ファイルの判別方法 - Life like a clown</a></li>
+</ol>
+
+</div>
+<!-- end of main text -->
+
+<!-- footer -->
+<div class="foot">
+<address class="copyright">
+Copyright &copy; 2004 - 2010, clown. All rights reserved.
+Mailto: tt.clown(a)gmail.com
+</address>
+</div>
+<!-- end of footer -->
+
+</div>
+</body>
+
+</html>

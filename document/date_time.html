@@ -1,0 +1,223 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ja">
+
+<head>
+<meta name="author" content="clown">
+<meta http-equiv="Content-type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<meta http-equiv="Content-Script-Type" content="text/javascript">
+
+<script type="text/javascript" src="script/sh_main.js"></script>
+<script type="text/javascript" src="script/sh_cpp.js"></script>
+
+<link rel="index" href="index.html">
+<link rel="stylesheet" href="style/default.css" type="text/css">
+<link rel="stylesheet" href="style/hilight.css" type="text/css">
+
+<title>CLX C++ Libraries - date_time</title>
+</head>
+
+<body onload="sh_highlightDocument()">
+<div class="contents">
+
+<!-- header -->
+<div class="title">
+<a href="http://clx.cielquis.net/">CLX C++ Libraries</a>
+<a href="http://b.hatena.ne.jp/entry/http://clx.cielquis.net/date_time.html">
+<img src="http://d.hatena.ne.jp/images/b_entry.gif"
+  width="16" height="12" border="0">
+</a>
+</div>
+<div class="head"><a href="index.html">Home</a> &gt;&gt;
+<a href="date_time.html">date_time</a></div>
+<!-- end of header -->
+
+<!-- main text -->
+<div class="main">
+
+<h1>Declaration</h1>
+<pre class="sh_cpp">
+template &lt;class TimeZone&gt;
+class basic_date_time;
+
+typedef basic_date_time&lt;CLX_TZ_LOCAL&gt; date_time;
+typedef basic_date_time&lt;CLX_TZ_UTC&gt; date_time_utc;
+</pre>
+
+<h1>Overview</h1>
+<p>C の struct tm をラップしたクラスです．<a href="
+http://www.boost.org/doc/libs/1_35_0/doc/html/date_time.html" target="_blank">
+boost::date_time</a> を参考に演算子を定義しています．具体的には，
+時刻 <em>x</em> の <em>y</em> 秒後を計算，2つの時刻 <em>a</em>，<em>b</em>
+の和・差を計算，2つの時刻 <em>a</em>，<em>b</em> の大小関係を比較する際に，
++ 演算子や - 演算子，比較演算子を用いて直感的に記述することができます．</p>
+
+<p>時刻 <em>x</em> の <em>z</em> 時間後を計算したい場合には，対応する秒数を記述する代わりに
+x + clx::hours(<em>z</em>) と記述することができます．同様のクラス/関数として，years()，months()，
+days()，weeks()，hours()，minutes() を定義しています．詳細は，<a href="time_duration.html">
+time_duration</a> を参照して下さい．</p>
+
+<p>尚，時刻の計算にはC 標準ライブラリの<a href="
+http://www.linux.or.jp/JM/html/LDP_man-pages/man3/mktime.3.html" target="_blank">
+mktime()</a> 関数を利用して計算しています．</p>
+
+<h1>Example</h1>
+<p><a href="example/example_date_time.cpp">example_date_time.cpp</a></p>
+
+<pre class="sh_cpp">
+#include &lt;iostream&gt;
+#include &quot;clx/format.h&quot;
+#include &quot;clx/time.h&quot;
+
+int main(int argc, char* argv[]) {
+    std::string fmt = &quot;%a %d %b %Y %H:%M:%S JST&quot;;
+    
+    /*
+     * 現在時刻の取得．
+     * デフォルトコンストラクタは，現在時刻でdate_timeクラスを初期化する．
+     */
+    clx::date_time now;
+    std::cout &lt;&lt; now.to_string&lt;char&gt;(fmt) &lt;&lt; std::endl;
+    
+    // 現在時刻から5年3ヶ月後の時刻を取得．
+    clx::date_time t1 = now + clx::years(5) + clx::months(3);
+    std::cout &lt;&lt; &quot;5 years 3 months later ... &quot;;
+    std::cout &lt;&lt; t1.to_string&lt;char&gt;(fmt) &lt;&lt; std::endl;
+    
+    std::cout &lt;&lt; clx::format(&quot;%d days have passed since %d/01/01&quot;)
+        % now.totaldays() % now.year() &lt;&lt; std::endl;
+    
+    return 0;
+}
+</pre>
+
+<pre>
+<strong>Result</strong>
+Fri 02 Nov 2007 23:08:29 JST
+5 years 3 months later ... Sat 02 Feb 2013 23:08:29 JST
+305 days have passed since 2007/01/01
+</pre>
+
+<h1>Template Parameters</h1>
+<dl>
+<dt>TimeZone</dt>
+<dd>どのタイムゾーンで日付・時刻を計算するのかを指定します．現在，
+CLX_TZ_LOCAL （実行するコンピュータのローカルタイムゾーン），CLX_TZ_UTC （UTC
+タイムゾーン）の 2 種類が定義されています．</dd>
+</dl>
+
+<h1>Related Types</h1>
+<pre class="sh_cpp">
+typedef unsigned int value_type;
+typedef std::tm tm_type;
+</pre>
+
+<h1>Constructions and Member Functions</h1>
+<pre class="sh_cpp">
+date_time();
+explicit basic_date_time(const tm_type&amp; t);
+explicit basic_date_time(const std::time_t&amp; t);
+explicit basic_date_time(value_type&amp; y, value_type&amp; m, value_type&amp; d,
+    value_type&amp; h, value_type&amp; mm, value_type&amp; s);
+
+value_type year() const;
+value_type month() const;
+value_type day() const;
+value_type hour() const;
+value_type minute() const;
+value_type second() const;
+value_type totaldays() const;
+</pre>
+
+<p>コンストラクタには，std::time，および struct tm 構造体を指定することもできます．
+デフォルトコンストラクタを呼び出した場合，現在時刻を基にして date_time
+クラスを初期化します．</p>
+
+<pre class="sh_cpp">
+template &lt;class CharT&gt;
+basic_date_time&amp; from_string(const CharT* s, const CharT* fmt);
+
+template &lt;class CharT&gt;
+basic_date_time&amp; from_string(const std::basic_string&lt;CharT&gt;&amp; s,
+    const std::basic_string&lt;CharT&gt;&amp; fmt = &quot;%Y-%m-%dT%H:%M:%S&quot;);
+
+template &lt;class CharT&gt;
+std::basic_string&lt;CharT&gt; to_string(const CharT* fmt);
+
+template &lt;class CharT&gt;
+std::basic_string&lt;CharT&gt; to_string(
+    const std::basic_string&lt;CharT&gt; fmt = &quot;%Y-%m-%dT%H:%M:%S&quot;);
+</pre>
+
+<p>date_time &lt;-&gt; 文字列の相互変換を行うためのメソッド群です．どちらも <em>fmt</em>
+にしたがって文字列を解析/出力します．<em>fmt</em> を省略した場合，&quot;yyyy-mm-ddTHH:MM:SS&quot;
+と言う書式で文字列を解析/出力します．詳細については，<a href="time_convert.html">
+date_time - string conversion</a> を参照して下さい．</p>
+
+<h1>Operators</h1>
+<pre class="sh_cpp">
+basic_date_time&amp; operator=(const basic_date_time&amp; t);
+basic_date_time&amp; operator=(const tm_type&amp; t);
+basic_date_time&amp; operator=(const std::time_t&amp; t);
+
+basic_date_time&amp; operator+=(value_type t);
+basic_date_time&amp; operator+=(const date_duration&amp; t);
+basic_date_time&amp; operator-=(value_type t);
+basic_date_time&amp; operator-=(const date_duration&amp; t);
+
+double operator-(const basic_date_time&amp; t) const;
+double operator-(const std::time_t&amp; t) const;
+double operator-(const std::tm&amp; t) const;
+
+friend basic_date_time operator+(basic_date_time x, value_type y);
+friend basic_date_time operator+(basic_date_time x, const date_duration&amp; y);
+friend basic_date_time operator-(basic_date_time x, value_type y)
+friend basic_date_time operator-(basic_date_time x, const date_duration&amp; y);
+friend basic_date_time operator+(value_type y, basic_date_time x);
+friend basic_date_time operator+(const date_duration&amp; y, basic_date_time x);
+friend basic_date_time operator-(value_type y, basic_date_time x);
+friend basic_date_time operator-(const date_duration&amp; y, basic_date_time x);
+
+friend bool operator&lt;(const basic_date_time&amp; x, const basic_date_time&amp; y);
+friend bool operator&gt;(const basic_date_time&amp; x, const basic_date_time&amp; y);
+friend bool operator&lt;=(const basic_date_time&amp; x, const basic_date_time&amp; y);
+friend bool operator&gt;=(const basic_date_time&amp; x, const basic_date_time&amp; y);
+friend bool operator==(const basic_date_time&amp; x, const basic_date_time&amp; y);
+friend bool operator!=(const basic_date_time&amp; x, const basic_date_time&amp; y);
+</pre>
+
+<p>value_type は&quot;秒&quot;を表します．&quot;年&quot; や &quot;時間&quot;
+などの加減演算を行いたい場合は，clx::years()，clx::months()，clx::days()，
+clx::hours()，clx::minutes() の補助クラス/関数群を併用して下さい．</p>
+
+<h1>Related Page</h1>
+<ol>
+<li><a href="time_convert.html">CLX C++ Libraries - date_time - string conversion</a></li>
+<li><a href="time_duration.html">CLX C++ Libraries - time_duration</a></li>
+</ol>
+
+<h1>References</h1>
+<ol>
+<li><a href="http://www.linux.or.jp/JM/html/LDP_man-pages/man3/mktime.3.html"
+target="_blank">Manpage of CTIME</a></li>
+<li><a href="http://www.boost.org/doc/libs/1_35_0/doc/html/date_time.html"
+target="_blank">Boost C++ Libraries - Boost Date_Time</a></li>
+</ol>
+
+</div>
+<!-- end of main text -->
+
+<!-- footer -->
+<div class="foot">
+<address class="copyright">
+Copyright &copy; 2004 - 2008, clown. All rights reserved.
+Mailto: tt.clown(a)gmail.com
+</address>
+</div>
+<!-- end of footer -->
+
+</div>
+</body>
+
+</html>

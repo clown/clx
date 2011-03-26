@@ -1,0 +1,218 @@
+/* ------------------------------------------------------------------------- */
+/*
+ *  background
+ *
+ *  コンテンツは，div.contentsで枠組みを作成してその中に記述するので，
+ *  bodyは枠の外の背景色の設定を行うためのもの．
+ */
+/* ------------------------------------------------------------------------- */
+body {
+    background-color        : #7080a0;
+    margin                  : 0px;
+    padding                 : 0px;
+}
+
+div.contents {
+    width                   : 830px;
+    border-left             : solid 2px #005588;
+    border-right            : solid 2px #005588;
+    background-color        : #ffffff;
+    margin                  : 0 auto;
+}
+
+/* ------------------------------------------------------------------------- */
+/*
+ *  font
+ *
+ *  tableのフォントはdiv.contentsでの設定が適用されないので，
+ *  同じフォント設定をしておく．
+ */
+/* ------------------------------------------------------------------------- */
+div.contents, table {
+    font-family             : "Times New Roman", "Times", "ＭＳ Ｐゴシック", "Osaka", sans-serif;
+    font-size               : 13px;
+    text-autospace          : ideograph-space;
+    line-height             : 1.4;
+    color                   : #222222;
+}
+
+pre {
+    font-family             : "Courier New", "ＭＳ ゴシック", "Osaka-等幅", monospace;
+}
+
+/* ------------------------------------------------------------------------- */
+/*
+ *  header
+ *
+ *  タイトル部，およびパンくずリスト部．
+ */
+/* ------------------------------------------------------------------------- */
+.title {
+    background              : #001545 url(../image/bg_title.jpg) no-repeat;
+    padding                 : 16px 0px 17px 30px;
+    text-align              : left;
+    font-size               : 28px;
+    font-weight             : bold;
+    color                   : #ffffff;
+}
+
+.head {
+    background              : #001545 url(../image/bg_menubar.jpg) no-repeat;
+    width                   : 800px;
+    margin                  : 0px;
+    padding                 : 0px 15px;
+    color                   : #ffffff;
+    font-size               : 14px;
+    font-weight             : bold;
+}
+
+.title a, .head a {
+    color                   : #ffffff;
+}
+
+.title a:link, .head a:link {
+    color                   : #ffffff;
+}
+
+.title a:visited, .head a:visited {
+    color                   : #ffffff;
+}
+
+.title a:hover, .head a:hover {
+    color                   : #ef810f;
+    text-decoration         : underline;
+}
+
+/* ------------------------------------------------------------------------- */
+/*  footer */
+/* ------------------------------------------------------------------------- */
+.foot {
+    clear                   : both;
+}
+
+.foot .copyright {
+    background              : #001545 url(../image/bg_title.jpg) no-repeat;
+    border-top              : solid 1px #666666;
+    padding                 : 2px 0px;
+    text-align              : center;
+    color                   : #ffffff;
+}
+
+/* ------------------------------------------------------------------------- */
+/*  links */
+/* ------------------------------------------------------------------------- */
+a {
+    text-decoration         : none;
+}
+
+a:link {
+    color                   : #0015aa;
+}
+
+a:visited {
+    color                   : #0015aa;
+}
+
+a:hover {
+    color                   : #ef810f;
+    text-decoration         : underline;
+}
+
+/* ------------------------------------------------------------------------- */
+/*  main text  */
+/* ------------------------------------------------------------------------- */
+div.main {
+    width                   : 800px;
+    padding                 : 1em;
+}
+
+/* section and main text */
+div.main p {
+    padding                 : 0px 2em;
+    text-align              : left;
+}
+
+div.main h1 {
+    margin                  : 0px;
+    padding                 : 1px 1em;
+    border-width            : 1px;
+    border-style            : solid;
+    border-color            : #ddddff #aaaacc #aaaacc #ddddff;
+    text-align              : left;
+    background              : url(../image/bg_section.jpg) repeat-y;
+    color                   : #444466;
+    font-size               : 14px;
+    text-autospace          : ideograph-space;
+}
+
+div.main h2 {
+    padding                 : 0px 1em;
+    font-size               : 14px;
+    color                   : #444466;
+    text-autospace          : ideograph-space;
+}
+
+/* table */
+div.main table {
+    margin                  : 1em 2em;
+    text-align              : center;
+}
+
+div.main thead {
+    text-align              : center;
+    background              : url(../image/bg_section.jpg) repeat-y;
+    color                   : #444466;
+    font-size               : 14px;
+}
+
+/* list */
+div.main ul, div.main ol {
+    margin                  : 0.5em 2em;
+    padding                 : 0px 2em;
+}
+
+div.main ol.section {
+    list-style-type         : upper-roman;
+}
+
+div.main ol.subsection {
+    margin                  : 0.5em 0;
+    padding                 : 0px 3em;
+    list-style-type         : decimal;
+}
+
+div.main ul.paragraph {
+    margin                  : 0.25em 0;
+    padding                 : 0 2em;
+    list-style-type         : circle;
+}
+
+div.main dl {
+    padding                 : 0 2em;
+}
+
+div.main dt {
+    font-weight             : bold;
+}
+
+div.main dd {
+    margin                  : 0.25em 2em;
+}
+
+div.main pre {
+    margin                  : 1em 2em;
+    padding                 : 1em;
+    border-width            : 1px;
+    border-style            : solid;
+    border-color            : #ddddff #aaaacc #aaaacc #ddddff;
+}
+
+/* blockquote */
+div.main blockquote {
+    border                  : double 3px #777777;
+    padding                 : 1em;
+}
+
+div.main blockquote div.cite {
+    text-align              : right;
+}

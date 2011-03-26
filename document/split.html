@@ -1,0 +1,120 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ja">
+
+<head>
+<meta name="author" content="clown">
+<meta http-equiv="Content-type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<meta http-equiv="Content-Script-Type" content="text/javascript">
+
+<script type="text/javascript" src="script/sh_main.js"></script>
+<script type="text/javascript" src="script/sh_cpp.js"></script>
+
+<link rel="index" href="index.html">
+<link rel="stylesheet" href="style/default.css" type="text/css">
+<link rel="stylesheet" href="style/hilight.css" type="text/css">
+
+<title>CLX C++ Libraries - split</title>
+</head>
+
+<body onload="sh_highlightDocument()">
+<div class="contents">
+
+<!-- header -->
+<div class="title">
+<a href="http://clx.cielquis.net/">CLX C++ Libraries</a>
+<a href="http://b.hatena.ne.jp/entry/http://clx.cielquis.net/split.html">
+<img src="http://d.hatena.ne.jp/images/b_entry.gif"
+  width="16" height="12" border="0">
+</a>
+</div>
+<div class="head"><a href="index.html">Home</a> &gt;&gt;
+<a href="salgorithm.html">salgorithm</a>&gt;&gt;
+<a href="split.html">split</a></div>
+<!-- end of header -->
+
+<!-- main text -->
+<div class="main">
+
+<h1>Declarations</h1>
+<pre class="sh_cpp">
+Container&amp; split(const String&amp; s, Container&amp; result,
+    bool emtok = false, const std::locale&amp loc = std::locale());
+Container&amp; split_if(const String&amp; s, Container&amp; result,
+    PredicateFunc f, bool emtok = false);
+
+String&amp; join(const Container&amp; v, String&amp; result, const String&amp; delim);
+</pre>
+
+<h1>Overview</h1>
+<p>split() は，空白文字を区切り文字として文字列を分割し，結果を Container に格納します．
+そのため，Container には std::vector&lt;String&gt; など，分割した文字列を格納できるもの
+を指定する必要があります．split_if() は，空白文字の代わりに PredicateFunc で指定した Functor
+が真を返す文字を区切り文字として文字列を分割します．split()，split_if() の引数 <em>emtok</em>
+を true に指定すると，区切り文字が連続して現れたときに 2 つのトークンとして扱います
+（片方は空のトークン）．</p>
+
+<p>join() はその逆関数であり，Container に格納されている文字列群を文字列 <em>delim</em>
+を区切り文字として結合し，一つの文字列にして返します．</p>
+
+<p>尚，Declarations においては template &lt; ... &gt; の部分を省略していますが，
+単語の先頭が大文字になっているものはテンプレート引数として渡される型です（ただし，
+String は std::basic_string&lt;CharT, Traits&gt;）．</p>
+
+<h1>Example</h1>
+<p><a href="example/example_split.cpp">example_split.cpp</a></p>
+
+<pre class="sh_cpp">
+#include &lt;iostream&gt;
+#include &lt;string&gt;
+#include &lt;vector&gt;
+#include &quot;clx/salgorithm.h&quot;
+
+int main(int argc, char* argv[]) {
+    std::string s = &quot;apple orange,strawberry pineapple,,,&quot;;
+    std::cout &lt;&lt; &quot;original: &quot; &lt;&lt; s &lt;&lt; std::endl;
+    
+    /*
+     * スペース，タブ文字，コンマを区切り文字として分割する．
+     * ただし，空のトークンは認めない（無視する）．
+     */
+    std::cout &lt;&lt; &quot;split: &quot;;
+    std::vector&lt;std::string&gt; tok;
+    clx::split_if(s, tok, clx::is_any_of(&quot; \t,&quot;));
+    for (unsigned int i = 0; i &lt; tok.size(); i++) {
+        std::cout &lt;&lt; '&lt;' &lt;&lt; tok.at(i) &lt;&lt; &quot;&gt; &quot;;
+    }
+    std::cout &lt;&lt; std::endl;
+    
+    std::string result;
+    clx::join(tok, result, &quot;=&quot;);
+    std::cout &lt;&lt; &quot;join: &quot; &lt;&lt; result &lt;&lt; std::endl;
+    
+    return 0;
+}
+</pre>
+
+<pre>
+<strong>Result</strong>
+original: apple orange,strawberry pineapple,,,
+split: &lt;apple&gt; &lt;orange&gt; &lt;strawberry&gt; &lt;pineapple&gt; 
+join: apple=orange=strawberry=pineapple
+</pre>
+
+</div>
+<!-- end of main text -->
+
+<!-- footer -->
+<div class="foot">
+<address class="copyright">
+Copyright &copy; 2004 - 2008, clown. All rights reserved.
+Mailto: tt.clown(a)gmail.com
+</address>
+</div>
+<!-- end of footer -->
+
+</div>
+</body>
+
+</html>

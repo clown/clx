@@ -1,0 +1,263 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ja">
+
+<head>
+<meta name="author" content="clown">
+<meta http-equiv="Content-type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<meta http-equiv="Content-Script-Type" content="text/javascript">
+
+<script type="text/javascript" src="script/sh_main.js"></script>
+<script type="text/javascript" src="script/sh_cpp.js"></script>
+
+<link rel="index" href="index.html">
+<link rel="stylesheet" href="style/default.css" type="text/css">
+<link rel="stylesheet" href="style/hilight.css" type="text/css">
+
+<title>CLX C++ Libraries - json</title>
+</head>
+
+<body onload="sh_highlightDocument();">
+<div class="contents">
+
+<!-- header -->
+<div class="title">
+<a href="http://clx.cielquis.net/">CLX C++ Libraries</a>
+<a href="http://b.hatena.ne.jp/entry/http://clx.cielquis.net/json.html">
+<img src="http://d.hatena.ne.jp/images/b_entry.gif"
+  width="16" height="12" border="0">
+</a>
+</div>
+<div class="head"><a href="index.html">Home</a> &gt;&gt;
+<a href="json.html">json</a></div>
+<!-- end of header -->
+
+<!-- main text -->
+<div class="main">
+
+<h1>Declrations</h1>
+<pre class="sh_cpp">
+template &lt;
+    class CharT,
+    class Traits = std::char_traits&lt;CharT&gt;
+&gt;
+class json_separator;
+
+template &lt;
+    class CharT,
+    class Traits = std::char_traits&lt;CharT&gt;
+&gt;
+class basic_json_array;
+
+typedef basic_tokenmap&lt;json_separator&lt;char&gt;, std::string, std::string&gt; json
+typedef basic_json_array&lt;char&gt; json_array;
+#ifdef CXL_USE_WCHAR
+typedef basic_tokenmap&lt;json_separator&lt;wchar_t&gt;, std::wstring, std::wstring&gt; wjson
+typedef basic_json_array&lt;wchar_t&gt; wjson_array;
+#endif
+</pre>
+
+<h1>Overview</h1>
+<p>json，および json_array は，JSON 形式データの解析を行うためのクラス群です．
+json は，JSON 形式データの <em>object</em> (&quot;{&quot; で始まり，&quot;}&quot;
+で終わる文字列）を解析し，json_array は <em>array</em> (&quot;[&quot; で始まり，&quot;]&quot;
+で終わる文字列）を解析します．JSON 形式データの書式の詳細については，<a
+href="http://www.json.org/json-ja.html" target="_blank">JSON の紹介</a>を参照して下さい．</p>
+
+<p>json は，object の中に array や object が存在する場合，その部分の再帰的な解析は行わず，
+文字列のまま返します．該当箇所の解析が必要な場合は，返された文字列を引数にして再度
+json，または json_array を用いて解析を行って下さい．json_array は，<em>array</em>
+に含まれる文字列を <em>object</em> とそれ以外に分けて解析します．
+解析結果は，それぞれ objects()，strings() メソッドで取得することができます．</p>
+
+<p>json，および json_array は，<em>string</em>，<em>number</em>，true，false，null
+を全て文字列として格納し，その結果を返します (e.g., true-&gt;&quot;true&quot;,
+false-&gt;&quot;false&quot;, null-&gt;&quot;null&quot;)．</p>
+
+<h1>Example</h1>
+<p><a href="example/example_json.cpp">example_json.cpp</a></p>
+
+<pre class="sh_cpp">
+// ワイド文字関連のCLXライブラリを使用するために必要
+#ifndef CLX_USE_WCHAR
+#define CLX_USE_WCHAR
+#endif
+
+#include &lt;iostream&gt;
+#include &lt;string&gt;
+#include &quot;clx/http.h&quot;
+#include &quot;clx/uri.h&quot;
+#include &quot;clx/code_convert.h&quot;
+#include &quot;clx/json.h&quot;
+
+int main(int argc, char* argv[]) {
+    if (argc &lt; 3) std::exit(-1);
+    
+    clx::http session(clx::uri::encode(argv[1]));
+    if (!session.get(clx::uri::encode(argv[2]))) {
+        std::cerr &lt;&lt; &quot;failed to get response&quot; &lt;&lt; std::endl;
+        std::exit(-1);
+    }
+    
+    /*
+     * parse a hatena bookmark entry.
+     * はてなのJSONは()で括られているので，その部分は除外．
+     */
+    std::wstring body = clx::code_convert&lt;wchar_t&gt;(session.body());
+    clx::wjson hateb(body.begin() + 1, body.end() - 1);
+    
+    std::wcout.imbue(std::locale(&quot;japanese&quot;));
+    for (clx::wjson::iterator pos = hateb.begin(); pos != hateb.end(); pos++) {
+        std::wcout &lt;&lt; pos-&gt;first &lt;&lt; L&quot;: &quot; &lt;&lt; pos-&gt;second &lt;&lt; std::endl;
+    }
+    std::wcout &lt;&lt; std::endl;
+    
+    if (hateb.find(L&quot;bookmarks&quot;) == hateb.end()) return 0;
+    
+    // parse and print the detail of &quot;bookmarks&quot;
+    clx::wjson_array bk(hateb[L&quot;bookmarks&quot;]);
+    std::wcout &lt;&lt; L&quot;bookmarks have &quot; &lt;&lt; bk.objects().size() &lt;&lt; L&quot; object, &quot;
+        &lt;&lt; bk.strings().size() &lt;&lt; L&quot; string&quot; &lt;&lt; std::endl;
+    std::wcout &lt;&lt; L&quot;-----&quot; &lt;&lt; std::endl;
+    for (size_t i = 0; i &lt; bk.objects().size(); i++) {
+        std::wcout &lt;&lt; L&quot;object &quot; &lt;&lt; i &lt;&lt; L&quot;:&quot; &lt;&lt; std::endl;
+        for (clx::wjson::iterator pos = bk.object(i).begin();
+            pos != bk.object(i).end(); pos++) {
+            std::wcout &lt;&lt; L&quot;\t&quot; &lt;&lt; pos-&gt;first &lt;&lt; L&quot;: &quot; &lt;&lt; pos-&gt;second &lt;&lt; std::endl;
+        }
+    }
+    
+    return 0;
+}
+</pre>
+
+<pre>
+<strong>Result</strong>
+$ ./test b.hatena.ne.jp &quot;/entry/json/?url=http://d.hatena.ne.jp/tt_clown/20080823/p1&quot;
+bookmarks: [{&quot;comment&quot;:&quot; &quot;,&quot;timestamp&quot;:&quot;2008/08/25 16:01:00&quot;,&quot;user&quot;:&quot;HISAMATSU&quot;,
+&quot;tags&quot;:[&quot;\u306f\u3066\u306a&quot;,&quot;ruby&quot;]},{&quot;comment&quot;:&quot;\u306f\u3066\u306a\u30d6\u30c3
+\u30af\u30de\u30fc\u30af\u3000\u985e\u4f3c&quot;,&quot;timestamp&quot;:&quot;2008/08/24 21:11:03&quot;,
+&quot;user&quot;:&quot;poafag&quot;,&quot;tags&quot;:[&quot;ruby&quot;,&quot;\u306f\u3066\u306a&quot;]}]
+count: 2
+eid: 9756340
+entry_url: http://b.hatena.ne.jp/entry/http://d.hatena.ne.jp/tt_clown/20080823/p1
+related: []
+screenshot: http://screenshot.hatena.ne.jp/images/120x90/0/f/f/9/5
+/d9701e8c6a5392d9a3a729155d07315e310.jpg
+title:  github::clown::ruby-hatena - Life like a clown
+url: http://d.hatena.ne.jp/tt_clown/20080823/p1
+
+bookmarks have 2 object, 0 string
+-----
+object 0:
+        comment:  
+        tags: [&quot;\u306f\u3066\u306a&quot;,&quot;ruby&quot;]
+        timestamp: 2008/08/25 16:01:00
+        user: HISAMATSU
+object 1:
+        comment: はてなブックマーク　類似
+        tags: [&quot;ruby&quot;,&quot;\u306f\u3066\u306a&quot;]
+        timestamp: 2008/08/24 21:11:03
+        user: poafag
+</pre>
+
+<h1>Template Parameters</h1>
+<h2>json</h2>
+<p><a href="tokenmap.html">tokenmap</a> を参照して下さい．</p>
+
+<h2>json_array</h2>
+<dl>
+<dt>CharT</dt><dd>文字の型を指定します．</dd>
+<dt>Traits</dt><dd>文字列を扱うためのtraitsを指定します．デフォルト値は，
+std::char_traits&lt;CharT&gt;．</dd>
+</dl>
+
+<h1>Related Types</h1>
+<h2>json</h2>
+<p><a href="tokenmap.html">tokenmap</a> を参照して下さい．</p>
+
+<h2>json_array</h2>
+<pre class="sh_cpp">
+typedef CharT char_type;
+typedef std::basic_string&lt;CharT, Traits&gt; string_type;
+typedef basic_tokenmap&lt;json_separator&lt;CharT, Traits&gt;, string_type,
+    string_type&gt; object_type;
+typedef size_t size_type;
+</pre>
+
+<h1>Construction and Member Functions</h1>
+<h2>json</h2>
+<p><a href="tokenmap.html">tokenmap</a> を参照して下さい．</p>
+
+<h2>json_array</h2>
+<pre class="sh_cpp">
+basic_json_array();
+
+template &lt;class InIter&gt;
+explicit basic_json_array(InIter first, InIter last);
+
+explicit basic_json_array(const string_type&amp; src);
+explicit basic_json_array(const char_type* src);
+
+virtual ~basic_json_array();
+
+void reset();
+
+template &lt;class InIter&gt;
+basic_json_array&amp; assign(InIter first, InIter last);
+
+basic_json_array&amp; assign(const string_type&amp; src);
+basic_json_array&amp; assign(const char_type* src);
+</pre>
+
+<p>入力イテレータ，または文字列を指定して解析を行います．解析結果は，<em>object</em>
+とそれ以外に分かれて内部変数で保持されます．</p>
+
+<pre class="sh_cpp">
+std::vector&lt;object_type&gt;&amp; objects();
+const std::vector&lt;object_type&gt; objects() const;
+
+object_type&amp; object(size_type index);
+const object_type&amp; object(size_type index) const;
+
+std::vector&lt;string_type&gt;&amp; strings();
+const std::vector&lt;string_type&gt;&amp; strings() const;
+
+string_type&amp; string(size_type index);
+const string_type&amp; string(size_type index) const;
+</pre>
+
+<p>objects()，strings() メソッドは，解析結果を格納した配列全体を返します．これに対して，
+object()，string() メソッドは，引数に指定された添え字に対応する <em>object</em>，
+および文字列を返します．</p>
+
+<h1>Related Pages</h1>
+<ol>
+<li><a href="tokenmap.html">CLX C++ Libraries - tokenmap</a></li>
+<li><a href="tokenizer_func.html">CLX C++ Libraries - tokenizer_func</a></li>
+</ol>
+
+<h1>Referrences</h1>
+<ol>
+<li><a href="http://d.hatena.ne.jp/tt_clown/20080829/p1" target="_blank">
+Life like a clown - ワイド文字と codecvt</a></li>
+<li><a href="http://www.json.org/json-ja.html" target="_blank">
+JSON の紹介</a></li>
+</ol>
+</div>
+<!-- end of main text -->
+
+<!-- footer -->
+<div class="foot">
+<address class="copyright">
+Copyright &copy; 2004 - 2009, clown. All rights reserved.
+Mailto: tt.clown(a)gmail.com
+</address>
+</div>
+<!-- end of footer -->
+
+</div>
+</body>
+
+</html>

@@ -86,11 +86,11 @@ namespace clx {
 			static const size_type width = (sizeof(char_type) > 1) ? 4 : 2;
 			
 			if (alnum(c) || f_(c)) *out++ = c;
-			else if (c == 0x20 && plus_) *out++ = LITERAL('+');
+			else if (c == 0x20 && plus_) *out++ = (char_type)LITERAL('+');
 			else {
 				std::basic_stringstream<char_type, traits> ss;
-				ss << LITERAL('%');
-				if (sizeof(char_type) > 1) ss << LITERAL('u');
+				ss << (char_type)LITERAL('%');
+				if (sizeof(char_type) > 1) ss << (char_type)LITERAL('u');
 				if (!lower_) ss << std::uppercase;
 				ss << std::setw(width) << std::setfill((char_type)LITERAL('0')) << std::hex;
 				ss << (static_cast<size_type>(c) & mpl::lower_mask<sizeof(char_type) * 8>::value);

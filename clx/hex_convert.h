@@ -82,7 +82,7 @@ namespace clx {
 			std::basic_stringstream<char_type, traits> ss;
 			if (!prefix_.empty()) ss << prefix_;
 			if (!lower_) ss << std::uppercase;
-			ss << std::setw(width) << std::setfill(LITERAL('0')) << std::hex;
+			ss << std::setw(width) << std::setfill((char_type)LITERAL('0')) << std::hex;
 			ss << (static_cast<size_type>(c) & mpl::lower_mask<sizeof(char_type) * 8>::value);
 			if (!suffix_.empty()) ss << suffix_;
 			

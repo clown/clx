@@ -32,7 +32,6 @@
  *  Last-modified: Wed 28 Mar 2007 16:14:09 JST
  */
 /* ------------------------------------------------------------------------- */
-#define CLX_USE_WCHAR
 #include <iostream>
 #include "clx/ini.h"
 

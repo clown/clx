@@ -142,21 +142,21 @@ namespace clx {
 		OutIter operator()(char_type c, OutIter out) {
 			switch (status_) {
 			case 1: // encoded ASCII character
-				if (c == LITERAL('%')) throw std::runtime_error("invalid encoded URI");
-				if (c == LITERAL('u')) status_ = 2;
+				if (c == (char_type)LITERAL('%')) throw std::runtime_error("invalid encoded URI");
+				if (c == (char_type)LITERAL('u')) status_ = 2;
 				else {
 					buffer_ += c;
 					if (buffer_.size() >= 2) out = this->output(out);
 				}
 				break;
 			case 2: // encoded Multi-byte character
-				if (c == LITERAL('%')) throw std::runtime_error("invalid encoded URI");
+				if (c == (char_type)LITERAL('%')) throw std::runtime_error("invalid encoded URI");
 				buffer_ += c;
 				if (buffer_.size() >= 4) out = this->output(out);
 				break;
 			default:
-				if (c == LITERAL('%')) status_ = 1;
-				else if (c == LITERAL('+')) *out++ = 0x20;
+				if (c == (char_type)LITERAL('%')) status_ = 1;
+				else if (c == (char_type)LITERAL('+')) *out++ = 0x20;
 				else *out++ = c;
 				break;
 			}

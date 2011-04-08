@@ -32,6 +32,7 @@
  *  Last-modified: Thu 09 Oct 2008 07:38:00 JST
  */
 /* ------------------------------------------------------------------------- */
+#include <cstdio>
 #include <iostream>
 #include "clx/random.h"
 #include "clx/format.h"

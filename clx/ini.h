@@ -77,7 +77,7 @@ namespace clx {
 		
 		bool insert(const key_type& s) {
 			std::vector<string_type> v;
-			split_if(s, v, is_any_of(LITERAL("=")));
+			split_if(s, v, is_any_of((const char_type*)LITERAL("=")));
 			if (v.empty()) return false;
 			
 			string_type key = v.at(0);
@@ -169,7 +169,7 @@ namespace clx {
 			std::basic_ifstream<CharT, Traits> fs(path);
 			if (fs.fail()) {
 				std::basic_stringstream<CharT, Traits> msg;
-				msg << path << ": no such file or directory";
+				msg << path << (const char_type*)LITERAL(": no such file or directory");
 				throw std::runtime_error(msg.str());
 			}
 			return this->read(fs);
@@ -186,16 +186,16 @@ namespace clx {
 			if (pos != this->member.end()) {
 				for (typename subcontainer::iterator it = pos->second.begin();
 					it != pos->second.end(); ++it) {
-					out << it->first << LITERAL("=") << it->second << std::endl;
+					out << it->first << (const char_type*)LITERAL("=") << it->second << std::endl;
 				}
 			}
 			
 			for (pos = this->member.begin(); pos != this->member.end(); ++pos) {
 				if (pos->first == string_type()) continue;
-				out << LITERAL("[") << pos->first << LITERAL("]") << std::endl;
+				out << (const char_type*)LITERAL("[") << pos->first << (const char_type*)LITERAL("]") << std::endl;
 				for (typename subcontainer::iterator it = pos->second.begin();
 					it != pos->second.end(); ++it) {
-					out << it->first << LITERAL("=") << it->second << std::endl;
+					out << it->first << (const char_type*)LITERAL("=") << it->second << std::endl;
 				}
 			}
 			return *this;
@@ -205,7 +205,7 @@ namespace clx {
 			std::basic_ofstream<CharT, Traits> ofs(path);
 			if (ofs.fail()) {
 				std::basic_stringstream<CharT, Traits> msg;
-				msg << path << ": cannot open the file";
+				msg << path << (const char_type*)LITERAL(": cannot open the file");
 				throw std::runtime_error(msg.str());
 			}
 			return this->write(ofs);

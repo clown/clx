@@ -252,6 +252,8 @@ namespace clx {
 				clx::chomp(buf);
 				int code;
 				
+				if (buf.size() < 5) continue; // response code (xxx) + delimiter + message
+				
 				try {
 					code = clx::lexical_cast<int>(buf.substr(0, 3));
 					if (!dest.str().empty()) dest << std::endl;

@@ -296,6 +296,7 @@ namespace clx {
 			string_type buf;
 			while (std::getline(sin, buf)) {
 				chomp(buf);
+				if (buf.size() < 5) continue; // respnse code (xxx) + delimiter + message
 				int code;
 				
 				try {

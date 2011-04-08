@@ -303,6 +303,7 @@ namespace clx {
 			string_type line;
 			while (std::getline(sin, line)) {
 				chomp(line);
+				if (line.empty()) continue;
 				tmp << line << std::endl;
 				line.clear();
 			}

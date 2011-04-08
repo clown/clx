@@ -187,6 +187,7 @@ namespace clx {
 			list_type dest;
 			while (std::getline(ss, buf)) {
 				chomp(buf);
+				if (buf.empty()) continue;
 				if (buf[0] == '.') break;
 				dest.push_back(buf);
 			}
@@ -212,6 +213,7 @@ namespace clx {
 			list_type dest;
 			while (std::getline(ss, buf)) {
 				chomp(buf);
+				if (buf.empty()) continue;
 				if (buf[0] == '.') break;
 				dest.push_back(buf);
 			}
@@ -253,6 +255,7 @@ namespace clx {
 			std::basic_stringstream<char_type> dest;
 			while (std::getline(ss, buf)) {
 				chomp(buf);
+				if (buf.empty()) continue;
 				if (buf[0] == '.') break;
 				dest << buf << std::endl;
 			}
@@ -271,6 +274,7 @@ namespace clx {
 			std::basic_stringstream<char_type> dest;
 			while (std::getline(ss, buf)) {
 				chomp(buf);
+				if (buf.empty()) continue;
 				if (buf[0] == '.') break;
 				dest << buf << std::endl;;
 			}
